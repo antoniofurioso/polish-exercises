@@ -1,69 +1,171 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Choice, Field } from "@/components/ui";
+import { CASE_INFO } from "@/lib/cases";
+import { saveConfig, useStoredConfig, useStoredStats } from "@/lib/storage";
+import { CASES } from "@/lib/types";
+import type { Case, Config, GramNumber, WordMode } from "@/lib/types";
+
+const COUNTS = [10, 20, 30, 50];
+
+const MODE_LABELS: Record<WordMode, { title: string; blurb: string }> = {
+  nouns: { title: "Nouns", blurb: "Decline the noun on its own." },
+  adjectives: { title: "Adjectives", blurb: "The noun is given — decline the adjective." },
+  both: { title: "Nouns + adjectives", blurb: "Decline the whole phrase." },
+};
+
+const DEFAULT_CONFIG: Config = {
+  cases: ["gen", "acc", "ins", "loc"],
+  numbers: ["sg"],
+  mode: "nouns",
+  count: 20,
+};
+
+export default function ConfiguratorPage() {
+  const router = useRouter();
+  const stored = useStoredConfig();
+  const stats = useStoredStats();
+  const [draft, setDraft] = useState<Config | null>(null);
+
+  const config: Config =
+    draft ?? (stored?.cases?.length && stored.numbers?.length ? stored : DEFAULT_CONFIG);
+
+  /** Same signature as a useState setter, but the base is whatever is on screen. */
+  const setConfig = (update: (current: Config) => Config) => setDraft(update(config));
+
+  const toggleCase = (kase: Case) =>
+    setConfig((c) => ({
+      ...c,
+      cases: c.cases.includes(kase) ? c.cases.filter((x) => x !== kase) : [...c.cases, kase],
+    }));
+
+  const toggleNumber = (num: GramNumber) =>
+    setConfig((c) => {
+      const next = c.numbers.includes(num)
+        ? c.numbers.filter((x) => x !== num)
+        : [...c.numbers, num];
+      return { ...c, numbers: next.length ? next : c.numbers };
+    });
+
+  const start = () => {
+    saveConfig(config);
+    const params = new URLSearchParams({
+      cases: config.cases.join(","),
+      num: config.numbers.join(","),
+      mode: config.mode,
+      count: String(config.count),
+      seed: String(Math.floor(Math.random() * 1_000_000)),
+    });
+    router.push(`/practice?${params.toString()}`);
+  };
+
+  const ready = config.cases.length > 0;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <main className="mx-auto w-full max-w-3xl px-5 py-10 sm:py-16">
+      <header className="mb-10">
+        <p className="text-sm uppercase tracking-[0.2em] text-accent">Ćwiczenia</p>
+        <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Polish case practice</h1>
+        <p className="mt-3 text-muted">
+          Pick what you want to drill, then fill in one sentence at a time.
+        </p>
+      </header>
+
+      <div className="space-y-9">
+        <Field label="1 · Cases" hint="Choose one or more.">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {CASES.map((kase) => {
+              const info = CASE_INFO[kase];
+              const stat = stats[kase];
+              return (
+                <Choice key={kase} selected={config.cases.includes(kase)} onClick={() => toggleCase(kase)}>
+                  <span className="block font-medium">{info.pl}</span>
+                  <span className="block text-sm text-muted">
+                    {info.en} · {info.question}
+                  </span>
+                  {stat && stat.total > 0 ? (
+                    <span className="mt-1 block text-xs text-muted">
+                      lifetime {Math.round((stat.correct / stat.total) * 100)}% of {stat.total}
+                    </span>
+                  ) : null}
+                </Choice>
+              );
+            })}
+          </div>
+          <div className="flex gap-3 text-sm">
+            <button
+              type="button"
+              className="text-accent underline underline-offset-4 cursor-pointer"
+              onClick={() => setConfig((c) => ({ ...c, cases: [...CASES] }))}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              Select all
+            </button>
+            <button
+              type="button"
+              className="text-muted underline underline-offset-4 cursor-pointer"
+              onClick={() => setConfig((c) => ({ ...c, cases: [] }))}
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+              Clear
+            </button>
+          </div>
+        </Field>
+
+        <Field label="2 · What to decline">
+          <div className="grid gap-3 sm:grid-cols-3">
+            {(Object.keys(MODE_LABELS) as WordMode[]).map((mode) => (
+              <Choice key={mode} selected={config.mode === mode} onClick={() => setConfig((c) => ({ ...c, mode }))}>
+                <span className="block font-medium">{MODE_LABELS[mode].title}</span>
+                <span className="block text-sm text-muted">{MODE_LABELS[mode].blurb}</span>
+              </Choice>
+            ))}
+          </div>
+          <div className="flex gap-3">
+            {(["sg", "pl"] as GramNumber[]).map((num) => (
+              <Choice key={num} selected={config.numbers.includes(num)} onClick={() => toggleNumber(num)} className="flex-1">
+                <span className="font-medium">{num === "sg" ? "Singular" : "Plural"}</span>
+              </Choice>
+            ))}
+          </div>
+        </Field>
+
+        <Field label="3 · How many sentences">
+          <div className="flex flex-wrap gap-3">
+            {COUNTS.map((count) => (
+              <Choice key={count} selected={config.count === count} onClick={() => setConfig((c) => ({ ...c, count }))} className="w-20 text-center">
+                <span className="font-medium">{count}</span>
+              </Choice>
+            ))}
+            <label className="flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-3">
+              <span className="text-sm text-muted">custom</span>
+              <input
+                type="number"
+                min={1}
+                max={200}
+                value={config.count}
+                onChange={(e) =>
+                  setConfig((c) => ({
+                    ...c,
+                    count: Math.min(200, Math.max(1, Number(e.target.value) || 1)),
+                  }))
+                }
+                className="w-16 bg-transparent text-right outline-none"
+              />
+            </label>
+          </div>
+        </Field>
+
+        <button
+          type="button"
+          onClick={start}
+          disabled={!ready}
+          className="w-full rounded-xl bg-accent px-6 py-4 text-lg font-medium text-white transition-opacity disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+        >
+          Start · {config.count} sentences
+        </button>
+        {!ready ? <p className="text-center text-sm text-accent">Pick at least one case.</p> : null}
+      </div>
+    </main>
   );
 }

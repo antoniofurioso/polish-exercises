@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ćwiczenia — Polish case practice
 
-## Getting Started
+Fill-in-the-blank drills for Polish declension, in the style of courseofpolish.com.
+Configure the cases, the word type and the length of the session, then answer one
+sentence at a time with its English translation, and get the correct form plus the
+rule behind it after every answer.
 
-First, run the development server:
+Audio: short synthesised cues mark right / near-miss / wrong (Web Audio, no asset
+files), and the sentence is read aloud in Polish through the browser's speech
+synthesis — 🔈 on the card replays it, and the full correct sentence is read back
+once the answer is revealed. The 🔊 toggle in the header mutes both and is
+remembered.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev     # http://localhost:3000
+npm test        # grammar engine + generator fuzz tests
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How exercises are made
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Everything is generated locally and deterministically — no API calls.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| File | Role |
+| --- | --- |
+| `lib/nouns.ts` | ~85 nouns with their full 14-form paradigms (declension is too irregular to derive) |
+| `lib/adjectives.ts` | ~32 adjectives as stem + hardness; only the masculine-personal nominative plural is stored |
+| `lib/declineAdjective.ts` | The regular adjective endings |
+| `lib/templates.ts` | ~80 sentence frames, one per case/trigger, with an English gloss and the rule that applies |
+| `lib/generate.ts` | Picks a template, a noun that semantically fits it and an adjective, then builds the exercise |
+| `lib/grade.ts` | Normalises the answer; a diacritics-only miss is reported separately |
+| `lib/sound.ts` | Synthesised right / near-miss / wrong cues |
+| `lib/speak.ts` | pl-PL speech synthesis for reading sentences aloud |
 
-## Learn More
+Semantic tags on each noun (`food`, `vehicle`, `placeIn`, …) keep sentences sensible —
+`Jem …` only ever takes food, `Jadę …` only vehicles.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Sessions are seeded from the URL (`/practice?cases=gen,loc&num=sg&mode=both&count=20&seed=42`),
+so a session can be reproduced or shared. Settings and lifetime per-case accuracy live in
+localStorage.
