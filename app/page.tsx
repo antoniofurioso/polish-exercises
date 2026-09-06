@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Choice, Field } from "@/components/ui";
 import { CASE_INFO } from "@/lib/cases";
+import { randomSeed, sessionParams } from "@/lib/session";
 import { saveConfig, useStoredConfig, useStoredStats } from "@/lib/storage";
 import { CASES } from "@/lib/types";
 import type { Case, Config, GramNumber, WordMode } from "@/lib/types";
@@ -51,14 +52,7 @@ export default function ConfiguratorPage() {
 
   const start = () => {
     saveConfig(config);
-    const params = new URLSearchParams({
-      cases: config.cases.join(","),
-      num: config.numbers.join(","),
-      mode: config.mode,
-      count: String(config.count),
-      seed: String(Math.floor(Math.random() * 1_000_000)),
-    });
-    router.push(`/practice?${params.toString()}`);
+    router.push(`/practice?${sessionParams(config, randomSeed())}`);
   };
 
   const ready = config.cases.length > 0;

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ExerciseCard } from "@/components/ExerciseCard";
 import { ResultsSummary, type Result } from "@/components/ResultsSummary";
@@ -9,10 +9,34 @@ import { buildSession } from "@/lib/generate";
 import { grade, type Verdict } from "@/lib/grade";
 import { playFinish, playVerdict } from "@/lib/sound";
 import { stopSpeaking } from "@/lib/speak";
+import { parseSession, randomSeed, sessionParams } from "@/lib/session";
 import { recordAnswer, setSoundOn, useSoundOn } from "@/lib/storage";
 import type { Config, Exercise } from "@/lib/types";
 
-export function PracticeClient({ config, seed }: { config: Config; seed: number }) {
+/**
+ * The session lives entirely in the query string, read on the client so the
+ * whole app can be exported as static files.
+ */
+export function PracticePage() {
+  const params = useSearchParams();
+  const session = useMemo(() => parseSession(new URLSearchParams(params.toString())), [params]);
+
+  if (!session) {
+    return (
+      <main className="mx-auto w-full max-w-2xl px-5 py-20 text-center">
+        <p className="text-muted">This practice link has no settings in it.</p>
+        <Link href="/" className="mt-4 inline-block text-accent underline underline-offset-4">
+          Set up a session
+        </Link>
+      </main>
+    );
+  }
+
+  // a new seed means a new set of sentences, so start the runner from scratch
+  return <Runner key={session.seed} config={session.config} seed={session.seed} />;
+}
+
+function Runner({ config, seed }: { config: Config; seed: number }) {
   const router = useRouter();
   const initial = useMemo(() => buildSession(config, seed), [config, seed]);
 
@@ -59,16 +83,7 @@ export function PracticeClient({ config, seed }: { config: Config; seed: number 
     setDone(false);
   };
 
-  const restart = () => {
-    const params = new URLSearchParams({
-      cases: config.cases.join(","),
-      num: config.numbers.join(","),
-      mode: config.mode,
-      count: String(config.count),
-      seed: String(Math.floor(Math.random() * 1_000_000)),
-    });
-    router.push(`/practice?${params.toString()}`);
-  };
+  const restart = () => router.push(`/practice?${sessionParams(config, randomSeed())}`);
 
   return (
     <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:py-14">

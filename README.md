@@ -15,7 +15,20 @@ remembered.
 npm install
 npm run dev     # http://localhost:3000
 npm test        # grammar engine + generator fuzz tests
+npm run build   # static site in out/
 ```
+
+## Deploying
+
+The app is a fully static export (`output: "export"`) — no server, no adapter.
+On Cloudflare Pages, connect the repo and set:
+
+| Setting | Value |
+| --- | --- |
+| Build command | `npm run build` |
+| Output directory | `out` |
+
+The same `out/` folder works on any static host.
 
 ## How exercises are made
 
@@ -28,6 +41,7 @@ Everything is generated locally and deterministically — no API calls.
 | `lib/declineAdjective.ts` | The regular adjective endings |
 | `lib/templates.ts` | ~80 sentence frames, one per case/trigger, with an English gloss and the rule that applies |
 | `lib/generate.ts` | Picks a template, a noun that semantically fits it and an adjective, then builds the exercise |
+| `lib/session.ts` | Encodes a session in the query string and reads it back |
 | `lib/grade.ts` | Normalises the answer; a diacritics-only miss is reported separately |
 | `lib/sound.ts` | Synthesised right / near-miss / wrong cues |
 | `lib/speak.ts` | pl-PL speech synthesis for reading sentences aloud |
