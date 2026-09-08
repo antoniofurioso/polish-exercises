@@ -6,6 +6,15 @@ export type GramNumber = "sg" | "pl";
 /** Polish genders, split by the distinctions that actually change endings. */
 export type Gender = "mPers" | "mAnim" | "mInanim" | "f" | "n";
 
+/** The three buckets a learner picks from on the configurator. */
+export const GENDER_GROUPS = ["m", "f", "n"] as const;
+export type GenderGroup = (typeof GENDER_GROUPS)[number];
+
+/** Collapses the ending-level genders into the pickable bucket. */
+export function genderGroup(gender: Gender): GenderGroup {
+  return gender === "f" ? "f" : gender === "n" ? "n" : "m";
+}
+
 export type Tag =
   | "person"
   | "profession"
@@ -76,6 +85,8 @@ export type Config = {
   numbers: GramNumber[];
   mode: WordMode;
   count: number;
+  /** Which noun genders to draw from; omitted / empty means all. */
+  genders?: GenderGroup[];
 };
 
 export type Token = { text: string; blank: boolean };

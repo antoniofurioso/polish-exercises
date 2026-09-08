@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { buildSession, makeRng, renderPrompt, renderSolution, resolvePrep } from "../generate";
 import { grade, normalise } from "../grade";
-import { CASES } from "../types";
+import { NOUNS } from "../nouns";
+import { CASES, genderGroup } from "../types";
 import type { Case, Config, GramNumber, WordMode } from "../types";
 
 const MODES: WordMode[] = ["nouns", "adjectives", "both"];
@@ -81,6 +82,21 @@ describe("buildSession", () => {
       }
     }
     expect(checked).toBeGreaterThan(4000);
+  });
+
+  it("only draws nouns from the selected genders", () => {
+    const groupOf = (lemma: string) => {
+      const noun = NOUNS.find((x) => x.lemma === lemma);
+      return noun ? genderGroup(noun.gender) : undefined;
+    };
+    const session = buildSession(
+      { cases: [...CASES], numbers: ["sg"], mode: "nouns", count: 30, genders: ["n"] },
+      11,
+    );
+    expect(session.length).toBeGreaterThan(0);
+    for (const ex of session) {
+      expect(groupOf(ex.hint), ex.hint).toBe("n");
+    }
   });
 
   it("is deterministic for a given seed", () => {

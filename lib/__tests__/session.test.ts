@@ -10,6 +10,19 @@ describe("session URLs", () => {
     expect(parsed).toEqual({ config, seed: 42 });
   });
 
+  it("round-trips a gender subset", () => {
+    const withGenders: Config = { ...config, genders: ["f", "n"] };
+    const parsed = parseSession(new URLSearchParams(sessionParams(withGenders, 1)));
+    expect(parsed).toEqual({ config: withGenders, seed: 1 });
+  });
+
+  it("drops the gender filter when all groups are selected", () => {
+    const parsed = parseSession(
+      new URLSearchParams(sessionParams({ ...config, genders: ["m", "f", "n"] }, 1)),
+    );
+    expect(parsed?.config.genders).toBeUndefined();
+  });
+
   it("rejects a link with no valid case", () => {
     expect(parseSession(new URLSearchParams("count=10"))).toBeNull();
     expect(parseSession(new URLSearchParams("cases=xx&count=10"))).toBeNull();

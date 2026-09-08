@@ -2,11 +2,13 @@ import { ADJECTIVES } from "./adjectives";
 import { declineAdjective } from "./declineAdjective";
 import { NOUNS } from "./nouns";
 import { TEMPLATES } from "./templates";
+import { genderGroup } from "./types";
 import type {
   Adjective,
   Case,
   Config,
   Exercise,
+  GenderGroup,
   GramNumber,
   Noun,
   Template,
@@ -73,10 +75,12 @@ function templatesFor(kase: Case, number: GramNumber): Template[] {
   return TEMPLATES.filter((t) => t.case === kase && (t.number === "any" || t.number === number));
 }
 
-function nounsFor(tpl: Template, number: GramNumber): Noun[] {
+function nounsFor(tpl: Template, number: GramNumber, genders?: GenderGroup[]): Noun[] {
   return NOUNS.filter(
     (noun) =>
-      fitsTemplate(noun, tpl) && (number === "sg" || (!noun.noPlural && noun.pl !== undefined)),
+      fitsTemplate(noun, tpl) &&
+      (number === "sg" || (!noun.noPlural && noun.pl !== undefined)) &&
+      (!genders || genders.length === 0 || genders.includes(genderGroup(noun.gender))),
   );
 }
 
@@ -147,11 +151,12 @@ function tryPick(
   number: GramNumber,
   mode: WordMode,
   rng: () => number,
+  genders?: GenderGroup[],
 ): Pick | null {
   const templates = templatesFor(kase, number);
   if (templates.length === 0) return null;
   for (const tpl of shuffle(templates, rng)) {
-    const nouns = nounsFor(tpl, number);
+    const nouns = nounsFor(tpl, number, genders);
     if (nouns.length === 0) continue;
     for (const noun of shuffle(nouns, rng)) {
       if (mode === "nouns") return { tpl, noun };
@@ -169,10 +174,11 @@ export function buildExercise(
   mode: WordMode,
   rng: () => number,
   taken: Set<string> = new Set(),
+  genders?: GenderGroup[],
 ): Exercise | null {
   for (let attempt = 0; attempt < 40; attempt++) {
     const number = pick(numbers, rng);
-    const chosen = tryPick(kase, number, mode, rng);
+    const chosen = tryPick(kase, number, mode, rng, genders);
     if (!chosen) continue;
     const { tpl, noun, adj } = chosen;
     const key = `${tpl.pl}|${noun.lemma}|${adj?.lemma ?? ""}|${number}`;
@@ -219,7 +225,7 @@ export function buildSession(config: Config, seed = Date.now()): Exercise[] {
   for (let i = 0; i < config.count; i++) {
     if (pool.length === 0) pool = shuffle(cases, rng);
     const kase = pool.pop()!;
-    const exercise = buildExercise(kase, numbers, config.mode, rng, taken);
+    const exercise = buildExercise(kase, numbers, config.mode, rng, taken, config.genders);
     if (exercise) exercises.push(exercise);
   }
   return exercises;

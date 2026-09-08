@@ -6,10 +6,16 @@ import { Choice, Field } from "@/components/ui";
 import { CASE_INFO } from "@/lib/cases";
 import { randomSeed, sessionParams } from "@/lib/session";
 import { saveConfig, useStoredConfig, useStoredStats } from "@/lib/storage";
-import { CASES } from "@/lib/types";
-import type { Case, Config, GramNumber, WordMode } from "@/lib/types";
+import { CASES, GENDER_GROUPS } from "@/lib/types";
+import type { Case, Config, GenderGroup, GramNumber, WordMode } from "@/lib/types";
 
 const COUNTS = [10, 20, 30, 50];
+
+const GENDER_LABELS: Record<GenderGroup, { title: string; blurb: string }> = {
+  m: { title: "Masculine", blurb: "pan, kot, dom" },
+  f: { title: "Feminine", blurb: "kobieta, kawa" },
+  n: { title: "Neuter", blurb: "okno, dziecko" },
+};
 
 const MODE_LABELS: Record<WordMode, { title: string; blurb: string }> = {
   nouns: { title: "Nouns", blurb: "Decline the noun on its own." },
@@ -41,6 +47,16 @@ export default function ConfiguratorPage() {
       ...c,
       cases: c.cases.includes(kase) ? c.cases.filter((x) => x !== kase) : [...c.cases, kase],
     }));
+
+  const toggleGender = (g: GenderGroup) =>
+    setConfig((c) => {
+      const current = c.genders?.length ? c.genders : [...GENDER_GROUPS];
+      const next = current.includes(g)
+        ? current.filter((x) => x !== g)
+        : [...current, g];
+      if (next.length === 0) return c;
+      return { ...c, genders: next.length === GENDER_GROUPS.length ? undefined : next };
+    });
 
   const toggleNumber = (num: GramNumber) =>
     setConfig((c) => {
@@ -106,7 +122,21 @@ export default function ConfiguratorPage() {
           </div>
         </Field>
 
-        <Field label="2 · What to decline">
+        <Field label="2 · Gender" hint="Which noun genders to drill.">
+          <div className="grid gap-3 sm:grid-cols-3">
+            {GENDER_GROUPS.map((g) => {
+              const selected = config.genders?.length ? config.genders.includes(g) : true;
+              return (
+                <Choice key={g} selected={selected} onClick={() => toggleGender(g)}>
+                  <span className="block font-medium">{GENDER_LABELS[g].title}</span>
+                  <span className="block text-sm text-muted">{GENDER_LABELS[g].blurb}</span>
+                </Choice>
+              );
+            })}
+          </div>
+        </Field>
+
+        <Field label="3 · What to decline">
           <div className="grid gap-3 sm:grid-cols-3">
             {(Object.keys(MODE_LABELS) as WordMode[]).map((mode) => (
               <Choice key={mode} selected={config.mode === mode} onClick={() => setConfig((c) => ({ ...c, mode }))}>
@@ -124,7 +154,7 @@ export default function ConfiguratorPage() {
           </div>
         </Field>
 
-        <Field label="3 · How many sentences">
+        <Field label="4 · How many sentences">
           <div className="flex flex-wrap gap-3">
             {COUNTS.map((count) => (
               <Choice key={count} selected={config.count === count} onClick={() => setConfig((c) => ({ ...c, count }))} className="w-20 text-center">
