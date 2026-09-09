@@ -1,4 +1,4 @@
-import type { Forms, Gender, Noun, Tag } from "./types";
+import type { Case, Forms, Gender, GramNumber, Noun, Tag } from "./types";
 
 type Row = [string, string, string, string, string, string, string];
 
@@ -27,6 +27,16 @@ function n(
     pl: pl ? forms(pl) : undefined,
     ...extra,
   };
+}
+
+/**
+ * Every accepted spelling of one cell of a noun's table, primary form first.
+ * Empty when that number has no table at all (mleko, muzyka...).
+ */
+export function nounVariants(noun: Noun, number: GramNumber, kase: Case): string[] {
+  const table = number === "pl" ? noun.pl : noun.sg;
+  if (!table) return [];
+  return [table[kase], ...(noun.alt?.[`${number}.${kase}`] ?? [])];
 }
 
 export const NOUNS: Noun[] = [

@@ -1,6 +1,7 @@
 import { ADJECTIVES } from "./adjectives";
+import { buildOptions } from "./choices";
 import { declineAdjective } from "./declineAdjective";
-import { NOUNS } from "./nouns";
+import { NOUNS, nounVariants } from "./nouns";
 import { TEMPLATES } from "./templates";
 import { genderGroup } from "./types";
 import type {
@@ -55,15 +56,15 @@ export function resolvePrep(prep: "z" | "w", next: string): string {
 }
 
 function nounForm(noun: Noun, number: GramNumber, kase: Case): string {
-  const table = number === "pl" ? noun.pl : noun.sg;
-  return (table ?? noun.sg)[kase];
+  return nounVariants(noun, number, kase)[0] ?? noun.sg[kase];
 }
 
 function nounAlts(noun: Noun, number: GramNumber, kase: Case): string[] {
-  return noun.alt?.[`${number}.${kase}`] ?? [];
+  return nounVariants(noun, number, kase).slice(1);
 }
 
 function fitsTemplate(noun: Noun, tpl: Template): boolean {
+  if (tpl.excludeLemmas?.includes(noun.lemma)) return false;
   return tpl.requires.length === 0 || noun.tags.some((t) => tpl.requires.includes(t));
 }
 
@@ -208,6 +209,7 @@ export function buildExercise(
       en: renderEnglish(tpl, noun, adj, number),
       answers: buildAnswers(tokens, noun, adj, number, kase, mode),
       note: tpl.note,
+      source: { noun, adj },
     };
   }
   return null;
@@ -226,7 +228,12 @@ export function buildSession(config: Config, seed = Date.now()): Exercise[] {
     if (pool.length === 0) pool = shuffle(cases, rng);
     const kase = pool.pop()!;
     const exercise = buildExercise(kase, numbers, config.mode, rng, taken, config.genders);
-    if (exercise) exercises.push(exercise);
+    if (!exercise) continue;
+    if (config.answerMode === "choice") {
+      const options = buildOptions(exercise, rng);
+      if (options.length > 1) exercise.options = options;
+    }
+    exercises.push(exercise);
   }
   return exercises;
 }

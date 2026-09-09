@@ -51,10 +51,11 @@ function Runner({ config, seed }: { config: Config; seed: number }) {
   const exercise = exercises[index];
   const score = results.filter((r) => r.verdict === "correct").length;
 
-  const submit = () => {
+  const submit = (answer: string = value) => {
     if (!exercise) return;
     if (verdict === null) {
-      const result = grade(value, exercise);
+      const result = grade(answer, exercise);
+      setValue(answer);
       setVerdict(result);
       setResults((r) => [...r, { exercise, verdict: result }]);
       recordAnswer(exercise.case, result === "correct");

@@ -2,9 +2,10 @@
 
 import { Fragment, useEffect, useRef, type ReactNode } from "react";
 import { CASE_INFO } from "@/lib/cases";
+import { explainMiss } from "@/lib/diagnose";
 import { renderPrompt, renderSolution } from "@/lib/generate";
 import { spokenGap, speak, stopSpeaking, useSpeechAvailable } from "@/lib/speak";
-import type { Verdict } from "@/lib/grade";
+import { normalise, stripDiacritics, type Verdict } from "@/lib/grade";
 import type { Exercise } from "@/lib/types";
 
 const VERDICT_STYLE: Record<Verdict, string> = {
@@ -32,18 +33,32 @@ export function ExerciseCard({
   value: string;
   verdict: Verdict | null;
   onChange: (value: string) => void;
-  onSubmit: () => void;
+  onSubmit: (answer?: string) => void;
   isLast: boolean;
   soundOn: boolean;
 }) {
   const canSpeak = useSpeechAvailable();
   const inputRef = useRef<HTMLInputElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
+  const options = exercise.options;
 
   useEffect(() => {
     if (verdict) nextRef.current?.focus();
-    else inputRef.current?.focus();
-  }, [verdict, exercise.id]);
+    else if (!options) inputRef.current?.focus();
+  }, [verdict, exercise.id, options]);
+
+  // in multiple choice the number keys pick an option
+  useEffect(() => {
+    if (!options || verdict) return;
+    const onKey = (e: KeyboardEvent) => {
+      const n = Number(e.key);
+      if (!n || n > options.length) return;
+      e.preventDefault();
+      onSubmit(options[n - 1]);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [options, verdict, onSubmit]);
 
   // once the answer is revealed, read the complete sentence back
   useEffect(() => {
@@ -53,9 +68,28 @@ export function ExerciseCard({
 
   const info = CASE_INFO[exercise.case];
   const answered = verdict !== null;
+  // accents get their own one-liner already; every other miss gets explained
+  const explanation = verdict === "wrong" ? explainMiss(value, exercise) : null;
   const width = Math.max(9, value.length + 2);
+  const accepted = exercise.answers.map((a) => stripDiacritics(normalise(a)));
 
-  const gap = (
+  const slot = (
+    <span
+      className={`inline-block min-w-[6ch] border-b-2 px-1 text-center transition-colors ${
+        answered
+          ? verdict === "correct"
+            ? "border-ok text-ok"
+            : "border-accent text-accent line-through decoration-1"
+          : "border-accent/50 text-muted"
+      }`}
+    >
+      {value || "\u00a0\u00a0\u00a0"}
+    </span>
+  );
+
+  const gap = options ? (
+    slot
+  ) : (
     <input
       ref={inputRef}
       value={value}
@@ -76,6 +110,13 @@ export function ExerciseCard({
     />
   );
 
+  const gapWithHint = (
+    <span className="whitespace-nowrap">
+      {gap}
+      <span className="ml-1 text-lg text-muted">({exercise.hint})</span>
+    </span>
+  );
+
   const parts: ReactNode[] = [];
   let blankUsed = false;
   for (const [i, token] of exercise.tokens.entries()) {
@@ -84,7 +125,7 @@ export function ExerciseCard({
     parts.push(
       <Fragment key={i}>
         {space}
-        {token.blank ? gap : token.text}
+        {token.blank ? gapWithHint : token.text}
       </Fragment>,
     );
     if (token.blank) blankUsed = true;
@@ -117,13 +158,13 @@ export function ExerciseCard({
           onSubmit();
         }}
       >
+        <p className="mb-3 text-muted italic">&ldquo;{exercise.en}&rdquo;</p>
         <p className="sentence text-2xl leading-relaxed sm:text-3xl">
           {exercise.before}
           {parts}
           {exercise.after}
         </p>
         <div className="mt-3 flex items-center gap-3">
-          <p className="text-lg text-muted">({exercise.hint})</p>
           {canSpeak ? (
             <button
               type="button"
@@ -141,7 +182,36 @@ export function ExerciseCard({
             </button>
           ) : null}
         </div>
-        <p className="mt-4 text-muted italic">&ldquo;{exercise.en}&rdquo;</p>
+
+        {options ? (
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {options.map((option, i) => {
+              const isAnswer = accepted.includes(stripDiacritics(normalise(option)));
+              const chosen = answered && normalise(option) === normalise(value);
+              const style = !answered
+                ? "border-line bg-background hover:border-accent/60"
+                : isAnswer
+                  ? "border-ok bg-ok-soft text-ok"
+                  : chosen
+                    ? "border-accent bg-accent-soft text-accent"
+                    : "border-line text-muted opacity-60";
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  disabled={answered}
+                  onClick={() => onSubmit(option)}
+                  className={`sentence flex items-center gap-3 rounded-xl border px-4 py-3 text-left text-lg transition-colors ${style} ${
+                    answered ? "cursor-default" : "cursor-pointer"
+                  }`}
+                >
+                  <span className="text-xs text-muted tabular-nums">{i + 1}</span>
+                  <span>{option}</span>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
 
         {answered ? (
           <div className={`mt-6 rounded-xl border p-4 ${VERDICT_STYLE[verdict]}`} role="status">
@@ -155,17 +225,22 @@ export function ExerciseCard({
             {verdict !== "correct" ? (
               <p className="sentence mt-2 text-lg text-foreground">{renderSolution(exercise)}</p>
             ) : null}
+            {explanation ? (
+              <p className="mt-2 text-sm text-foreground">{explanation}</p>
+            ) : null}
             <p className="mt-2 text-sm text-muted">{exercise.note}</p>
           </div>
         ) : null}
 
-        <button
-          ref={nextRef}
-          type="submit"
-          className="mt-5 w-full rounded-xl bg-accent px-6 py-3 font-medium text-white cursor-pointer"
-        >
-          {answered ? (isLast ? "See results ↵" : "Next ↵") : "Check ↵"}
-        </button>
+        {answered || !options ? (
+          <button
+            ref={nextRef}
+            type="submit"
+            className="mt-5 w-full rounded-xl bg-accent px-6 py-3 font-medium text-white cursor-pointer"
+          >
+            {answered ? (isLast ? "See results ↵" : "Next ↵") : "Check ↵"}
+          </button>
+        ) : null}
       </form>
     </div>
   );

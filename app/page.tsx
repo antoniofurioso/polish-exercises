@@ -6,8 +6,8 @@ import { Choice, Field } from "@/components/ui";
 import { CASE_INFO } from "@/lib/cases";
 import { randomSeed, sessionParams } from "@/lib/session";
 import { saveConfig, useStoredConfig, useStoredStats } from "@/lib/storage";
-import { CASES, GENDER_GROUPS } from "@/lib/types";
-import type { Case, Config, GenderGroup, GramNumber, WordMode } from "@/lib/types";
+import { ANSWER_MODES, CASES, GENDER_GROUPS } from "@/lib/types";
+import type { AnswerMode, Case, Config, GenderGroup, GramNumber, WordMode } from "@/lib/types";
 
 const COUNTS = [10, 20, 30, 50];
 
@@ -23,11 +23,17 @@ const MODE_LABELS: Record<WordMode, { title: string; blurb: string }> = {
   both: { title: "Nouns + adjectives", blurb: "Decline the whole phrase." },
 };
 
+const ANSWER_LABELS: Record<AnswerMode, { title: string; blurb: string }> = {
+  typing: { title: "Writing", blurb: "Type the form yourself." },
+  choice: { title: "Multiple choice", blurb: "Pick the right form out of four." },
+};
+
 const DEFAULT_CONFIG: Config = {
   cases: ["gen", "acc", "ins", "loc"],
   numbers: ["sg"],
   mode: "nouns",
   count: 20,
+  answerMode: "typing",
 };
 
 export default function ConfiguratorPage() {
@@ -154,7 +160,22 @@ export default function ConfiguratorPage() {
           </div>
         </Field>
 
-        <Field label="4 · How many sentences">
+        <Field label="4 · How to answer">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {ANSWER_MODES.map((answerMode) => (
+              <Choice
+                key={answerMode}
+                selected={(config.answerMode ?? "typing") === answerMode}
+                onClick={() => setConfig((c) => ({ ...c, answerMode }))}
+              >
+                <span className="block font-medium">{ANSWER_LABELS[answerMode].title}</span>
+                <span className="block text-sm text-muted">{ANSWER_LABELS[answerMode].blurb}</span>
+              </Choice>
+            ))}
+          </div>
+        </Field>
+
+        <Field label="5 · How many sentences">
           <div className="flex flex-wrap gap-3">
             {COUNTS.map((count) => (
               <Choice key={count} selected={config.count === count} onClick={() => setConfig((c) => ({ ...c, count }))} className="w-20 text-center">

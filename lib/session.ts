@@ -1,5 +1,5 @@
 import { CASES, GENDER_GROUPS } from "./types";
-import type { Case, Config, GenderGroup, GramNumber, WordMode } from "./types";
+import type { AnswerMode, Case, Config, GenderGroup, GramNumber, WordMode } from "./types";
 
 const MODES: WordMode[] = ["nouns", "adjectives", "both"];
 
@@ -17,6 +17,7 @@ export function sessionParams(config: Config, seed: number): string {
   if (config.genders && config.genders.length > 0 && config.genders.length < GENDER_GROUPS.length) {
     params.set("gen", config.genders.join(","));
   }
+  if (config.answerMode === "choice") params.set("ans", "choice");
   return params.toString();
 }
 
@@ -35,6 +36,8 @@ export function parseSession(params: URLSearchParams): Session | null {
   const mode = (params.get("mode") ?? "") as WordMode;
   const count = Number(params.get("count"));
 
+  const answerMode = params.get("ans") as AnswerMode;
+
   const genders = (params.get("gen") ?? "")
     .split(",")
     .filter((g): g is GenderGroup => (GENDER_GROUPS as readonly string[]).includes(g));
@@ -46,6 +49,7 @@ export function parseSession(params: URLSearchParams): Session | null {
       mode: MODES.includes(mode) ? mode : "nouns",
       count: Number.isFinite(count) ? Math.min(200, Math.max(1, Math.round(count))) : 20,
       ...(genders.length > 0 && genders.length < GENDER_GROUPS.length ? { genders } : {}),
+      ...(answerMode === "choice" ? { answerMode } : {}),
     },
     seed: Number(params.get("seed")) || 1,
   };

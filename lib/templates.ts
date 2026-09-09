@@ -38,6 +38,22 @@ export const TEMPLATES: Template[] = [
   { case: "nom", number: "pl", pl: "Interesują mnie {NP}.", en: "{npDef} interest me.",
     requires: ["abstract", "text", "object"], note: "The subject of the sentence is nominative." },
 
+  // everyday phrases
+  { case: "nom", number: "sg", pl: "Ile kosztuje {NP}?", en: "How much does {npDef} cost?",
+    requires: ["object", "food", "drink", "vehicle", "text"], note: "The subject of the sentence is nominative." },
+  { case: "nom", number: "pl", pl: "Ile kosztują {NP}?", en: "How much do {npDef} cost?",
+    requires: ["object", "food", "drink", "vehicle", "text"], note: "The subject of the sentence is nominative." },
+  { case: "nom", number: "sg", pl: "Zaraz przyjdzie {NP}.", en: "{npDef} is coming in a minute.",
+    requires: ["person"], note: "The subject of the sentence is nominative." },
+  { case: "nom", number: "pl", pl: "Zaraz przyjdą {NP}.", en: "{npDef} are coming in a minute.",
+    requires: ["person"], note: "The subject of the sentence is nominative." },
+  { case: "nom", number: "sg", pl: "Czeka na ciebie {NP}.", en: "{npDef} is waiting for you.",
+    requires: ["person"], note: "The subject of the sentence is nominative." },
+  { case: "nom", number: "sg", pl: "Na stole leży {NP}.", en: "There's {np} on the table.",
+    requires: ["text", "food"], note: "The subject of the sentence is nominative." },
+  { case: "nom", number: "pl", pl: "Na stole leżą {NP}.", en: "There are {np} on the table.",
+    requires: ["text", "food"], note: "The subject of the sentence is nominative." },
+
   // ---- genitive ----------------------------------------------------------
   { case: "gen", number: "any", pl: "Nie mam {NP}.", en: "I don't have {np}.",
     requires: [], note: "A negated verb turns its accusative object into the genitive." },
@@ -62,6 +78,19 @@ export const TEMPLATES: Template[] = [
   { case: "gen", number: "sg", pl: "Jestem u {NP}.", en: "I'm at {npDef}'s place.",
     requires: ["person"], note: "'u' (at someone's) always takes the genitive." },
 
+  // everyday phrases
+  { case: "gen", number: "any", pl: "Nie ma {NP}.", en: "There is no {npBare}.",
+    enPl: "There are no {npBare}.", requires: [],
+    note: "'nie ma' (there isn't) always takes the genitive." },
+  { case: "gen", number: "sg", pl: "Nie ma tu {NP}.", en: "{npDef} isn't here.",
+    requires: ["person", "animal", "object"], note: "'nie ma' (there isn't) always takes the genitive." },
+  { case: "gen", number: "any", pl: "Potrzebuję {NP}.", en: "I need {np}.",
+    requires: [], note: "'potrzebować' always takes the genitive." },
+  { case: "gen", number: "any", pl: "To zależy od {NP}.", en: "It depends on {npDef}.",
+    requires: ["person", "abstract"], note: "'od' (from/on) always takes the genitive." },
+  { case: "gen", number: "any", pl: "Wracam {z} {NP}.", en: "I'm coming back from {npDef}.",
+    requires: ["placeIn"], note: "'z' meaning 'out of / from' takes the genitive." },
+
   // ---- dative ------------------------------------------------------------
   { case: "dat", number: "any", pl: "Pomagam {NP}.", en: "I help {npDef}.",
     requires: ["person", "animal"], note: "'pomagać' always takes the dative." },
@@ -83,6 +112,16 @@ export const TEMPLATES: Template[] = [
     requires: ["person"], note: "'przeszkadzać' always takes the dative." },
   { case: "dat", number: "any", pl: "Ten prezent podoba się {NP}.", en: "{npDef} likes this present.",
     enPl: "{npDef} like this present.", requires: ["person"], note: "With 'podobać się' the person who likes takes the dative." },
+
+  // everyday phrases
+  { case: "dat", number: "any", pl: "Powiedz to {NP}.", en: "Tell that to {npDef}.",
+    requires: ["person"], note: "The receiver of the message takes the dative." },
+  { case: "dat", number: "any", pl: "Wysyłam wiadomość {NP}.", en: "I'm sending a message to {npDef}.",
+    requires: ["person"], note: "The indirect object (the receiver) takes the dative." },
+  { case: "dat", number: "any", pl: "Życzę {NP} miłego dnia.", en: "I wish {npDef} a nice day.",
+    requires: ["person"], note: "'życzyć' always takes the dative." },
+  { case: "dat", number: "any", pl: "Dzięki {NP} wszystko się udało.", en: "Thanks to {npDef} everything worked out.",
+    requires: ["person"], note: "'dzięki' (thanks to) always takes the dative." },
 
   // ---- accusative --------------------------------------------------------
   { case: "acc", number: "any", pl: "Mam {NP}.", en: "I have {np}.",
@@ -106,6 +145,23 @@ export const TEMPLATES: Template[] = [
     requires: ["person", "animal", "abstract"], note: "The direct object of a positive verb takes the accusative." },
   { case: "acc", number: "any", pl: "Zapraszam {NP} na kawę.", en: "I'm inviting {npDef} for a coffee.",
     requires: ["person"], note: "The direct object of a positive verb takes the accusative." },
+
+  // everyday phrases
+  { case: "acc", number: "any", pl: "Poproszę {NP}.", en: "{np}, please.",
+    requires: ["food", "drink", "text"],
+    note: "The direct object of a positive verb takes the accusative." },
+  { case: "acc", number: "any", pl: "Masz {NP}?", en: "Do you have {np}?",
+    requires: [], note: "The direct object of a positive verb takes the accusative." },
+  { case: "acc", number: "any", pl: "Muszę kupić {NP}.", en: "I have to buy {np}.",
+    requires: ["object", "food", "drink", "text", "vehicle"],
+    note: "The direct object of a positive verb takes the accusative." },
+  { case: "acc", number: "any", pl: "Czekam na {NP}.", en: "I'm waiting for {npDef}.",
+    requires: ["person", "vehicle"], note: "'na' meaning 'waiting for' takes the accusative." },
+  { case: "acc", number: "any", pl: "Mam ochotę na {NP}.", en: "I feel like having {np}.",
+    requires: ["food", "drink"], note: "'mieć ochotę na' (to fancy) takes the accusative." },
+  { case: "acc", number: "any", pl: "Dzięki za {NP}.", en: "Thanks for {npDef}.",
+    requires: ["object", "text", "food", "drink", "abstract"],
+    note: "'za' (for) takes the accusative." },
 
   // ---- instrumental ------------------------------------------------------
   { case: "ins", number: "any", pl: "Interesuję się {NP}.", en: "I'm interested in {np}.",
@@ -131,6 +187,16 @@ export const TEMPLATES: Template[] = [
   { case: "ins", number: "any", pl: "Opiekuję się {NP}.", en: "I take care of {npDef}.",
     requires: ["person", "animal"], note: "'opiekować się' always takes the instrumental." },
 
+  // everyday phrases
+  { case: "ins", number: "any", pl: "Mieszkam {z} {NP}.", en: "I live with {npDef}.",
+    requires: ["person"], note: "'z' meaning 'together with' takes the instrumental." },
+  { case: "ins", number: "any", pl: "Spotkajmy się przed {NP}.", en: "Let's meet in front of {npDef}.",
+    requires: ["placeIn"], excludeLemmas: ["kuchnia", "pokój", "ulica"], note: "'przed' (in front of) takes the instrumental." },
+  { case: "ins", number: "any", pl: "Coś jest nie tak {z} {NP}.", en: "Something is wrong with {npDef}.",
+    requires: ["object", "vehicle"], note: "'z' meaning 'with' takes the instrumental." },
+  { case: "ins", number: "any", pl: "Pracuję nad {NP}.", en: "I'm working on {npDef}.",
+    requires: ["text"], note: "'nad' meaning 'on (a task)' takes the instrumental." },
+
   // ---- locative ----------------------------------------------------------
   { case: "loc", number: "any", pl: "Myślę o {NP}.", en: "I'm thinking about {npDef}.",
     requires: [], note: "'o' meaning 'about' takes the locative." },
@@ -143,15 +209,27 @@ export const TEMPLATES: Template[] = [
   { case: "loc", number: "any", pl: "Marzę o {NP}.", en: "I dream about {np}.",
     requires: ["abstract", "object", "placeTo", "vehicle"], note: "'o' meaning 'about' takes the locative." },
   { case: "loc", number: "any", pl: "Mieszkam {w} {NP}.", en: "I live in {npDef}.",
-    requires: ["placeIn"], note: "'w' meaning 'inside' takes the locative." },
+    requires: ["placeIn"], excludeLemmas: ["ulica"], note: "'w' meaning 'inside' takes the locative." },
   { case: "loc", number: "any", pl: "Jestem {w} {NP}.", en: "I'm in {npDef}.",
-    requires: ["placeIn"], note: "'w' meaning 'inside' takes the locative." },
+    requires: ["placeIn"], excludeLemmas: ["ulica"], note: "'w' meaning 'inside' takes the locative." },
   { case: "loc", number: "any", pl: "Byłem wczoraj {w} {NP}.", en: "I was in {npDef} yesterday.",
-    requires: ["placeIn"], note: "'w' meaning 'inside' takes the locative." },
+    requires: ["placeIn"], excludeLemmas: ["ulica"], note: "'w' meaning 'inside' takes the locative." },
   { case: "loc", number: "any", pl: "Książka leży na {NP}.", en: "The book is lying on {npDef}.",
     requires: ["surface"], note: "'na' meaning 'on' takes the locative when there is no movement." },
   { case: "loc", number: "any", pl: "Przy {NP} stoi krzesło.", en: "There is a chair next to {npDef}.",
     requires: ["surface"], note: "'przy' (next to) always takes the locative." },
+
+  // everyday phrases
+  { case: "loc", number: "any", pl: "Pracuję {w} {NP}.", en: "I work in {npDef}.",
+    requires: ["placeIn"], excludeLemmas: ["ulica"], note: "'w' meaning 'inside' takes the locative." },
+  { case: "loc", number: "any", pl: "Spotkajmy się {w} {NP}.", en: "Let's meet in {npDef}.",
+    requires: ["placeIn"], excludeLemmas: ["ulica"], note: "'w' meaning 'inside' takes the locative." },
+  { case: "loc", number: "any", pl: "Co wiesz o {NP}?", en: "What do you know about {npDef}?",
+    requires: [], note: "'o' meaning 'about' takes the locative." },
+  { case: "loc", number: "any", pl: "Zależy mi na {NP}.", en: "I care about {npDef}.",
+    requires: ["person", "abstract"], note: "'na' after 'zależeć' takes the locative." },
+  { case: "loc", number: "any", pl: "Znam się na {NP}.", en: "I know a lot about {npDef}.",
+    requires: ["abstract", "text", "object"], note: "'na' after 'znać się' takes the locative." },
 
   // ---- vocative ----------------------------------------------------------
   { case: "voc", number: "any", pl: "Dzień dobry, {NP}!", en: "Good morning, {npBare}!",
@@ -174,4 +252,13 @@ export const TEMPLATES: Template[] = [
     requires: ["person", "animal"], note: "Addressing someone directly takes the vocative." },
   { case: "voc", number: "pl", pl: "Gdzie jesteście, {NP}?", en: "Where are you, {npBare}?",
     requires: ["person", "animal"], note: "Addressing someone directly takes the vocative." },
+  // everyday phrases
+  { case: "voc", number: "sg", pl: "Uważaj, {NP}!", en: "Watch out, {npBare}!",
+    requires: ["person", "animal"], note: "Addressing someone directly takes the vocative." },
+  { case: "voc", number: "any", pl: "Do zobaczenia, {NP}!", en: "See you, {npBare}!",
+    requires: ["person"], note: "Addressing someone directly takes the vocative." },
+  { case: "voc", number: "sg", pl: "Nie martw się, {NP}.", en: "Don't worry, {npBare}.",
+    requires: ["person"], note: "Addressing someone directly takes the vocative." },
+  { case: "voc", number: "any", pl: "Miłego dnia, {NP}!", en: "Have a nice day, {npBare}!",
+    requires: ["person"], note: "Addressing someone directly takes the vocative." },
 ];

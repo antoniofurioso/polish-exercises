@@ -74,11 +74,17 @@ export type Template = {
   enPl?: string;
   /** Noun must carry at least one of these tags. */
   requires: Tag[];
+  /** Nouns that fit the tags but not this sentence (w ulicy, przed kuchnią...). */
+  excludeLemmas?: string[];
   /** One-line explanation of why this case is used here. */
   note: string;
 };
 
 export type WordMode = "nouns" | "adjectives" | "both";
+
+/** How the learner supplies the answer: type it out, or pick from options. */
+export const ANSWER_MODES = ["typing", "choice"] as const;
+export type AnswerMode = (typeof ANSWER_MODES)[number];
 
 export type Config = {
   cases: Case[];
@@ -87,6 +93,8 @@ export type Config = {
   count: number;
   /** Which noun genders to draw from; omitted / empty means all. */
   genders?: GenderGroup[];
+  /** Omitted means typing. */
+  answerMode?: AnswerMode;
 };
 
 export type Token = { text: string; blank: boolean };
@@ -106,6 +114,10 @@ export type Exercise = {
   /** Accepted answers for the blanked part. */
   answers: string[];
   note: string;
+  /** Multiple-choice options, correct one included; absent in typing mode. */
+  options?: string[];
+  /** The words behind the blank, kept so a wrong answer can be explained. */
+  source?: { noun: Noun; adj?: Adjective };
 };
 
 export type CaseStat = { correct: number; total: number };
