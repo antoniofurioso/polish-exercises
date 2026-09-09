@@ -51,6 +51,8 @@ export function ExerciseCard({
   useEffect(() => {
     if (!options || verdict) return;
     const onKey = (e: KeyboardEvent) => {
+      // a bare number picks an option; ⌘1 / ctrl+1 stay the browser's
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
       const n = Number(e.key);
       if (!n || n > options.length) return;
       e.preventDefault();
