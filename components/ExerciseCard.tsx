@@ -98,8 +98,16 @@ export function ExerciseCard({
       onChange={(e) => onChange(e.target.value)}
       disabled={answered}
       spellCheck={false}
+      type="text"
+      name="answer"
       autoComplete="off"
+      autoCorrect="off"
       autoCapitalize="off"
+      inputMode="text"
+      data-lpignore="true"
+      data-1p-ignore=""
+      data-bwignore="true"
+      data-form-type="other"
       aria-label="Your answer"
       style={{ width: `${width}ch` }}
       className={`border-b-2 bg-transparent text-center outline-none transition-colors ${
