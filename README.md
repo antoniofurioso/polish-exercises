@@ -1,9 +1,16 @@
-# Ćwiczenia — Polish case practice
+# Ćwiczenia — Polish practice
 
-Fill-in-the-blank drills for Polish declension, in the style of courseofpolish.com.
-Configure the cases, the word type and the length of the session, then answer one
-sentence at a time with its English translation, and get the correct form plus the
-rule behind it after every answer.
+Fill-in-the-blank drills for Polish, in the style of courseofpolish.com. The home
+page (`/`) is a menu of exercises:
+
+| Route | Exercise |
+| --- | --- |
+| `/cases` | Decline nouns / adjectives across all seven cases. |
+| `/pronouns` | Make the demonstrative `ten` / `tamten` agree with a given noun in gender, number and case. |
+
+Configure the cases (and word type / demonstrative), then answer one sentence at a
+time with its English translation, and get the correct form plus the rule behind it
+after every answer.
 
 Audio: short synthesised cues mark right / near-miss / wrong (Web Audio, no asset
 files), and the sentence is read aloud in Polish through the browser's speech
@@ -41,7 +48,8 @@ Everything is generated locally and deterministically — no API calls.
 | `lib/declineAdjective.ts` | The regular adjective endings |
 | `lib/templates.ts` | ~80 sentence frames, one per case/trigger, with an English gloss and the rule that applies |
 | `lib/generate.ts` | Picks a template, a noun that semantically fits it and an adjective, then builds the exercise |
-| `lib/session.ts` | Encodes a session in the query string and reads it back |
+| `lib/pronouns.ts` | The `ten` / `tamten` paradigm plus a small frame set — builds the demonstrative-pronoun exercise |
+| `lib/session.ts` | Encodes a session in the query string and reads it back (`type=pronouns` selects the pronoun drill) |
 | `lib/grade.ts` | Normalises the answer; a diacritics-only miss is reported separately |
 | `lib/sound.ts` | Synthesised right / near-miss / wrong cues |
 | `lib/speak.ts` | pl-PL speech synthesis for reading sentences aloud |

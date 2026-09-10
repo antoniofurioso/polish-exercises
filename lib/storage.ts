@@ -1,10 +1,10 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import type { Case, Config, Stats } from "./types";
+import type { Case, Config, ExerciseKind, Stats } from "./types";
 
-const CONFIG_KEY = "polish.config.v1";
-const STATS_KEY = "polish.stats.v1";
+const configKey = (kind: ExerciseKind) => `polish.config.${kind}.v1`;
+const statsKey = (kind: ExerciseKind) => `polish.stats.${kind}.v1`;
 const SOUND_KEY = "polish.sound.v1";
 
 /** Stable fallbacks — useSyncExternalStore needs referentially stable snapshots. */
@@ -61,23 +61,26 @@ function write(key: string, value: unknown): void {
   listeners.forEach((fn) => fn());
 }
 
-/** Last used configurator settings, or null on a first visit. */
-export const useStoredConfig = (): Config | null =>
-  useStored<Config | null>(CONFIG_KEY, NO_CONFIG);
+/** Last used configurator settings for an exercise, or null on a first visit. */
+export const useStoredConfig = (kind: ExerciseKind): Config | null =>
+  useStored<Config | null>(configKey(kind), NO_CONFIG);
 
-/** Lifetime accuracy per case. */
-export const useStoredStats = (): Stats => useStored<Stats>(STATS_KEY, NO_STATS);
+/** Lifetime accuracy per case, kept separately for each exercise. */
+export const useStoredStats = (kind: ExerciseKind): Stats =>
+  useStored<Stats>(statsKey(kind), NO_STATS);
 
-export const saveConfig = (config: Config) => write(CONFIG_KEY, config);
+export const saveConfig = (kind: ExerciseKind, config: Config) =>
+  write(configKey(kind), config);
 
 /** Whether answer sounds play; defaults to on. */
 export const useSoundOn = (): boolean => useStored<boolean>(SOUND_KEY, SOUND_ON);
 
 export const setSoundOn = (on: boolean) => write(SOUND_KEY, on);
 
-export function recordAnswer(kase: Case, correct: boolean): void {
-  const stats = { ...snapshot(STATS_KEY, NO_STATS) };
+export function recordAnswer(kind: ExerciseKind, kase: Case, correct: boolean): void {
+  const key = statsKey(kind);
+  const stats = { ...snapshot(key, NO_STATS) };
   const entry = stats[kase] ?? { correct: 0, total: 0 };
   stats[kase] = { correct: entry.correct + (correct ? 1 : 0), total: entry.total + 1 };
-  write(STATS_KEY, stats);
+  write(key, stats);
 }

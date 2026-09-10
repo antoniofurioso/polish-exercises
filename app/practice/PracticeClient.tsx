@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { ExerciseCard } from "@/components/ExerciseCard";
 import { ResultsSummary, type Result } from "@/components/ResultsSummary";
 import { buildSession } from "@/lib/generate";
+import { buildPronounSession } from "@/lib/pronouns";
 import { grade, type Verdict } from "@/lib/grade";
 import { playFinish, playVerdict } from "@/lib/sound";
 import { stopSpeaking } from "@/lib/speak";
@@ -38,7 +39,12 @@ export function PracticePage() {
 
 function Runner({ config, seed }: { config: Config; seed: number }) {
   const router = useRouter();
-  const initial = useMemo(() => buildSession(config, seed), [config, seed]);
+  const kind = config.kind ?? "cases";
+  const home = kind === "pronouns" ? "/pronouns" : "/cases";
+  const initial = useMemo(
+    () => (kind === "pronouns" ? buildPronounSession(config, seed) : buildSession(config, seed)),
+    [kind, config, seed],
+  );
 
   const [exercises, setExercises] = useState<Exercise[]>(initial);
   const [index, setIndex] = useState(0);
@@ -58,7 +64,7 @@ function Runner({ config, seed }: { config: Config; seed: number }) {
       setValue(answer);
       setVerdict(result);
       setResults((r) => [...r, { exercise, verdict: result }]);
-      recordAnswer(exercise.case, result === "correct");
+      recordAnswer(kind, exercise.case, result === "correct");
       if (soundOn) playVerdict(result);
       return;
     }
@@ -89,7 +95,7 @@ function Runner({ config, seed }: { config: Config; seed: number }) {
   return (
     <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:py-14">
       <div className="mb-8 flex items-center justify-between">
-        <Link href="/" className="text-sm uppercase tracking-[0.2em] text-accent">
+        <Link href={home} className="text-sm uppercase tracking-[0.2em] text-accent">
           Ćwiczenia
         </Link>
         <div className="flex items-center gap-4">
@@ -107,14 +113,14 @@ function Runner({ config, seed }: { config: Config; seed: number }) {
           >
             {soundOn ? "🔊" : "🔇"}
           </button>
-          <Link href="/" className="text-sm text-muted underline underline-offset-4">
+          <Link href={home} className="text-sm text-muted underline underline-offset-4">
             Quit
           </Link>
         </div>
       </div>
 
       {done || !exercise ? (
-        <ResultsSummary results={results} onRetryMissed={retryMissed} onRestart={restart} />
+        <ResultsSummary results={results} onRetryMissed={retryMissed} onRestart={restart} home={home} />
       ) : (
         <ExerciseCard
           exercise={exercise}

@@ -12,10 +12,12 @@ export function ResultsSummary({
   results,
   onRetryMissed,
   onRestart,
+  home = "/",
 }: {
   results: Result[];
   onRetryMissed: () => void;
   onRestart: () => void;
+  home?: string;
 }) {
   const correct = results.filter((r) => r.verdict === "correct").length;
   const missed = results.filter((r) => r.verdict !== "correct");
@@ -92,7 +94,7 @@ export function ResultsSummary({
           New sentences, same settings
         </button>
         <Link
-          href="/"
+          href={home}
           className="flex-1 rounded-xl border border-line bg-surface px-6 py-3 text-center font-medium hover:border-accent/50"
         >
           Change settings

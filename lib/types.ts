@@ -1,6 +1,16 @@
 export const CASES = ["nom", "gen", "dat", "acc", "ins", "loc", "voc"] as const;
 export type Case = (typeof CASES)[number];
 
+/** Cases drilled in the demonstrative-pronoun exercise — no vocative. */
+export const PRONOUN_CASES = ["nom", "gen", "dat", "acc", "ins", "loc"] as const;
+
+/** Which drill the configurator and runner are set up for. */
+export const EXERCISE_KINDS = ["cases", "pronouns"] as const;
+export type ExerciseKind = (typeof EXERCISE_KINDS)[number];
+
+/** Which demonstrative the pronoun exercise draws from. */
+export type DemoChoice = "ten" | "tamten" | "both";
+
 export type GramNumber = "sg" | "pl";
 
 /** Polish genders, split by the distinctions that actually change endings. */
@@ -95,6 +105,10 @@ export type Config = {
   genders?: GenderGroup[];
   /** Omitted means typing. */
   answerMode?: AnswerMode;
+  /** Which drill this is; omitted means the case-declension drill. */
+  kind?: ExerciseKind;
+  /** Pronoun drill only: which demonstrative to use; omitted means both. */
+  demo?: DemoChoice;
 };
 
 export type Token = { text: string; blank: boolean };

@@ -28,11 +28,11 @@ export function makeRng(seed: number): () => number {
   };
 }
 
-function pick<T>(items: T[], rng: () => number): T {
+export function pick<T>(items: T[], rng: () => number): T {
   return items[Math.floor(rng() * items.length)];
 }
 
-function shuffle<T>(items: T[], rng: () => number): T[] {
+export function shuffle<T>(items: T[], rng: () => number): T[] {
   const out = [...items];
   for (let i = out.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
@@ -55,7 +55,7 @@ export function resolvePrep(prep: "z" | "w", next: string): string {
   return "wf".includes(a) && isConsonant(b) ? "we" : "w";
 }
 
-function nounForm(noun: Noun, number: GramNumber, kase: Case): string {
+export function nounForm(noun: Noun, number: GramNumber, kase: Case): string {
   return nounVariants(noun, number, kase)[0] ?? noun.sg[kase];
 }
 
@@ -72,11 +72,11 @@ function fitsNoun(adj: Adjective, noun: Noun): boolean {
   return !adj.fits || noun.tags.some((t) => adj.fits!.includes(t));
 }
 
-function templatesFor(kase: Case, number: GramNumber): Template[] {
+export function templatesFor(kase: Case, number: GramNumber): Template[] {
   return TEMPLATES.filter((t) => t.case === kase && (t.number === "any" || t.number === number));
 }
 
-function nounsFor(tpl: Template, number: GramNumber, genders?: GenderGroup[]): Noun[] {
+export function nounsFor(tpl: Template, number: GramNumber, genders?: GenderGroup[]): Noun[] {
   return NOUNS.filter(
     (noun) =>
       fitsTemplate(noun, tpl) &&
@@ -85,11 +85,11 @@ function nounsFor(tpl: Template, number: GramNumber, genders?: GenderGroup[]): N
   );
 }
 
-function article(phrase: string): string {
+export function article(phrase: string): string {
   return VOWELS.includes(phrase[0]) ? "an" : "a";
 }
 
-function capitalise(s: string): string {
+export function capitalise(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 

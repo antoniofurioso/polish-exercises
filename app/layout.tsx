@@ -6,9 +6,9 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin", "lat
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin", "latin-ext"] });
 
 export const metadata: Metadata = {
-  title: "Ćwiczenia — Polish case practice",
+  title: "Ćwiczenia — Polish practice",
   description:
-    "Fill-in-the-blank drills for Polish noun and adjective declension across all seven cases.",
+    "Fill-in-the-blank drills for Polish: noun and adjective declension across all seven cases, and demonstrative-pronoun agreement.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
