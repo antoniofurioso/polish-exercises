@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { ExerciseCard } from "@/components/ExerciseCard";
 import { ResultsSummary, type Result } from "@/components/ResultsSummary";
 import { buildSession } from "@/lib/generate";
+import { buildPossessiveSession } from "@/lib/possessives";
 import { buildPronounSession } from "@/lib/pronouns";
 import { grade, type Verdict } from "@/lib/grade";
 import { playFinish, playVerdict } from "@/lib/sound";
@@ -40,11 +41,12 @@ export function PracticePage() {
 function Runner({ config, seed }: { config: Config; seed: number }) {
   const router = useRouter();
   const kind = config.kind ?? "cases";
-  const home = kind === "pronouns" ? "/pronouns" : "/cases";
-  const initial = useMemo(
-    () => (kind === "pronouns" ? buildPronounSession(config, seed) : buildSession(config, seed)),
-    [kind, config, seed],
-  );
+  const home = kind === "cases" ? "/cases" : `/${kind}`;
+  const initial = useMemo(() => {
+    if (kind === "pronouns") return buildPronounSession(config, seed);
+    if (kind === "possessives") return buildPossessiveSession(config, seed);
+    return buildSession(config, seed);
+  }, [kind, config, seed]);
 
   const [exercises, setExercises] = useState<Exercise[]>(initial);
   const [index, setIndex] = useState(0);

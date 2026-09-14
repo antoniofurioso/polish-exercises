@@ -15,6 +15,13 @@ const EXERCISES: { href: string; title: string; pl: string; blurb: string }[] = 
     blurb:
       "Make ten / tamten agree with the noun in gender, number and case.",
   },
+  {
+    href: "/possessives",
+    title: "Possessive pronouns",
+    pl: "Zaimki dzierżawcze",
+    blurb:
+      "Decline mój, twój, nasz, wasz — and learn where jego, jej and ich stay put.",
+  },
 ];
 
 export default function HomePage() {

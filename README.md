@@ -7,6 +7,7 @@ page (`/`) is a menu of exercises:
 | --- | --- |
 | `/cases` | Decline nouns / adjectives across all seven cases. |
 | `/pronouns` | Make the demonstrative `ten` / `tamten` agree with a given noun in gender, number and case. |
+| `/possessives` | Make the possessive (`mój`, `twój`, `nasz`, `wasz`, `swój`) agree with a given noun — and leave `jego` / `jej` / `ich` alone. |
 
 Configure the cases (and word type / demonstrative), then answer one sentence at a
 time with its English translation, and get the correct form plus the rule behind it
@@ -48,8 +49,10 @@ Everything is generated locally and deterministically — no API calls.
 | `lib/declineAdjective.ts` | The regular adjective endings |
 | `lib/templates.ts` | ~80 sentence frames, one per case/trigger, with an English gloss and the rule that applies |
 | `lib/generate.ts` | Picks a template, a noun that semantically fits it and an adjective, then builds the exercise |
-| `lib/pronouns.ts` | The `ten` / `tamten` paradigm plus a small frame set — builds the demonstrative-pronoun exercise |
-| `lib/session.ts` | Encodes a session in the query string and reads it back (`type=pronouns` selects the pronoun drill) |
+| `lib/agreement.ts` | Sentence frames, English gloss and distractors shared by the two agreement drills |
+| `lib/pronouns.ts` | The `ten` / `tamten` paradigm — builds the demonstrative-pronoun exercise |
+| `lib/possessives.ts` | The `mój` and `nasz` paradigms (and the indeclinable `jego` / `jej` / `ich`) — builds the possessive exercise |
+| `lib/session.ts` | Encodes a session in the query string and reads it back (`type=pronouns` / `type=possessives` select the agreement drills) |
 | `lib/grade.ts` | Normalises the answer; a diacritics-only miss is reported separately |
 | `lib/sound.ts` | Synthesised right / near-miss / wrong cues |
 | `lib/speak.ts` | pl-PL speech synthesis for reading sentences aloud |

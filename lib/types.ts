@@ -4,12 +4,28 @@ export type Case = (typeof CASES)[number];
 /** Cases drilled in the demonstrative-pronoun exercise — no vocative. */
 export const PRONOUN_CASES = ["nom", "gen", "dat", "acc", "ins", "loc"] as const;
 
+/** The possessive drill runs over the same cases. */
+export const POSSESSIVE_CASES = PRONOUN_CASES;
+
 /** Which drill the configurator and runner are set up for. */
-export const EXERCISE_KINDS = ["cases", "pronouns"] as const;
+export const EXERCISE_KINDS = ["cases", "pronouns", "possessives"] as const;
 export type ExerciseKind = (typeof EXERCISE_KINDS)[number];
 
 /** Which demonstrative the pronoun exercise draws from. */
 export type DemoChoice = "ten" | "tamten" | "both";
+
+/** Possessives drilled, keyed without diacritics so they survive a URL. */
+export const POSSESSIVES = [
+  "moj",
+  "twoj",
+  "jego",
+  "jej",
+  "nasz",
+  "wasz",
+  "ich",
+  "swoj",
+] as const;
+export type Possessive = (typeof POSSESSIVES)[number];
 
 export type GramNumber = "sg" | "pl";
 
@@ -88,6 +104,8 @@ export type Template = {
   excludeLemmas?: string[];
   /** One-line explanation of why this case is used here. */
   note: string;
+  /** Set when the sentence has a first-person singular subject ("Widzę..."). */
+  subject?: "1sg";
 };
 
 export type WordMode = "nouns" | "adjectives" | "both";
@@ -109,6 +127,8 @@ export type Config = {
   kind?: ExerciseKind;
   /** Pronoun drill only: which demonstrative to use; omitted means both. */
   demo?: DemoChoice;
+  /** Possessive drill only: which possessors to draw from; omitted means all. */
+  owners?: Possessive[];
 };
 
 export type Token = { text: string; blank: boolean };

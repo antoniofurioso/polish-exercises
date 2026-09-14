@@ -1,13 +1,11 @@
-import { CASE_INFO } from "./cases";
 import {
-  capitalise,
-  makeRng,
-  nounForm,
-  nounsFor,
-  pick,
-  shuffle,
-} from "./generate";
-import { normalise, stripDiacritics } from "./grade";
+  GENDER_WORD,
+  agreementTemplatesFor,
+  buildAgreementOptions,
+  renderAgreementEnglish,
+} from "./agreement";
+import { CASE_INFO } from "./cases";
+import { makeRng, nounForm, nounsFor, pick, shuffle } from "./generate";
 import { PRONOUN_CASES, genderGroup } from "./types";
 import type {
   AnswerMode,
@@ -18,7 +16,6 @@ import type {
   GenderGroup,
   GramNumber,
   Noun,
-  Template,
   Token,
 } from "./types";
 
@@ -30,12 +27,6 @@ import type {
 
 export const DEMONSTRATIVES = ["ten", "tamten"] as const;
 export type Demonstrative = (typeof DEMONSTRATIVES)[number];
-
-const GENDER_WORD: Record<GenderGroup, string> = {
-  m: "masculine",
-  f: "feminine",
-  n: "neuter",
-};
 
 const DETERMINER: Record<Demonstrative, [string, string]> = {
   ten: ["this", "these"],
@@ -132,48 +123,6 @@ export function declineDemonstrative(
   return "tam" + ten;
 }
 
-/**
- * A handful of simple sentence frames, one trigger per case, kept plain so the
- * only thing being tested is the agreement of the demonstrative.
- */
-const PRONOUN_TEMPLATES: Template[] = [
-  { case: "nom", number: "sg", pl: "Tu jest {NP}.", en: "{np} is here.",
-    requires: [], note: "The subject of the sentence stays in the nominative." },
-  { case: "nom", number: "pl", pl: "Tu są {NP}.", en: "{np} are here.",
-    requires: [], note: "The subject of the sentence stays in the nominative." },
-  { case: "gen", number: "any", pl: "Nie ma tu {NP}.", en: "{np} isn't here.",
-    enPl: "{np} aren't here.", requires: [], note: "'nie ma' (there isn't) takes the genitive." },
-  { case: "dat", number: "any", pl: "Przyglądam się {NP}.", en: "I'm looking at {np}.",
-    requires: [], note: "'przyglądać się' takes the dative." },
-  { case: "acc", number: "any", pl: "Widzę {NP}.", en: "I can see {np}.",
-    requires: [], note: "A direct object takes the accusative." },
-  { case: "ins", number: "any", pl: "Interesuję się {NP}.", en: "I'm interested in {np}.",
-    requires: [], note: "'interesować się' takes the instrumental." },
-  { case: "loc", number: "any", pl: "Myślę o {NP}.", en: "I'm thinking about {np}.",
-    requires: [], note: "'o' (about) takes the locative." },
-];
-
-function templatesFor(kase: Case, number: GramNumber): Template[] {
-  return PRONOUN_TEMPLATES.filter(
-    (t) => t.case === kase && (t.number === "any" || t.number === number),
-  );
-}
-
-function renderEnglish(
-  tpl: Template,
-  noun: Noun,
-  base: Demonstrative,
-  number: GramNumber,
-): string {
-  const head = number === "pl" ? noun.enPl : noun.en;
-  const np = `${DETERMINER[base][number === "pl" ? 1 : 0]} ${head}`;
-  const text = (tpl.enPl && number === "pl" ? tpl.enPl : tpl.en)
-    .replace(/\{npDef\}/g, np)
-    .replace(/\{npBare\}/g, np)
-    .replace(/\{np\}/g, np);
-  return capitalise(text);
-}
-
 function note(
   base: Demonstrative,
   noun: Noun,
@@ -219,7 +168,7 @@ export function buildPronounExercise(
 ): Exercise | null {
   for (let attempt = 0; attempt < 40; attempt++) {
     const number = pick(numbers, rng);
-    const templates = templatesFor(kase, number);
+    const templates = agreementTemplatesFor(kase, number);
     if (templates.length === 0) continue;
 
     for (const tpl of shuffle(templates, rng)) {
@@ -250,7 +199,7 @@ export function buildPronounExercise(
           after,
           tokens,
           hint: `${noun.lemma} · ${GENDER_WORD[genderGroup(noun.gender)]}`,
-          en: renderEnglish(tpl, noun, base, number),
+          en: renderAgreementEnglish(tpl, noun, DETERMINER[base][number === "pl" ? 1 : 0], number),
           answers,
           note: note(base, noun, number, kase, tpl.note),
         };
@@ -267,11 +216,7 @@ export function buildPronounExercise(
   return null;
 }
 
-/**
- * Multiple-choice distractors: the same demonstrative in other cells of its own
- * paradigm, same-number cells first. Returns [] when the paradigm is too
- * syncretic to offer a real choice.
- */
+/** Multiple-choice distractors drawn from the demonstrative's own paradigm. */
 export function buildPronounOptions(
   base: Demonstrative,
   gender: Gender,
@@ -281,25 +226,15 @@ export function buildPronounOptions(
   rng: () => number,
   count = 4,
 ): string[] {
-  const correct = answers[0];
-  const taken = new Set(answers.map((a) => stripDiacritics(normalise(a))));
-  const near: string[] = [];
-  const far: string[] = [];
-
-  for (const num of ["sg", "pl"] as GramNumber[]) {
-    for (const k of PRONOUN_CASES) {
-      if (num === number && k === kase) continue;
-      const text = declineDemonstrative(base, gender, num, k);
-      const label = stripDiacritics(normalise(text));
-      if (taken.has(label)) continue;
-      taken.add(label);
-      (num === number ? near : far).push(text);
-    }
-  }
-
-  const distractors = [...shuffle(near, rng), ...shuffle(far, rng)].slice(0, count - 1);
-  if (distractors.length < 1) return [];
-  return shuffle([correct, ...distractors], rng);
+  return buildAgreementOptions(
+    (g, n, k) => declineDemonstrative(base, g, n, k),
+    gender,
+    number,
+    kase,
+    answers,
+    rng,
+    count,
+  );
 }
 
 /** Builds a full pronoun session, spreading the selected cases evenly. */

@@ -1,4 +1,4 @@
-import { CASES, GENDER_GROUPS, PRONOUN_CASES } from "./types";
+import { CASES, GENDER_GROUPS, POSSESSIVES, PRONOUN_CASES } from "./types";
 import type {
   AnswerMode,
   Case,
@@ -7,6 +7,7 @@ import type {
   ExerciseKind,
   GenderGroup,
   GramNumber,
+  Possessive,
   WordMode,
 } from "./types";
 
@@ -28,7 +29,11 @@ export function sessionParams(config: Config, seed: number): string {
   }
   if (config.answerMode === "choice") params.set("ans", "choice");
   if (config.kind === "pronouns") params.set("type", "pronouns");
+  if (config.kind === "possessives") params.set("type", "possessives");
   if (config.demo === "ten" || config.demo === "tamten") params.set("demo", config.demo);
+  if (config.owners && config.owners.length > 0 && config.owners.length < POSSESSIVES.length) {
+    params.set("own", config.owners.join(","));
+  }
   return params.toString();
 }
 
@@ -36,12 +41,18 @@ export const randomSeed = () => Math.floor(Math.random() * 1_000_000);
 
 /** Reads a session back out of the URL; null when no valid case is named. */
 export function parseSession(params: URLSearchParams): Session | null {
-  const kind: ExerciseKind = params.get("type") === "pronouns" ? "pronouns" : "cases";
-  const allowed = kind === "pronouns" ? PRONOUN_CASES : CASES;
+  const type = params.get("type");
+  const kind: ExerciseKind =
+    type === "pronouns" ? "pronouns" : type === "possessives" ? "possessives" : "cases";
+  const allowed = kind === "cases" ? CASES : PRONOUN_CASES;
   const cases = (params.get("cases") ?? "")
     .split(",")
     .filter((c): c is Case => (allowed as readonly string[]).includes(c));
   if (cases.length === 0) return null;
+
+  const owners = (params.get("own") ?? "")
+    .split(",")
+    .filter((o): o is Possessive => (POSSESSIVES as readonly string[]).includes(o));
 
   const demo = params.get("demo");
   const demoChoice: DemoChoice | undefined =
@@ -67,8 +78,9 @@ export function parseSession(params: URLSearchParams): Session | null {
       count: Number.isFinite(count) ? Math.min(200, Math.max(1, Math.round(count))) : 20,
       ...(genders.length > 0 && genders.length < GENDER_GROUPS.length ? { genders } : {}),
       ...(answerMode === "choice" ? { answerMode } : {}),
-      ...(kind === "pronouns" ? { kind } : {}),
+      ...(kind !== "cases" ? { kind } : {}),
       ...(demoChoice ? { demo: demoChoice } : {}),
+      ...(owners.length > 0 && owners.length < POSSESSIVES.length ? { owners } : {}),
     },
     seed: Number(params.get("seed")) || 1,
   };
