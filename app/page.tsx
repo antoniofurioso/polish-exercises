@@ -22,6 +22,13 @@ const EXERCISES: { href: string; title: string; pl: string; blurb: string }[] = 
     blurb:
       "Decline mój, twój, nasz, wasz — and learn where jego, jej and ich stay put.",
   },
+  {
+    href: "/numbers",
+    title: "Numbers",
+    pl: "Liczebniki",
+    blurb:
+      "Why it's dwa koty but pięć kotów — plus writing figures out, dates and the time.",
+  },
 ];
 
 export default function HomePage() {

@@ -146,8 +146,9 @@ export function ExerciseCard({
       <div className="space-y-2">
         <div className="flex items-baseline justify-between text-sm text-muted">
           <span>
-            {index + 1} / {total} · <span className="text-accent">{info.pl}</span>{" "}
-            {exercise.number === "pl" ? "· plural" : "· singular"}
+            {index + 1} / {total} ·{" "}
+            <span className="text-accent">{exercise.label ?? info.pl}</span>
+            {exercise.label ? null : exercise.number === "pl" ? " · plural" : " · singular"}
           </span>
           <span>
             {score} correct

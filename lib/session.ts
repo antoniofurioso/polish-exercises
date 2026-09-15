@@ -1,4 +1,11 @@
-import { CASES, GENDER_GROUPS, POSSESSIVES, PRONOUN_CASES } from "./types";
+import {
+  CASES,
+  GENDER_GROUPS,
+  NUMBER_DRILLS,
+  POSSESSIVES,
+  PRONOUN_CASES,
+  SPELL_RANGES,
+} from "./types";
 import type {
   AnswerMode,
   Case,
@@ -7,7 +14,9 @@ import type {
   ExerciseKind,
   GenderGroup,
   GramNumber,
+  NumberDrill,
   Possessive,
+  SpellRange,
   WordMode,
 } from "./types";
 
@@ -30,6 +39,11 @@ export function sessionParams(config: Config, seed: number): string {
   if (config.answerMode === "choice") params.set("ans", "choice");
   if (config.kind === "pronouns") params.set("type", "pronouns");
   if (config.kind === "possessives") params.set("type", "possessives");
+  if (config.kind === "numbers") params.set("type", "numbers");
+  if (config.drills && config.drills.length > 0 && config.drills.length < NUMBER_DRILLS.length) {
+    params.set("drills", config.drills.join(","));
+  }
+  if (config.max) params.set("max", String(config.max));
   if (config.demo === "ten" || config.demo === "tamten") params.set("demo", config.demo);
   if (config.owners && config.owners.length > 0 && config.owners.length < POSSESSIVES.length) {
     params.set("own", config.owners.join(","));
@@ -43,7 +57,7 @@ export const randomSeed = () => Math.floor(Math.random() * 1_000_000);
 export function parseSession(params: URLSearchParams): Session | null {
   const type = params.get("type");
   const kind: ExerciseKind =
-    type === "pronouns" ? "pronouns" : type === "possessives" ? "possessives" : "cases";
+    type === "pronouns" || type === "possessives" || type === "numbers" ? type : "cases";
   const allowed = kind === "cases" ? CASES : PRONOUN_CASES;
   const cases = (params.get("cases") ?? "")
     .split(",")
@@ -53,6 +67,15 @@ export function parseSession(params: URLSearchParams): Session | null {
   const owners = (params.get("own") ?? "")
     .split(",")
     .filter((o): o is Possessive => (POSSESSIVES as readonly string[]).includes(o));
+
+  const drills = (params.get("drills") ?? "")
+    .split(",")
+    .filter((d): d is NumberDrill => (NUMBER_DRILLS as readonly string[]).includes(d));
+
+  const max = Number(params.get("max"));
+  const spellRange = (SPELL_RANGES as readonly number[]).includes(max)
+    ? (max as SpellRange)
+    : undefined;
 
   const demo = params.get("demo");
   const demoChoice: DemoChoice | undefined =
@@ -81,6 +104,8 @@ export function parseSession(params: URLSearchParams): Session | null {
       ...(kind !== "cases" ? { kind } : {}),
       ...(demoChoice ? { demo: demoChoice } : {}),
       ...(owners.length > 0 && owners.length < POSSESSIVES.length ? { owners } : {}),
+      ...(drills.length > 0 && drills.length < NUMBER_DRILLS.length ? { drills } : {}),
+      ...(spellRange ? { max: spellRange } : {}),
     },
     seed: Number(params.get("seed")) || 1,
   };

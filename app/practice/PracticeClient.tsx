@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { ExerciseCard } from "@/components/ExerciseCard";
 import { ResultsSummary, type Result } from "@/components/ResultsSummary";
 import { buildSession } from "@/lib/generate";
+import { buildNumberSession } from "@/lib/numbers";
 import { buildPossessiveSession } from "@/lib/possessives";
 import { buildPronounSession } from "@/lib/pronouns";
 import { grade, type Verdict } from "@/lib/grade";
@@ -45,6 +46,7 @@ function Runner({ config, seed }: { config: Config; seed: number }) {
   const initial = useMemo(() => {
     if (kind === "pronouns") return buildPronounSession(config, seed);
     if (kind === "possessives") return buildPossessiveSession(config, seed);
+    if (kind === "numbers") return buildNumberSession(config, seed);
     return buildSession(config, seed);
   }, [kind, config, seed]);
 

@@ -7,8 +7,11 @@ export const PRONOUN_CASES = ["nom", "gen", "dat", "acc", "ins", "loc"] as const
 /** The possessive drill runs over the same cases. */
 export const POSSESSIVE_CASES = PRONOUN_CASES;
 
+/** Counted noun phrases are drilled over the same cases too. */
+export const NUMBER_CASES = PRONOUN_CASES;
+
 /** Which drill the configurator and runner are set up for. */
-export const EXERCISE_KINDS = ["cases", "pronouns", "possessives"] as const;
+export const EXERCISE_KINDS = ["cases", "pronouns", "possessives", "numbers"] as const;
 export type ExerciseKind = (typeof EXERCISE_KINDS)[number];
 
 /** Which demonstrative the pronoun exercise draws from. */
@@ -26,6 +29,14 @@ export const POSSESSIVES = [
   "swoj",
 ] as const;
 export type Possessive = (typeof POSSESSIVES)[number];
+
+/** The four things the numbers exercise can ask for. */
+export const NUMBER_DRILLS = ["count", "numeral", "spell", "ordinal"] as const;
+export type NumberDrill = (typeof NUMBER_DRILLS)[number];
+
+/** How high the spelling drill reaches. */
+export const SPELL_RANGES = [20, 100, 1000, 9999] as const;
+export type SpellRange = (typeof SPELL_RANGES)[number];
 
 export type GramNumber = "sg" | "pl";
 
@@ -129,6 +140,10 @@ export type Config = {
   demo?: DemoChoice;
   /** Possessive drill only: which possessors to draw from; omitted means all. */
   owners?: Possessive[];
+  /** Numbers drill only: which of the four sub-drills to mix; omitted means all. */
+  drills?: NumberDrill[];
+  /** Numbers drill only: the highest number the spelling drill reaches. */
+  max?: SpellRange;
 };
 
 export type Token = { text: string; blank: boolean };
@@ -150,6 +165,8 @@ export type Exercise = {
   note: string;
   /** Multiple-choice options, correct one included; absent in typing mode. */
   options?: string[];
+  /** Replaces the case name on the progress line when no case is being drilled. */
+  label?: string;
   /** The words behind the blank, kept so a wrong answer can be explained. */
   source?: { noun: Noun; adj?: Adjective };
 };
