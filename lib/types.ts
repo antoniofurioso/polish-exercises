@@ -35,8 +35,12 @@ export const NUMBER_DRILLS = ["count", "numeral", "spell", "ordinal"] as const;
 export type NumberDrill = (typeof NUMBER_DRILLS)[number];
 
 /** Tenses / moods the verbs exercise drills. */
-export const TENSES = ["past", "future", "futureCompound", "imperative"] as const;
+export const TENSES = ["present", "past", "future", "futureCompound", "imperative"] as const;
 export type Tense = (typeof TENSES)[number];
+
+/** Which verbs the verbs exercise draws from: with or without "się". */
+export const VERB_TYPES = ["plain", "reflexive", "both"] as const;
+export type VerbType = (typeof VERB_TYPES)[number];
 
 /** How high the spelling drill reaches. */
 export const SPELL_RANGES = [20, 100, 1000, 9999] as const;
@@ -150,6 +154,8 @@ export type Config = {
   max?: SpellRange;
   /** Verbs drill only: which tenses to mix; omitted means all. */
   tenses?: Tense[];
+  /** Verbs drill only: plain verbs, reflexive ones or both; omitted means both. */
+  verbType?: VerbType;
 };
 
 export type Token = { text: string; blank: boolean };

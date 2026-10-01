@@ -7,12 +7,16 @@ import { Choice, Field } from "@/components/ui";
 import { randomSeed, sessionParams } from "@/lib/session";
 import { saveConfig, useStoredConfig } from "@/lib/storage";
 import { TENSE_LABEL } from "@/lib/verbs";
-import { ANSWER_MODES, TENSES } from "@/lib/types";
-import type { AnswerMode, Config, GramNumber, Tense } from "@/lib/types";
+import { ANSWER_MODES, TENSES, VERB_TYPES } from "@/lib/types";
+import type { AnswerMode, Config, GramNumber, Tense, VerbType } from "@/lib/types";
 
 const COUNTS = [10, 20, 30, 50];
 
 const TENSE_INFO: Record<Tense, { title: string; blurb: string }> = {
+  present: {
+    title: "Present",
+    blurb: "piszę, czytasz, uczymy się — only imperfective verbs have a present.",
+  },
   past: {
     title: "Past",
     blurb: "pisałem, napisała, zjedliśmy — the -ł form plus a personal ending.",
@@ -29,6 +33,12 @@ const TENSE_INFO: Record<Tense, { title: string; blurb: string }> = {
     title: "Imperative",
     blurb: "zrób! nie rób! zróbmy! zróbcie! — orders, and why nie takes the imperfective.",
   },
+};
+
+const VERB_TYPE_LABELS: Record<VerbType, { title: string; blurb: string }> = {
+  plain: { title: "Plain", blurb: "pisać, robić, iść" },
+  reflexive: { title: "Reflexive", blurb: "uczyć się, myć się, budzić się" },
+  both: { title: "Both", blurb: "mix them" },
 };
 
 const NUMBER_LABELS: Record<GramNumber, { title: string; blurb: string }> = {
@@ -116,7 +126,22 @@ export default function VerbsConfiguratorPage() {
           </div>
         </Field>
 
-        <Field label="2 · Person" hint="The imperative only uses ty, my and wy.">
+        <Field label="2 · Verbs" hint="Reflexive verbs carry “się”.">
+          <div className="grid gap-3 sm:grid-cols-3">
+            {VERB_TYPES.map((verbType) => (
+              <Choice
+                key={verbType}
+                selected={(config.verbType ?? "both") === verbType}
+                onClick={() => setConfig((c) => ({ ...c, verbType }))}
+              >
+                <span className="block font-medium">{VERB_TYPE_LABELS[verbType].title}</span>
+                <span className="block text-sm text-muted">{VERB_TYPE_LABELS[verbType].blurb}</span>
+              </Choice>
+            ))}
+          </div>
+        </Field>
+
+        <Field label="3 · Person" hint="The imperative only uses ty, my and wy.">
           <div className="grid gap-3 sm:grid-cols-2">
             {(["sg", "pl"] as GramNumber[]).map((num) => (
               <Choice
@@ -131,7 +156,7 @@ export default function VerbsConfiguratorPage() {
           </div>
         </Field>
 
-        <Field label="3 · How to answer">
+        <Field label="4 · How to answer">
           <div className="grid gap-3 sm:grid-cols-2">
             {ANSWER_MODES.map((answerMode) => (
               <Choice
@@ -146,7 +171,7 @@ export default function VerbsConfiguratorPage() {
           </div>
         </Field>
 
-        <Field label="4 · How many sentences">
+        <Field label="5 · How many sentences">
           <div className="flex flex-wrap gap-3">
             {COUNTS.map((count) => (
               <Choice

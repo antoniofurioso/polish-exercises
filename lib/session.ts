@@ -6,6 +6,7 @@ import {
   PRONOUN_CASES,
   SPELL_RANGES,
   TENSES,
+  VERB_TYPES,
 } from "./types";
 import type {
   AnswerMode,
@@ -19,6 +20,7 @@ import type {
   Possessive,
   SpellRange,
   Tense,
+  VerbType,
   WordMode,
 } from "./types";
 
@@ -45,6 +47,9 @@ export function sessionParams(config: Config, seed: number): string {
   if (config.kind === "verbs") params.set("type", "verbs");
   if (config.tenses && config.tenses.length > 0 && config.tenses.length < TENSES.length) {
     params.set("tenses", config.tenses.join(","));
+  }
+  if (config.verbType === "plain" || config.verbType === "reflexive") {
+    params.set("vt", config.verbType);
   }
   if (config.drills && config.drills.length > 0 && config.drills.length < NUMBER_DRILLS.length) {
     params.set("drills", config.drills.join(","));
@@ -84,6 +89,9 @@ export function parseSession(params: URLSearchParams): Session | null {
     .split(",")
     .filter((t): t is Tense => (TENSES as readonly string[]).includes(t));
 
+  const vt = params.get("vt") as VerbType;
+  const verbType = (VERB_TYPES as readonly string[]).includes(vt) && vt !== "both" ? vt : undefined;
+
   const max = Number(params.get("max"));
   const spellRange = (SPELL_RANGES as readonly number[]).includes(max)
     ? (max as SpellRange)
@@ -119,6 +127,7 @@ export function parseSession(params: URLSearchParams): Session | null {
       ...(drills.length > 0 && drills.length < NUMBER_DRILLS.length ? { drills } : {}),
       ...(spellRange ? { max: spellRange } : {}),
       ...(tenses.length > 0 && tenses.length < TENSES.length ? { tenses } : {}),
+      ...(verbType ? { verbType } : {}),
     },
     seed: Number(params.get("seed")) || 1,
   };

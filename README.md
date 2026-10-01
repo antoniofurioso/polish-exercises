@@ -9,7 +9,7 @@ page (`/`) is a menu of exercises:
 | `/pronouns` | Make the demonstrative `ten` / `tamten` agree with a given noun in gender, number and case. |
 | `/possessives` | Make the possessive (`mój`, `twój`, `nasz`, `wasz`, `swój`) agree with a given noun — and leave `jego` / `jej` / `ich` alone. |
 | `/numbers` | Four numeral drills: the noun after a number (`dwa koty` / `pięć kotów`), the numeral's own form, writing figures out in words, and ordinals with dates and clock times. |
-| `/verbs` | Conjugate a verb in the past (`napisałam`), simple future (`napiszę`), compound future (`będę pisać` / `będę pisał`) or the imperative (`napisz!` / `nie pisz!` / `napiszmy!`). |
+| `/verbs` | Conjugate a verb — plain or reflexive (`uczyć się`) — in the present (`piszę`), past (`napisałam`), simple future (`napiszę`), compound future (`będę pisać` / `będę pisał`) or the imperative (`napisz!` / `nie pisz!` / `napiszmy!`). |
 
 Configure the cases (and word type / demonstrative), then answer one sentence at a
 time with its English translation, and get the correct form plus the rule behind it
@@ -56,7 +56,7 @@ Everything is generated locally and deterministically — no API calls.
 | `lib/possessives.ts` | The `mój` and `nasz` paradigms (and the indeclinable `jego` / `jej` / `ich`) — builds the possessive exercise |
 | `lib/numerals.ts` | Cardinals to 9999, the oblique `-u` forms, the 1 / 2-4 / 5+ government rule, ordinals and the months |
 | `lib/numbers.ts` | Builds the four numeral drills on top of it |
-| `lib/verbs.ts` | ~22 aspect pairs stored as principal parts (past stems, perfective non-past, imperative); builds the four tense drills |
+| `lib/verbs.ts` | ~32 aspect pairs (9 reflexive) stored as principal parts (past stems, non-past, imperative); builds the five tense drills and places `się` |
 | `lib/session.ts` | Encodes a session in the query string and reads it back (`type=pronouns` / `type=possessives` / `type=numbers` / `type=verbs` select the other drills) |
 | `lib/grade.ts` | Normalises the answer; a diacritics-only miss is reported separately |
 | `lib/sound.ts` | Synthesised right / near-miss / wrong cues |
