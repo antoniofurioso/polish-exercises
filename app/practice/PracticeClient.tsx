@@ -9,6 +9,7 @@ import { buildSession } from "@/lib/generate";
 import { buildNumberSession } from "@/lib/numbers";
 import { buildPossessiveSession } from "@/lib/possessives";
 import { buildPronounSession } from "@/lib/pronouns";
+import { buildVerbSession } from "@/lib/verbs";
 import { grade, type Verdict } from "@/lib/grade";
 import { playFinish, playVerdict } from "@/lib/sound";
 import { stopSpeaking } from "@/lib/speak";
@@ -47,6 +48,7 @@ function Runner({ config, seed }: { config: Config; seed: number }) {
     if (kind === "pronouns") return buildPronounSession(config, seed);
     if (kind === "possessives") return buildPossessiveSession(config, seed);
     if (kind === "numbers") return buildNumberSession(config, seed);
+    if (kind === "verbs") return buildVerbSession(config, seed);
     return buildSession(config, seed);
   }, [kind, config, seed]);
 

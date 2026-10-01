@@ -11,7 +11,7 @@ export const POSSESSIVE_CASES = PRONOUN_CASES;
 export const NUMBER_CASES = PRONOUN_CASES;
 
 /** Which drill the configurator and runner are set up for. */
-export const EXERCISE_KINDS = ["cases", "pronouns", "possessives", "numbers"] as const;
+export const EXERCISE_KINDS = ["cases", "pronouns", "possessives", "numbers", "verbs"] as const;
 export type ExerciseKind = (typeof EXERCISE_KINDS)[number];
 
 /** Which demonstrative the pronoun exercise draws from. */
@@ -33,6 +33,10 @@ export type Possessive = (typeof POSSESSIVES)[number];
 /** The four things the numbers exercise can ask for. */
 export const NUMBER_DRILLS = ["count", "numeral", "spell", "ordinal"] as const;
 export type NumberDrill = (typeof NUMBER_DRILLS)[number];
+
+/** Tenses / moods the verbs exercise drills. */
+export const TENSES = ["past", "future", "futureCompound", "imperative"] as const;
+export type Tense = (typeof TENSES)[number];
 
 /** How high the spelling drill reaches. */
 export const SPELL_RANGES = [20, 100, 1000, 9999] as const;
@@ -144,6 +148,8 @@ export type Config = {
   drills?: NumberDrill[];
   /** Numbers drill only: the highest number the spelling drill reaches. */
   max?: SpellRange;
+  /** Verbs drill only: which tenses to mix; omitted means all. */
+  tenses?: Tense[];
 };
 
 export type Token = { text: string; blank: boolean };

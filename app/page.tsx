@@ -29,6 +29,13 @@ const EXERCISES: { href: string; title: string; pl: string; blurb: string }[] = 
     blurb:
       "Why it's dwa koty but pięć kotów — plus writing figures out, dates and the time.",
   },
+  {
+    href: "/verbs",
+    title: "Verbs",
+    pl: "Czasowniki",
+    blurb:
+      "Past, simple future, compound future (będę robić) and the imperative — with aspect.",
+  },
 ];
 
 export default function HomePage() {

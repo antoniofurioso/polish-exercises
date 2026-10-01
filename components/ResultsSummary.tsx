@@ -4,7 +4,7 @@ import Link from "next/link";
 import { CASE_INFO } from "@/lib/cases";
 import { renderPrompt, renderSolution } from "@/lib/generate";
 import type { Verdict } from "@/lib/grade";
-import type { Case, Exercise } from "@/lib/types";
+import type { Exercise } from "@/lib/types";
 
 export type Result = { exercise: Exercise; verdict: Verdict };
 
@@ -23,12 +23,15 @@ export function ResultsSummary({
   const missed = results.filter((r) => r.verdict !== "correct");
   const percent = results.length ? Math.round((correct / results.length) * 100) : 0;
 
-  const byCase = new Map<Case, { correct: number; total: number }>();
+  // drills that are not about a case (tenses, spelling, dates) group by their label
+  const groupOf = (ex: Exercise) => ex.label ?? CASE_INFO[ex.case].pl;
+  const byGroup = new Map<string, { correct: number; total: number }>();
   for (const { exercise, verdict } of results) {
-    const entry = byCase.get(exercise.case) ?? { correct: 0, total: 0 };
+    const key = groupOf(exercise);
+    const entry = byGroup.get(key) ?? { correct: 0, total: 0 };
     entry.total += 1;
     if (verdict === "correct") entry.correct += 1;
-    byCase.set(exercise.case, entry);
+    byGroup.set(key, entry);
   }
 
   return (
@@ -42,9 +45,9 @@ export function ResultsSummary({
       </div>
 
       <div className="space-y-2">
-        {[...byCase.entries()].map(([kase, stat]) => (
-          <div key={kase} className="flex items-center gap-3 text-sm">
-            <span className="w-28 shrink-0 text-muted">{CASE_INFO[kase].pl}</span>
+        {[...byGroup.entries()].map(([group, stat]) => (
+          <div key={group} className="flex items-center gap-3 text-sm">
+            <span className="w-40 shrink-0 text-muted">{group}</span>
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-line">
               <div
                 className="h-full bg-accent"
@@ -68,7 +71,7 @@ export function ResultsSummary({
               <li key={`${exercise.id}-${i}`} className="rounded-xl border border-line bg-surface p-4">
                 <p className="sentence text-lg">{renderSolution(exercise)}</p>
                 <p className="text-sm text-muted">
-                  {renderPrompt(exercise)} ({exercise.hint}) · {CASE_INFO[exercise.case].pl}
+                  {renderPrompt(exercise)} ({exercise.hint}) · {groupOf(exercise)}
                 </p>
               </li>
             ))}

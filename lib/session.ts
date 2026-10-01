@@ -5,6 +5,7 @@ import {
   POSSESSIVES,
   PRONOUN_CASES,
   SPELL_RANGES,
+  TENSES,
 } from "./types";
 import type {
   AnswerMode,
@@ -17,6 +18,7 @@ import type {
   NumberDrill,
   Possessive,
   SpellRange,
+  Tense,
   WordMode,
 } from "./types";
 
@@ -40,6 +42,10 @@ export function sessionParams(config: Config, seed: number): string {
   if (config.kind === "pronouns") params.set("type", "pronouns");
   if (config.kind === "possessives") params.set("type", "possessives");
   if (config.kind === "numbers") params.set("type", "numbers");
+  if (config.kind === "verbs") params.set("type", "verbs");
+  if (config.tenses && config.tenses.length > 0 && config.tenses.length < TENSES.length) {
+    params.set("tenses", config.tenses.join(","));
+  }
   if (config.drills && config.drills.length > 0 && config.drills.length < NUMBER_DRILLS.length) {
     params.set("drills", config.drills.join(","));
   }
@@ -57,7 +63,9 @@ export const randomSeed = () => Math.floor(Math.random() * 1_000_000);
 export function parseSession(params: URLSearchParams): Session | null {
   const type = params.get("type");
   const kind: ExerciseKind =
-    type === "pronouns" || type === "possessives" || type === "numbers" ? type : "cases";
+    type === "pronouns" || type === "possessives" || type === "numbers" || type === "verbs"
+      ? type
+      : "cases";
   const allowed = kind === "cases" ? CASES : PRONOUN_CASES;
   const cases = (params.get("cases") ?? "")
     .split(",")
@@ -71,6 +79,10 @@ export function parseSession(params: URLSearchParams): Session | null {
   const drills = (params.get("drills") ?? "")
     .split(",")
     .filter((d): d is NumberDrill => (NUMBER_DRILLS as readonly string[]).includes(d));
+
+  const tenses = (params.get("tenses") ?? "")
+    .split(",")
+    .filter((t): t is Tense => (TENSES as readonly string[]).includes(t));
 
   const max = Number(params.get("max"));
   const spellRange = (SPELL_RANGES as readonly number[]).includes(max)
@@ -106,6 +118,7 @@ export function parseSession(params: URLSearchParams): Session | null {
       ...(owners.length > 0 && owners.length < POSSESSIVES.length ? { owners } : {}),
       ...(drills.length > 0 && drills.length < NUMBER_DRILLS.length ? { drills } : {}),
       ...(spellRange ? { max: spellRange } : {}),
+      ...(tenses.length > 0 && tenses.length < TENSES.length ? { tenses } : {}),
     },
     seed: Number(params.get("seed")) || 1,
   };
