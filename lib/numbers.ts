@@ -6,7 +6,7 @@ import {
 } from "./agreement";
 import { CASE_INFO } from "./cases";
 import { buildOptions } from "./choices";
-import { capitalise, makeRng, nounForm, pick, shuffle } from "./generate";
+import { capitalise, fitsTemplate, makeRng, nounForm, pick, resolvePrep, shuffle } from "./generate";
 import { normalise, stripDiacritics } from "./grade";
 import { NOUNS, nounVariants } from "./nouns";
 import {
@@ -47,9 +47,16 @@ import type {
 
 const withPlural = (noun: Noun) => !noun.noPlural && noun.pl !== undefined;
 
+/** "dwanaście miłości" is grammar with no sentence behind it. */
+const COUNTABLE: Tag[] = [
+  "person", "animal", "object", "vehicle", "text", "food", "drink",
+  "placeIn", "placeTo", "surface", "plant", "water", "show",
+];
+
 function lexicon(genders?: GenderGroup[]): Noun[] {
-  // "dwanaście miłości" is grammar with no sentence behind it
-  const countable = NOUNS.filter((n) => withPlural(n) && !n.tags.includes("abstract"));
+  const countable = NOUNS.filter(
+    (n) => withPlural(n) && fitsTemplate(n, { requires: COUNTABLE }),
+  );
   if (!genders || genders.length === 0) return countable;
   const wanted = countable.filter((n) => genders.includes(genderGroup(n.gender)));
   // a filter that leaves nothing to count would strand the noun-based drills
@@ -68,15 +75,30 @@ type CountTemplate = {
   en: string;
   /** The case the frame itself assigns — it only shows with "jeden". */
   case: "nom" | "acc";
-  /** Nouns carrying one of these tags do not belong in this sentence. */
-  excludes?: Tag[];
+  /** Which nouns the sentence makes sense with — see Template. */
+  requires: Tag[];
+  lemmas?: string[];
+  excludeLemmas?: string[];
+};
+
+/** Things that could sit "here": "Tu są trzy krzesła", not "Tu są dwa miasta". */
+const HERE: Pick<CountTemplate, "requires" | "excludeLemmas"> = {
+  requires: ["person", "animal", "object", "vehicle", "text", "food", "drink", "surface", "placeIn"],
+  excludeLemmas: ["kuchnia", "miasto", "ogród", "woda", "obiad", "zupa", "słoń", "rodzina"],
+};
+/** Things you'd see out of a window or in a photo. */
+const IN_VIEW: Pick<CountTemplate, "requires" | "excludeLemmas"> = {
+  requires: ["person", "animal", "vehicle", "placeIn", "placeTo", "water", "plant", "food"],
+  excludeLemmas: ["kuchnia", "pokój", "bank", "apteka", "biuro", "morze", "zupa", "obiad", "rodzina"],
 };
 
 const COUNT_TEMPLATES: CountTemplate[] = [
-  { pl: "Mam {N} {NP}.", en: "I have {np}.", case: "acc", excludes: ["person"] },
-  { pl: "Widzę {N} {NP}.", en: "I can see {np}.", case: "acc" },
-  { pl: "Tu {V} {N} {NP}.", en: "There {is} {np} here.", case: "nom" },
-  { pl: "Na zdjęciu {V} {N} {NP}.", en: "There {is} {np} in the photo.", case: "nom" },
+  { pl: "Mam {N} {NP}.", en: "I have {np}.", case: "acc",
+    requires: ["animal", "object", "vehicle", "text", "food"], lemmas: ["dom", "mieszkanie", "pokój"],
+    excludeLemmas: ["słoń", "zwierzę", "list", "gazeta", "radio", "zupa", "obiad", "samolot", "pociąg", "autobus"] },
+  { pl: "Widzę {N} {NP}.", en: "I can see {np}.", case: "acc", ...IN_VIEW },
+  { pl: "Tu {V} {N} {NP}.", en: "There {is} {np} here.", case: "nom", ...HERE },
+  { pl: "Na zdjęciu {V} {N} {NP}.", en: "There {is} {np} in the photo.", case: "nom", ...IN_VIEW },
 ];
 
 /**
@@ -116,7 +138,7 @@ function buildCountExercise(
 ): Exercise | null {
   for (const tpl of shuffle(COUNT_TEMPLATES, rng)) {
     for (const noun of shuffle(nouns, rng)) {
-      if (tpl.excludes?.some((tag) => noun.tags.includes(tag))) continue;
+      if (!fitsTemplate(noun, tpl)) continue;
       const key = `count|${n}|${noun.lemma}|${tpl.pl}`;
       if (taken.has(key)) continue;
       taken.add(key);
@@ -162,14 +184,28 @@ const NUMERAL_POOL = [
   30, 40, 50, 60, 70, 80, 90, 100,
 ];
 
-const NUMERAL_TEMPLATES: Record<Case, { pl: string; en: string; verb?: boolean }> = {
-  nom: { pl: "Tu {V} {NP}.", en: "There {is} {np} here.", verb: true },
-  gen: { pl: "Szukam {NP}.", en: "I'm looking for {np}." },
-  dat: { pl: "Przyglądam się {NP}.", en: "I'm looking at {np}." },
-  acc: { pl: "Widzę {NP}.", en: "I can see {np}." },
-  ins: { pl: "Interesuję się {NP}.", en: "I'm interested in {np}." },
-  loc: { pl: "Myślę o {NP}.", en: "I'm thinking about {np}." },
-  voc: { pl: "Widzę {NP}.", en: "I can see {np}." },
+type NumeralTemplate = Pick<CountTemplate, "requires" | "lemmas" | "excludeLemmas"> & {
+  pl: string;
+  en: string;
+};
+
+/** People you'd help or talk to in a group: "pięciu studentom", "z trzema kolegami". */
+const PEOPLE: Pick<CountTemplate, "requires" | "excludeLemmas"> = {
+  requires: ["person"],
+  excludeLemmas: ["pan", "pani", "rodzina"],
+};
+
+const NUMERAL_TEMPLATES: Record<Case, NumeralTemplate> = {
+  nom: { pl: "Tu {V} {NP}.", en: "There {is} {np} here.", ...HERE },
+  gen: { pl: "Szukam {NP}.", en: "I'm looking for {np}.",
+    requires: ["animal", "object", "profession"], excludeLemmas: ["słoń", "radio", "stół", "łóżko", "biurko"] },
+  dat: { pl: "Pomagam {NP}.", en: "I'm helping {np}.", ...PEOPLE },
+  acc: { pl: "Widzę {NP}.", en: "I can see {np}.", ...IN_VIEW },
+  ins: { pl: "Rozmawiam {z} {NP}.", en: "I'm talking with {np}.", ...PEOPLE },
+  loc: { pl: "Myślę o {NP}.", en: "I'm thinking about {np}.",
+    requires: ["person", "animal", "placeIn", "placeTo", "vehicle"],
+    excludeLemmas: ["pan", "pani", "rodzina", "kuchnia", "pokój", "bank", "apteka", "biuro"] },
+  voc: { pl: "Widzę {NP}.", en: "I can see {np}.", ...IN_VIEW },
 };
 
 /** Which cell the counted noun sits in once the numeral is in `kase`. */
@@ -229,7 +265,9 @@ function buildNumeralExercise(
   rng: () => number,
   taken: Set<string>,
 ): Exercise | null {
+  const tpl = NUMERAL_TEMPLATES[kase];
   for (const noun of shuffle(nouns, rng)) {
+    if (!fitsTemplate(noun, tpl)) continue;
     const key = `numeral|${n}|${noun.lemma}|${kase}`;
     if (taken.has(key)) continue;
     taken.add(key);
@@ -239,9 +277,11 @@ function buildNumeralExercise(
     const nounText = nounVariants(noun, cell.number, cell.case)[0];
     if (!nounText) continue;
 
-    const tpl = NUMERAL_TEMPLATES[kase];
     const verb = cell.case === "nom" && cell.number === "pl" ? "są" : "jest";
-    const [before, after] = tpl.pl.replace("{V}", verb).split("{NP}");
+    const [before, after] = tpl.pl
+      .replace("{V}", verb)
+      .replace("{z}", resolvePrep("z", answers[0]))
+      .split("{NP}");
 
     const exercise: Exercise = {
       id: key,

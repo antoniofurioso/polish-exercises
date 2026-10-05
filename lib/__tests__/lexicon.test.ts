@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { CASES } from "../types";
+import { ADJECTIVES, COLLOCATIONS } from "../adjectives";
+import { AGREEMENT_TEMPLATES } from "../agreement";
+import { nounsFor } from "../generate";
 import { NOUNS } from "../nouns";
 import { TEMPLATES } from "../templates";
+import { CASES, GENDER_GROUPS } from "../types";
 
 describe("noun lexicon", () => {
   it("has a full singular paradigm for every noun", () => {
@@ -58,6 +61,54 @@ describe("templates", () => {
       for (const text of [tpl.en, tpl.enPl].filter(Boolean) as string[]) {
         const hits = text.match(/\{np(Def|Bare)?\}/g) ?? [];
         expect(hits.length, text).toBe(1);
+      }
+    }
+  });
+});
+
+describe("sense checks", () => {
+  const lemmas = new Set(NOUNS.map((n) => n.lemma));
+  const adjectives = new Set(ADJECTIVES.map((a) => a.lemma));
+
+  it("only names nouns and adjectives that exist", () => {
+    for (const tpl of [...TEMPLATES, ...AGREEMENT_TEMPLATES]) {
+      for (const lemma of [...(tpl.lemmas ?? []), ...(tpl.excludeLemmas ?? [])]) {
+        expect(lemmas.has(lemma), `${tpl.pl}: ${lemma}`).toBe(true);
+      }
+      for (const adj of tpl.adjOnly ?? []) {
+        expect(adjectives.has(adj), `${tpl.pl}: ${adj}`).toBe(true);
+      }
+    }
+    for (const [noun, adjs] of Object.entries(COLLOCATIONS)) {
+      expect(lemmas.has(noun), noun).toBe(true);
+      for (const adj of adjs) expect(adjectives.has(adj), `${noun}: ${adj}`).toBe(true);
+    }
+  });
+
+  it("gives every noun a collocation entry and puts every adjective to use", () => {
+    for (const noun of NOUNS) expect(COLLOCATIONS[noun.lemma], noun.lemma).toBeDefined();
+    const used = new Set(Object.values(COLLOCATIONS).flat());
+    for (const adj of ADJECTIVES) expect(used.has(adj.lemma), adj.lemma).toBe(true);
+  });
+
+  it("leaves every sentence at least two nouns to choose from", () => {
+    for (const tpl of TEMPLATES) {
+      const numbers = tpl.number === "any" ? (["sg", "pl"] as const) : [tpl.number];
+      const most = Math.max(...numbers.map((num) => nounsFor(tpl, num).length));
+      expect(most, tpl.pl).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it("keeps every agreement case open to every gender and number", () => {
+    for (const kase of new Set(AGREEMENT_TEMPLATES.map((t) => t.case))) {
+      for (const number of ["sg", "pl"] as const) {
+        const tpls = AGREEMENT_TEMPLATES.filter(
+          (t) => t.case === kase && (t.number === "any" || t.number === number),
+        );
+        for (const gender of GENDER_GROUPS) {
+          const count = tpls.reduce((sum, t) => sum + nounsFor(t, number, [gender]).length, 0);
+          expect(count, `${kase}/${number}/${gender}`).toBeGreaterThan(0);
+        }
       }
     }
   });

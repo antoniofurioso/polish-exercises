@@ -1,4 +1,4 @@
-import { ADJECTIVES } from "./adjectives";
+import { ADJECTIVES, COLLOCATIONS } from "./adjectives";
 import { buildOptions } from "./choices";
 import { declineAdjective } from "./declineAdjective";
 import { NOUNS, nounVariants } from "./nouns";
@@ -63,13 +63,28 @@ function nounAlts(noun: Noun, number: GramNumber, kase: Case): string[] {
   return nounVariants(noun, number, kase).slice(1);
 }
 
-function fitsTemplate(noun: Noun, tpl: Template): boolean {
+export function fitsTemplate(
+  noun: Noun,
+  tpl: Pick<Template, "requires" | "lemmas" | "excludeLemmas">,
+): boolean {
   if (tpl.excludeLemmas?.includes(noun.lemma)) return false;
-  return tpl.requires.length === 0 || noun.tags.some((t) => tpl.requires.includes(t));
+  if (tpl.lemmas?.includes(noun.lemma)) return true;
+  if (tpl.requires.length === 0) return !tpl.lemmas;
+  return noun.tags.some((t) => tpl.requires.includes(t));
 }
 
-function fitsNoun(adj: Adjective, noun: Noun): boolean {
-  return !adj.fits || noun.tags.some((t) => adj.fits!.includes(t));
+const isLiving = (noun: Noun) => noun.tags.includes("person") || noun.tags.includes("animal");
+
+/** The adjectives that read naturally on this noun inside this sentence. */
+export function adjectivesFor(noun: Noun, tpl: Template): Adjective[] {
+  const natural = COLLOCATIONS[noun.lemma] ?? [];
+  return ADJECTIVES.filter(
+    (a) =>
+      natural.includes(a.lemma) &&
+      (tpl.adjOnly ? tpl.adjOnly.includes(a.lemma) : !a.address) &&
+      // "Kocham chorego psa": a passing state needs a sentence that cares about it
+      !(a.state && isLiving(noun) && !tpl.states),
+  );
 }
 
 export function templatesFor(kase: Case, number: GramNumber): Template[] {
@@ -80,7 +95,8 @@ export function nounsFor(tpl: Template, number: GramNumber, genders?: GenderGrou
   return NOUNS.filter(
     (noun) =>
       fitsTemplate(noun, tpl) &&
-      (number === "sg" || (!noun.noPlural && noun.pl !== undefined)) &&
+      // "ciepłe wody", "mocne herbaty": mass nouns stay singular in a sentence
+      (number === "sg" || (!noun.noPlural && !noun.onlySg && !noun.mass && noun.pl !== undefined)) &&
       (!genders || genders.length === 0 || genders.includes(genderGroup(noun.gender))),
   );
 }
@@ -103,8 +119,13 @@ function renderEnglish(
   const bare = adj ? `${adj.en} ${head}` : head;
   const indefinite =
     number === "pl" || noun.mass ? bare : `${article(bare)} ${bare}`;
+  // a relative or friend with no possessive in Polish is "my ..." in English
+  const mine = noun.tags.includes("family") || noun.tags.includes("friend");
+  // fields and ideas take no article: "about history", "about work"
+  const generic = noun.tags.includes("topic") || noun.tags.includes("abstract");
+  const definite = mine ? `my ${bare}` : generic ? bare : `the ${bare}`;
   const text = (tpl.enPl && number === "pl" ? tpl.enPl : tpl.en)
-    .replace(/\{npDef\}/g, `the ${bare}`)
+    .replace(/\{npDef\}/g, definite)
     .replace(/\{npBare\}/g, bare)
     .replace(/\{np\}/g, indefinite);
   return capitalise(text);
@@ -145,7 +166,7 @@ function buildAnswers(
   return [primary, ...variants.map((v) => prefix + v)];
 }
 
-type Pick = { tpl: Template; noun: Noun; adj?: Adjective };
+type Chosen = { tpl: Template; noun: Noun; adj?: Adjective };
 
 function tryPick(
   kase: Case,
@@ -153,7 +174,7 @@ function tryPick(
   mode: WordMode,
   rng: () => number,
   genders?: GenderGroup[],
-): Pick | null {
+): Chosen | null {
   const templates = templatesFor(kase, number);
   if (templates.length === 0) return null;
   for (const tpl of shuffle(templates, rng)) {
@@ -161,7 +182,7 @@ function tryPick(
     if (nouns.length === 0) continue;
     for (const noun of shuffle(nouns, rng)) {
       if (mode === "nouns") return { tpl, noun };
-      const adjectives = ADJECTIVES.filter((a) => fitsNoun(a, noun));
+      const adjectives = adjectivesFor(noun, tpl);
       if (adjectives.length === 0) continue;
       return { tpl, noun, adj: pick(adjectives, rng) };
     }

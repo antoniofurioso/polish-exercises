@@ -93,7 +93,7 @@ describe("buildPossessiveSession", () => {
     for (const ex of withSubject) {
       expect(ex.answers).toHaveLength(2);
       expect(grade(ex.answers[1], ex)).toBe("correct");
-      expect(ex.answers[1].startsWith("swo")).toBe(true);
+      expect(ex.answers[1]).toMatch(/^sw[oó]/);
     }
   });
 

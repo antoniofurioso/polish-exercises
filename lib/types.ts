@@ -74,9 +74,17 @@ export type Tag =
   | "placeTo" // sensible with "do" + genitive
   | "surface" // takes "na" / "pod" / "nad" + case
   | "vehicle"
-  | "object"
+  | "object" // portable things you can buy, own or hold
   | "text"
-  | "abstract";
+  | "abstract"
+  | "family" // relatives: English glosses them as "my ..."
+  | "friend"
+  | "topic" // fields of interest: muzyka, historia, sport...
+  | "show" // things you watch: film, mecz, serial
+  | "time"
+  | "body"
+  | "plant"
+  | "water"; // morze, jezioro, rzeka — "nad" rather than "do"
 
 export type Forms = Record<Case, string>;
 
@@ -92,6 +100,8 @@ export type Noun = {
   mass?: boolean;
   /** Plural is not used in practice (mleko, muzyka...). */
   noPlural?: boolean;
+  /** Has a plural, but not one a sentence about "my ..." can use (matki, żony). */
+  onlySg?: boolean;
   sg: Forms;
   pl?: Forms;
   /** Extra accepted answers, e.g. { "pl.gen": ["pokojów"] }. */
@@ -108,8 +118,10 @@ export type Adjective = {
   type: AdjType;
   /** Masculine-personal nominative plural — the only irregular slot. */
   virilePl: string;
-  /** Only combine with nouns carrying one of these tags (omit = any). */
-  fits?: Tag[];
+  /** A passing state or looks (chory, wysoki...): only in sentences that set `states`. */
+  state?: boolean;
+  /** Only used to address someone ("kochana babciu"), and only where a sentence asks for it. */
+  address?: boolean;
 };
 
 export type Template = {
@@ -123,8 +135,14 @@ export type Template = {
   enPl?: string;
   /** Noun must carry at least one of these tags. */
   requires: Tag[];
+  /** Nouns that fit even without a matching tag. */
+  lemmas?: string[];
   /** Nouns that fit the tags but not this sentence (w ulicy, przed kuchnią...). */
   excludeLemmas?: string[];
+  /** Allows state adjectives: "Opiekuję się chorą babcią", not "Kocham chorego psa". */
+  states?: boolean;
+  /** Only these adjectives make sense here ([] = no adjective at all). */
+  adjOnly?: string[];
   /** One-line explanation of why this case is used here. */
   note: string;
   /** Set when the sentence has a first-person singular subject ("Widzę..."). */

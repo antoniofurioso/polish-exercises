@@ -78,10 +78,10 @@ describe("buildNumberSession", () => {
     const session = buildNumberSession(config({ drills: ["count"], count: 60 }), 11);
     for (const exercise of session) {
       // the numeral sits in the visible part of the sentence
-      const numeral = exercise.before.trim().split(" ").slice(1).join(" ");
-      expect(numeral.length).toBeGreaterThan(0);
+      const before = exercise.before.trim();
+      expect(before.split(" ").length).toBeGreaterThan(1);
       if (exercise.case === "gen" && exercise.number === "pl") continue;
-      expect(exercise.number).toBe(numeral === "jeden" || numeral === "jedna" ? "sg" : "pl");
+      expect(exercise.number).toBe(/\bjed(en|na|no)$/.test(before) ? "sg" : "pl");
     }
   });
 

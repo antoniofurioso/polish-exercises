@@ -1,7 +1,7 @@
 import { capitalise, shuffle } from "./generate";
 import { normalise, stripDiacritics } from "./grade";
 import { PRONOUN_CASES } from "./types";
-import type { Case, Gender, GenderGroup, GramNumber, Noun, Template } from "./types";
+import type { Case, Gender, GenderGroup, GramNumber, Noun, Tag, Template } from "./types";
 
 /**
  * Shared machinery for the drills where the noun is handed over already
@@ -19,21 +19,31 @@ export const GENDER_WORD: Record<GenderGroup, string> = {
  * A handful of simple sentence frames, one trigger per case, kept plain so the
  * only thing being tested is the agreement of the blanked word.
  */
+const TANGIBLE: Tag[] = ["person", "animal", "object", "vehicle", "text", "food", "drink"];
+
 export const AGREEMENT_TEMPLATES: Template[] = [
   { case: "nom", number: "sg", pl: "Tu jest {NP}.", en: "{np} is here.",
-    requires: [], note: "The subject of the sentence stays in the nominative." },
+    requires: [...TANGIBLE, "placeIn"], note: "The subject of the sentence stays in the nominative." },
   { case: "nom", number: "pl", pl: "Tu są {NP}.", en: "{np} are here.",
-    requires: [], note: "The subject of the sentence stays in the nominative." },
+    requires: [...TANGIBLE, "placeIn"], note: "The subject of the sentence stays in the nominative." },
   { case: "gen", number: "any", pl: "Nie ma tu {NP}.", en: "{np} isn't here.",
-    enPl: "{np} aren't here.", requires: [], note: "'nie ma' (there isn't) takes the genitive." },
+    enPl: "{np} aren't here.", requires: ["person", "animal", "object", "vehicle", "text"],
+    note: "'nie ma' (there isn't) takes the genitive." },
   { case: "dat", number: "any", pl: "Przyglądam się {NP}.", en: "I'm looking at {np}.",
-    requires: [], subject: "1sg", note: "'przyglądać się' takes the dative." },
+    requires: ["person", "animal", "plant"], lemmas: ["dom", "samochód", "rower"],
+    excludeLemmas: ["pan", "pani"],
+    subject: "1sg", note: "'przyglądać się' takes the dative." },
   { case: "acc", number: "any", pl: "Widzę {NP}.", en: "I can see {np}.",
-    requires: [], subject: "1sg", note: "A direct object takes the accusative." },
-  { case: "ins", number: "any", pl: "Interesuję się {NP}.", en: "I'm interested in {np}.",
-    requires: [], subject: "1sg", note: "'interesować się' takes the instrumental." },
+    requires: [...TANGIBLE, "placeIn", "placeTo", "water", "plant"], lemmas: ["okno"],
+    subject: "1sg", note: "A direct object takes the accusative." },
+  { case: "ins", number: "any", pl: "Opiekuję się {NP}.", en: "I take care of {np}.",
+    requires: ["family", "animal"], lemmas: ["chłopiec", "ogród", "dom", "mieszkanie"],
+    excludeLemmas: ["pająk", "słoń"],
+    subject: "1sg", note: "'opiekować się' takes the instrumental." },
   { case: "loc", number: "any", pl: "Myślę o {NP}.", en: "I'm thinking about {np}.",
-    requires: [], subject: "1sg", note: "'o' (about) takes the locative." },
+    requires: ["family", "friend", "profession", "animal", "placeIn", "placeTo", "water", "vehicle", "time", "show"],
+    lemmas: ["praca", "imię", "projekt"],
+    subject: "1sg", note: "'o' (about) takes the locative." },
 ];
 
 export function agreementTemplatesFor(kase: Case, number: GramNumber): Template[] {
