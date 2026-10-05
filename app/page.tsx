@@ -36,6 +36,12 @@ const EXERCISES: { href: string; title: string; pl: string; blurb: string }[] = 
     blurb:
       "Past, simple future, compound future (będę robić) and the imperative — with aspect.",
   },
+  {
+    href: "/shuffle",
+    title: "Shuffle",
+    pl: "Mieszanka",
+    blurb: "Every exercise mixed into one session — cases, pronouns, numbers and verbs at random.",
+  },
 ];
 
 export default function HomePage() {

@@ -1,5 +1,6 @@
 import {
   CASES,
+  DRILL_KINDS,
   GENDER_GROUPS,
   NUMBER_DRILLS,
   POSSESSIVES,
@@ -13,6 +14,7 @@ import type {
   Case,
   Config,
   DemoChoice,
+  DrillKind,
   ExerciseKind,
   GenderGroup,
   GramNumber,
@@ -45,6 +47,10 @@ export function sessionParams(config: Config, seed: number): string {
   if (config.kind === "possessives") params.set("type", "possessives");
   if (config.kind === "numbers") params.set("type", "numbers");
   if (config.kind === "verbs") params.set("type", "verbs");
+  if (config.kind === "shuffle") params.set("type", "shuffle");
+  if (config.mix && config.mix.length > 0 && config.mix.length < DRILL_KINDS.length) {
+    params.set("mix", config.mix.join(","));
+  }
   if (config.tenses && config.tenses.length > 0 && config.tenses.length < TENSES.length) {
     params.set("tenses", config.tenses.join(","));
   }
@@ -68,7 +74,11 @@ export const randomSeed = () => Math.floor(Math.random() * 1_000_000);
 export function parseSession(params: URLSearchParams): Session | null {
   const type = params.get("type");
   const kind: ExerciseKind =
-    type === "pronouns" || type === "possessives" || type === "numbers" || type === "verbs"
+    type === "pronouns" ||
+    type === "possessives" ||
+    type === "numbers" ||
+    type === "verbs" ||
+    type === "shuffle"
       ? type
       : "cases";
   const allowed = kind === "cases" ? CASES : PRONOUN_CASES;
@@ -88,6 +98,10 @@ export function parseSession(params: URLSearchParams): Session | null {
   const tenses = (params.get("tenses") ?? "")
     .split(",")
     .filter((t): t is Tense => (TENSES as readonly string[]).includes(t));
+
+  const mix = (params.get("mix") ?? "")
+    .split(",")
+    .filter((k): k is DrillKind => (DRILL_KINDS as readonly string[]).includes(k));
 
   const vt = params.get("vt") as VerbType;
   const verbType = (VERB_TYPES as readonly string[]).includes(vt) && vt !== "both" ? vt : undefined;
@@ -128,6 +142,7 @@ export function parseSession(params: URLSearchParams): Session | null {
       ...(spellRange ? { max: spellRange } : {}),
       ...(tenses.length > 0 && tenses.length < TENSES.length ? { tenses } : {}),
       ...(verbType ? { verbType } : {}),
+      ...(mix.length > 0 && mix.length < DRILL_KINDS.length ? { mix } : {}),
     },
     seed: Number(params.get("seed")) || 1,
   };

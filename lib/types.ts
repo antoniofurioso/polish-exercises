@@ -10,8 +10,12 @@ export const POSSESSIVE_CASES = PRONOUN_CASES;
 /** Counted noun phrases are drilled over the same cases too. */
 export const NUMBER_CASES = PRONOUN_CASES;
 
-/** Which drill the configurator and runner are set up for. */
-export const EXERCISE_KINDS = ["cases", "pronouns", "possessives", "numbers", "verbs"] as const;
+/** The individual drills, each with its own generator. */
+export const DRILL_KINDS = ["cases", "pronouns", "possessives", "numbers", "verbs"] as const;
+export type DrillKind = (typeof DRILL_KINDS)[number];
+
+/** Which drill the configurator and runner are set up for; shuffle mixes the drills. */
+export const EXERCISE_KINDS = [...DRILL_KINDS, "shuffle"] as const;
 export type ExerciseKind = (typeof EXERCISE_KINDS)[number];
 
 /** Which demonstrative the pronoun exercise draws from. */
@@ -156,6 +160,8 @@ export type Config = {
   tenses?: Tense[];
   /** Verbs drill only: plain verbs, reflexive ones or both; omitted means both. */
   verbType?: VerbType;
+  /** Shuffle only: which drills to mix; omitted means all. */
+  mix?: DrillKind[];
 };
 
 export type Token = { text: string; blank: boolean };
@@ -179,6 +185,8 @@ export type Exercise = {
   options?: string[];
   /** Replaces the case name on the progress line when no case is being drilled. */
   label?: string;
+  /** Set on shuffle sessions so each answer is recorded against its own drill. */
+  kind?: DrillKind;
   /** The words behind the blank, kept so a wrong answer can be explained. */
   source?: { noun: Noun; adj?: Adjective };
 };

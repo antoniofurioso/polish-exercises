@@ -9,6 +9,7 @@ import { buildSession } from "@/lib/generate";
 import { buildNumberSession } from "@/lib/numbers";
 import { buildPossessiveSession } from "@/lib/possessives";
 import { buildPronounSession } from "@/lib/pronouns";
+import { buildShuffleSession } from "@/lib/shuffle";
 import { buildVerbSession } from "@/lib/verbs";
 import { grade, type Verdict } from "@/lib/grade";
 import { playFinish, playVerdict } from "@/lib/sound";
@@ -49,6 +50,7 @@ function Runner({ config, seed }: { config: Config; seed: number }) {
     if (kind === "possessives") return buildPossessiveSession(config, seed);
     if (kind === "numbers") return buildNumberSession(config, seed);
     if (kind === "verbs") return buildVerbSession(config, seed);
+    if (kind === "shuffle") return buildShuffleSession(config, seed);
     return buildSession(config, seed);
   }, [kind, config, seed]);
 
@@ -70,7 +72,7 @@ function Runner({ config, seed }: { config: Config; seed: number }) {
       setValue(answer);
       setVerdict(result);
       setResults((r) => [...r, { exercise, verdict: result }]);
-      recordAnswer(kind, exercise.case, result === "correct");
+      recordAnswer(exercise.kind ?? kind, exercise.case, result === "correct");
       if (soundOn) playVerdict(result);
       return;
     }
