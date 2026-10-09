@@ -90,8 +90,13 @@ function verbForms(v: Obj): string[] {
   const objects = ((v.objects ?? []) as Obj[]).map(
     (o) => `${str(o.pl)}${o.neg ? ` (neg ${str(o.neg)})` : ""} = ${str(o.en)}`,
   );
-  const lines = [aspect("impf", v.impf as Obj), aspect("pf", v.pf as Obj), `objects: ${objects.join("; ")}`];
-  const marks = flags(v, ["reflexive", "motion", "momentary"]);
+  const lines = [
+    aspect("impf", v.impf as Obj),
+    v.pf ? aspect("pf", v.pf as Obj) : "pf: none (imperfective only)",
+    `objects: ${objects.join("; ")}`,
+  ];
+  const marks = flags(v, ["reflexive", "motion", "indeterminate", "momentary", "stative"]);
+  if (v.orders) marks.push(`orders: ${str(v.orders)} only`);
   if (marks.length) lines.push(marks.join(", "));
   return lines;
 }
@@ -122,7 +127,8 @@ function english(d: Located): string {
   if (d.kind === "noun") return `${str(e.en)} / ${str(e.enPl)}`;
   if (d.kind === "verb") {
     const en = (e.en ?? {}) as Obj;
-    return `${str(en.base)} / ${str(en.past)} / ${str(en.ing)}`;
+    // a "be late" base has no past / -ing of its own: "be" is conjugated
+    return en.past === undefined ? str(en.base) : `${str(en.base)} / ${str(en.past)} / ${str(en.ing)}`;
   }
   if (e.enPl) return `${str(e.en)} | pl: ${str(e.enPl)}`;
   return str(e.en);
@@ -185,7 +191,7 @@ function candidates(d: Located): Exercise[] {
     case "numeral-frame":
       return pick([POOLS.numeral], (ex) => parts(ex)[0] === "numeral" && parts(ex)[3] === d.key);
     case "verb": {
-      const infs = [(e.impf as Obj).inf, (e.pf as Obj).inf];
+      const infs = [(e.impf as Obj).inf, (e.pf as Obj | undefined)?.inf].filter((inf) => inf !== undefined);
       const reflexive = e.reflexive === true;
       const all = pick(
         [POOLS.verbs],

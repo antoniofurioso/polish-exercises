@@ -2801,5 +2801,371 @@
       { "pl": "po schodach", "en": "up the stairs" }
     ],
     "review": "draft"
+  },
+  {
+    "indeterminate": true,
+    "orders": "negated",
+    "en": { "base": "go", "past": "went", "ing": "going" },
+    "level": "A1",
+    "freq": 1,
+    "impf": {
+      "inf": "chodzić",
+      "past": { "m": "chodził", "f": "chodziła", "vir": "chodzili" },
+      "pres": ["chodzę", "chodzisz", "chodzą"],
+      "imp": "chodź"
+    },
+    "objects": [
+      { "pl": "do pracy", "en": "to work" },
+      { "pl": "do szkoły", "en": "to school" },
+      { "pl": "na basen", "en": "to the swimming pool" },
+      { "pl": "na spacer", "en": "for a walk" }
+    ],
+    "review": "draft"
+  },
+  {
+    "indeterminate": true,
+    "orders": "negated",
+    "en": { "base": "go", "past": "went", "ing": "going" },
+    "level": "A1",
+    "freq": 2,
+    "impf": {
+      "inf": "jeździć",
+      "past": { "m": "jeździł", "f": "jeździła", "vir": "jeździli" },
+      "pres": ["jeżdżę", "jeździsz", "jeżdżą"],
+      "imp": "jeźdź"
+    },
+    "objects": [
+      { "pl": "do pracy autobusem", "en": "to work by bus" },
+      { "pl": "do szkoły rowerem", "en": "to school by bike" },
+      { "pl": "do miasta tramwajem", "en": "into town by tram" }
+    ],
+    "review": "draft"
+  },
+  {
+    "stative": true,
+    "en": { "base": "live", "past": "lived", "ing": "living" },
+    "level": "A1",
+    "freq": 1,
+    "impf": {
+      "inf": "mieszkać",
+      "past": { "m": "mieszkał", "f": "mieszkała", "vir": "mieszkali" },
+      "pres": ["mieszkam", "mieszkasz", "mieszkają"]
+    },
+    "objects": [
+      { "pl": "w Krakowie", "en": "in Kraków" },
+      { "pl": "w Warszawie", "en": "in Warsaw" },
+      { "pl": "na wsi", "en": "in the country" },
+      { "pl": "w centrum", "en": "in the centre" }
+    ],
+    "review": "draft"
+  },
+  {
+    "en": { "base": "work", "past": "worked", "ing": "working" },
+    "level": "A1",
+    "freq": 1,
+    "impf": {
+      "inf": "pracować",
+      "past": { "m": "pracował", "f": "pracowała", "vir": "pracowali" },
+      "pres": ["pracuję", "pracujesz", "pracują"],
+      "imp": "pracuj"
+    },
+    "objects": [
+      { "pl": "w domu", "en": "at home" },
+      { "pl": "w ogrodzie", "en": "in the garden" },
+      { "pl": "nad projektem", "en": "on the project" }
+    ],
+    "review": "draft"
+  },
+  {
+    "en": { "base": "sit", "past": "sat", "ing": "sitting" },
+    "level": "A1",
+    "freq": 2,
+    "impf": {
+      "inf": "siedzieć",
+      "past": { "m": "siedział", "f": "siedziała", "vir": "siedzieli" },
+      "pres": ["siedzę", "siedzisz", "siedzą"],
+      "imp": "siedź"
+    },
+    "objects": [
+      { "pl": "przy oknie", "en": "by the window" },
+      { "pl": "na kanapie", "en": "on the sofa" },
+      { "pl": "przy komputerze", "en": "at the computer" }
+    ],
+    "review": "draft"
+  },
+  {
+    "reflexive": true,
+    "stative": true,
+    "orders": "negated",
+    "en": { "base": "be afraid of" },
+    "level": "A2",
+    "freq": 2,
+    "impf": {
+      "inf": "bać się",
+      "past": { "m": "bał", "f": "bała", "vir": "bali" },
+      "pres": ["boję", "boisz", "boją"],
+      "imp": "bój"
+    },
+    "objects": [
+      { "pl": "psów", "en": "dogs" },
+      { "pl": "pająków", "en": "spiders" },
+      { "pl": "burzy", "en": "storms" },
+      { "pl": "ciemności", "en": "the dark" }
+    ],
+    "review": "draft"
+  },
+  {
+    "stative": true,
+    "en": { "base": "see", "past": "saw", "ing": "seeing" },
+    "level": "A1",
+    "freq": 1,
+    "impf": {
+      "inf": "widzieć",
+      "past": { "m": "widział", "f": "widziała", "vir": "widzieli" },
+      "pres": ["widzę", "widzisz", "widzą"]
+    },
+    "pf": {
+      "inf": "zobaczyć",
+      "past": { "m": "zobaczył", "f": "zobaczyła", "vir": "zobaczyli" },
+      "pres": ["zobaczę", "zobaczysz", "zobaczą"]
+    },
+    "objects": [
+      { "pl": "morze", "neg": "morza", "en": "the sea" },
+      { "pl": "góry", "neg": "gór", "en": "the mountains" },
+      { "pl": "Annę", "neg": "Anny", "en": "Anna" }
+    ],
+    "review": "draft"
+  },
+  {
+    "stative": true,
+    "en": { "base": "understand", "past": "understood", "ing": "understanding" },
+    "level": "A1",
+    "freq": 1,
+    "impf": {
+      "inf": "rozumieć",
+      "past": { "m": "rozumiał", "f": "rozumiała", "vir": "rozumieli" },
+      "pres": ["rozumiem", "rozumiesz", "rozumieją"]
+    },
+    "pf": {
+      "inf": "zrozumieć",
+      "past": { "m": "zrozumiał", "f": "zrozumiała", "vir": "zrozumieli" },
+      "pres": ["zrozumiem", "zrozumiesz", "zrozumieją"]
+    },
+    "objects": [
+      { "pl": "pytanie", "neg": "pytania", "en": "the question" },
+      { "pl": "zadanie", "neg": "zadania", "en": "the task" },
+      { "pl": "wszystko", "neg": "wszystkiego", "en": "everything" }
+    ],
+    "review": "draft"
+  },
+  {
+    "stative": true,
+    "en": { "base": "know", "past": "knew", "ing": "knowing" },
+    "level": "A1",
+    "freq": 1,
+    "impf": {
+      "inf": "wiedzieć",
+      "past": { "m": "wiedział", "f": "wiedziała", "vir": "wiedzieli" },
+      "pres": ["wiem", "wiesz", "wiedzą"]
+    },
+    "objects": [
+      { "pl": "wszystko", "neg": "wszystkiego", "en": "everything" },
+      { "pl": "o spotkaniu", "en": "about the meeting" },
+      { "pl": "dużo o Polsce", "en": "a lot about Poland" }
+    ],
+    "review": "draft"
+  },
+  {
+    "stative": true,
+    "en": { "base": "know", "past": "knew", "ing": "knowing" },
+    "level": "A1",
+    "freq": 1,
+    "impf": {
+      "inf": "znać",
+      "past": { "m": "znał", "f": "znała", "vir": "znali" },
+      "pres": ["znam", "znasz", "znają"]
+    },
+    "objects": [
+      { "pl": "odpowiedź", "neg": "odpowiedzi", "en": "the answer" },
+      { "pl": "tę piosenkę", "neg": "tej piosenki", "en": "this song" },
+      { "pl": "Kraków", "neg": "Krakowa", "en": "Kraków" }
+    ],
+    "review": "draft"
+  },
+  {
+    "stative": true,
+    "en": { "base": "like", "past": "liked", "ing": "liking" },
+    "level": "A1",
+    "freq": 1,
+    "impf": {
+      "inf": "lubić",
+      "past": { "m": "lubił", "f": "lubiła", "vir": "lubili" },
+      "pres": ["lubię", "lubisz", "lubią"]
+    },
+    "objects": [
+      { "pl": "kawę", "neg": "kawy", "en": "coffee" },
+      { "pl": "koty", "neg": "kotów", "en": "cats" },
+      { "pl": "zimę", "neg": "zimy", "en": "winter" }
+    ],
+    "review": "draft"
+  },
+  {
+    "stative": true,
+    "en": { "base": "love", "past": "loved", "ing": "loving" },
+    "level": "A1",
+    "freq": 1,
+    "impf": {
+      "inf": "kochać",
+      "past": { "m": "kochał", "f": "kochała", "vir": "kochali" },
+      "pres": ["kocham", "kochasz", "kochają"]
+    },
+    "objects": [
+      { "pl": "Annę", "neg": "Anny", "en": "Anna" },
+      { "pl": "góry", "neg": "gór", "en": "the mountains" },
+      { "pl": "muzykę", "neg": "muzyki", "en": "music" }
+    ],
+    "review": "draft"
+  },
+  {
+    "stative": true,
+    "orders": "affirmative",
+    "en": { "base": "remember", "past": "remembered", "ing": "remembering" },
+    "level": "A1",
+    "freq": 2,
+    "impf": {
+      "inf": "pamiętać",
+      "past": { "m": "pamiętał", "f": "pamiętała", "vir": "pamiętali" },
+      "pres": ["pamiętam", "pamiętasz", "pamiętają"],
+      "imp": "pamiętaj"
+    },
+    "objects": [
+      { "pl": "o kluczach", "en": "the keys" },
+      { "pl": "o spotkaniu", "en": "the meeting" },
+      { "pl": "o urodzinach mamy", "en": "Mum's birthday" }
+    ],
+    "review": "draft"
+  },
+  {
+    "stative": true,
+    "en": { "base": "hear", "past": "heard", "ing": "hearing" },
+    "level": "A1",
+    "freq": 2,
+    "impf": {
+      "inf": "słyszeć",
+      "past": { "m": "słyszał", "f": "słyszała", "vir": "słyszeli" },
+      "pres": ["słyszę", "słyszysz", "słyszą"]
+    },
+    "objects": [
+      { "pl": "muzykę", "neg": "muzyki", "en": "music" },
+      { "pl": "hałas", "neg": "hałasu", "en": "a noise" },
+      { "pl": "sąsiadów", "en": "the neighbours" }
+    ],
+    "review": "draft"
+  },
+  {
+    "stative": true,
+    "orders": "negated",
+    "en": { "base": "believe", "past": "believed", "ing": "believing" },
+    "level": "A2",
+    "freq": 2,
+    "impf": {
+      "inf": "wierzyć",
+      "past": { "m": "wierzył", "f": "wierzyła", "vir": "wierzyli" },
+      "pres": ["wierzę", "wierzysz", "wierzą"],
+      "imp": "wierz"
+    },
+    "objects": [
+      { "pl": "mamie", "en": "Mum" },
+      { "pl": "lekarzowi", "en": "the doctor" },
+      { "pl": "sąsiadowi", "en": "the neighbour" }
+    ],
+    "review": "draft"
+  },
+  {
+    "momentary": true,
+    "en": { "base": "taste", "past": "tasted", "ing": "tasting" },
+    "level": "A2",
+    "freq": 2,
+    "impf": {
+      "inf": "próbować",
+      "past": { "m": "próbował", "f": "próbowała", "vir": "próbowali" },
+      "pres": ["próbuję", "próbujesz", "próbują"],
+      "imp": "próbuj"
+    },
+    "pf": {
+      "inf": "spróbować",
+      "past": { "m": "spróbował", "f": "spróbowała", "vir": "spróbowali" },
+      "pres": ["spróbuję", "spróbujesz", "spróbują"],
+      "imp": "spróbuj"
+    },
+    "objects": [
+      { "pl": "zupy", "en": "the soup" },
+      { "pl": "sosu", "en": "the sauce" },
+      { "pl": "wina", "en": "the wine" }
+    ],
+    "review": "draft"
+  },
+  {
+    "reflexive": true,
+    "orders": "negated",
+    "en": { "base": "worry", "past": "worried", "ing": "worrying" },
+    "level": "A2",
+    "freq": 2,
+    "impf": {
+      "inf": "martwić się",
+      "past": { "m": "martwił", "f": "martwiła", "vir": "martwili" },
+      "pres": ["martwię", "martwisz", "martwią"],
+      "imp": "martw"
+    },
+    "objects": [
+      { "pl": "o egzamin", "en": "about the exam" },
+      { "pl": "o pieniądze", "en": "about money" },
+      { "pl": "o dzieci", "en": "about the children" }
+    ],
+    "review": "draft"
+  },
+  {
+    "reflexive": true,
+    "stative": true,
+    "en": { "base": "be interested in" },
+    "level": "A2",
+    "freq": 2,
+    "impf": {
+      "inf": "interesować się",
+      "past": { "m": "interesował", "f": "interesowała", "vir": "interesowali" },
+      "pres": ["interesuję", "interesujesz", "interesują"]
+    },
+    "objects": [
+      { "pl": "muzyką", "en": "music" },
+      { "pl": "historią", "en": "history" },
+      { "pl": "sportem", "en": "sport" },
+      { "pl": "polityką", "en": "politics" }
+    ],
+    "review": "draft"
+  },
+  {
+    "reflexive": true,
+    "momentary": true,
+    "orders": "negated",
+    "en": { "base": "be late" },
+    "level": "A2",
+    "freq": 3,
+    "impf": {
+      "inf": "spóźniać się",
+      "past": { "m": "spóźniał", "f": "spóźniała", "vir": "spóźniali" },
+      "pres": ["spóźniam", "spóźniasz", "spóźniają"],
+      "imp": "spóźniaj"
+    },
+    "pf": {
+      "inf": "spóźnić się",
+      "past": { "m": "spóźnił", "f": "spóźniła", "vir": "spóźnili" },
+      "pres": ["spóźnię", "spóźnisz", "spóźnią"]
+    },
+    "objects": [
+      { "pl": "do pracy", "en": "for work" },
+      { "pl": "na pociąg", "en": "for the train" },
+      { "pl": "na lekcję", "en": "for the lesson" }
+    ],
+    "review": "draft"
   }
 ]

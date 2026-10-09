@@ -314,9 +314,10 @@ approved.
 
 ## verbs.json
 
-A list of aspect pairs. Polish conjugation is too irregular to derive from the
-infinitive, so each verb stores its principal parts and `lib/verbs.ts` builds the
-rest. In error messages a verb is named by its imperfective infinitive.
+A list of aspect pairs, or imperfective verbs on their own. Polish conjugation
+is too irregular to derive from the infinitive, so each verb stores its
+principal parts and `lib/verbs.ts` builds the rest. In error messages a verb is
+named by its imperfective infinitive.
 
 ```json
 {
@@ -341,17 +342,21 @@ rest. In error messages a verb is named by its imperfective infinitive.
 
 | Field | Required | Meaning |
 | --- | --- | --- |
-| `en` | yes | English `base`, simple `past` and `ing` form. |
+| `en` | yes | English `base`, simple `past` and `ing` form. The base may be several words (come back, look after; the 3sg inflects the first: comes back). A "be" base (`"be late"`, `"be afraid of"`) has no `past` or `ing`: "be" is conjugated per subject (am / is / are late, was / were late, will be late, don't be late). |
 | `level`, `freq` | `level` only | As for nouns, for the aspect pair as a whole. |
-| `impf`, `pf` | yes | The imperfective and perfective verb, each with: |
+| `impf` | yes | The imperfective verb, with the fields below. |
+| `pf` | no | The perfective partner, same fields. Left out for a verb drilled without one (chodzić, mieszkać, wiedzieć, lubić): it has no simple future and no perfective past frame ("Wczoraj"), and is simply not drawn for a tense it has no frame in. |
 | ↳ `inf` | yes | Infinitive, with "się" on reflexive verbs (uczyć się). |
 | ↳ `past` | yes | 3sg masculine `m` (pisał), feminine `f` (pisała), masculine-personal plural `vir` (pisali), and `m1` only when the stem before -em / -eś differs from `m` (mógł → mogłem). |
 | ↳ `pres` | yes | Non-past 1sg, 2sg, 3pl: the present for `impf`, the future for `pf`. |
-| ↳ `imp` | no | 2sg imperative; left out when not in use. |
-| `objects` | yes | At least one complement: Polish `pl`, `neg` when a negated verb changes it (list → nie pisz listu), English `en`. |
+| ↳ `imp` | no | 2sg imperative; left out when not in use, or when no order with the verb's objects makes sense (zrozum zadanie!, widź morze!). A verb with no `imp` on either aspect is never drilled in the imperative. |
+| `objects` | yes | At least one complement: Polish `pl`, `neg` when a negated verb changes it (list → nie pisz listu), English `en`. `pl` is written in the case the verb governs, so it need not be an accusative: `psów` after bać się (gen), `mamie` after wierzyć (dat), `muzyką` after interesować się (ins), `o kluczach` after pamiętać. Only an accusative changes after "nie", so only an accusative gets `neg`. |
 | `reflexive` | no | `true` for verbs with "się" (uczyć się). |
 | `motion` | no | `true` for determinate motion (iść, jechać): no habits, no stretches of time. |
+| `indeterminate` | no | `true` for indeterminate motion (chodzić, jeździć): habits only ("Codziennie chodzę do pracy", "Wtedy jeździłem autobusem"), never one trip now. Has no `pf`. |
 | `momentary` | no | `true` when it is over in a moment (wracać): no "all evening" frames. |
+| `stative` | no | `true` for a state, not an action (wiedzieć, znać, lubić, widzieć, mieszkać, bać się): English keeps the simple present ("I understand now", never "I am understanding"), no "all evening" / "every day" / "usually" frames, so no compound future; instead "Chyba ..." (I think ...) in the present and "Wtedy ..." (at that time) in the past. |
+| `orders` | no | `"negated"` when only a prohibition sounds right (nie martw się!, nie spóźniaj się!, nie chodź tam!), `"affirmative"` when only a positive order does (pamiętaj o kluczach!). Left out, both are drilled. |
 
 ## Adding an entry
 

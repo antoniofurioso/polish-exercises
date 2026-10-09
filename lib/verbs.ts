@@ -27,6 +27,11 @@ import type {
  * verb stores a handful of principal parts and the rest is built from them.
  * Reflexive verbs carry "się", which the answers accept on either side of the
  * verb wherever Polish allows it.
+ *
+ * Not every verb is drilled in every tense. An imperfective-only verb
+ * (chodzić, mieszkać, wiedzieć) has no simple future and no perfective frame;
+ * a stative one (wiedzieć, lubić) no "all evening" or "every day"; a verb
+ * that fits no frame of a tense is simply not drawn for it.
  */
 
 type PastStems = {
@@ -59,15 +64,21 @@ type Complement = {
   en: string;
 };
 
+/**
+ * English base, simple past and -ing form. A "be + adjective" base (be late,
+ * be afraid of) has neither: "be" is conjugated (am late, was late).
+ */
+export type EnglishGloss = { base: string; past?: string; ing?: string };
+
 export type Verb = {
-  /** English base, simple past and -ing form. */
-  en: { base: string; past: string; ing: string };
+  en: EnglishGloss;
   /** CEFR level of the aspect pair. */
   level: Level;
   /** 1 = most common; see data/README.md. */
   freq?: Freq;
   impf: AspectForms;
-  pf: AspectForms;
+  /** Left out for an imperfective-only verb: chodzić, mieszkać, wiedzieć. */
+  pf?: AspectForms;
   objects: Complement[];
   /** Takes "się": uczyć się, myć się. */
   reflexive?: true;
@@ -76,8 +87,24 @@ export type Verb = {
    * ("codziennie idę" wants chodzić) and no stretch of time.
    */
   motion?: true;
+  /**
+   * Indeterminate motion (chodzić, jeździć): trips made again and again, so
+   * only habits ("codziennie chodzę do pracy"), never one trip now.
+   */
+  indeterminate?: true;
   /** Over in a moment (wracać, budzić się): no "all evening" frames. */
   momentary?: true;
+  /**
+   * A state, not an action (wiedzieć, lubić, widzieć): English keeps the
+   * simple present ("I understand now", never "I am understanding"), and
+   * there are no "all evening" or "every day" frames.
+   */
+  stative?: true;
+  /**
+   * Only orders of this polarity sound right: "negated" for "Nie martw się!"
+   * (never "Martw się!"), "affirmative" for "Pamiętaj o kluczach!".
+   */
+  orders?: "affirmative" | "negated";
   review?: Review;
 };
 
@@ -204,9 +231,12 @@ export function nonPast(
 export const presentForm = (verb: Verb, person: Person, number: GramNumber) =>
   nonPast(verb.impf, person, number);
 
-/** Perfective non-past — which is to say, the simple future. */
-export const futureSimple = (verb: Verb, person: Person, number: GramNumber) =>
-  nonPast(verb.pf, person, number);
+/** Perfective non-past — which is to say, the simple future; null without a perfective. */
+export const futureSimple = (
+  verb: Verb,
+  person: Person,
+  number: GramNumber,
+): string | null => (verb.pf ? nonPast(verb.pf, person, number) : null);
 
 const BYC: Record<GramNumber, [string, string, string]> = {
   sg: ["będę", "będziesz", "będzie"],
@@ -227,11 +257,11 @@ export function futureCompound(
 
 /** Imperative for ty / my / wy, or null when the verb has none in use. */
 export function imperative(
-  forms: AspectForms,
+  forms: AspectForms | undefined,
   person: Person,
   number: GramNumber,
 ): string | null {
-  if (!forms.imp) return null;
+  if (!forms?.imp) return null;
   if (number === "sg") return person === 2 ? forms.imp : null;
   if (person === 1) return `${forms.imp}my`;
   if (person === 2) return `${forms.imp}cie`;
@@ -276,6 +306,8 @@ type TimeFrame = {
   durative?: true;
   /** Describes a repeated action. */
   habit?: true;
+  /** Only for verbs with one of these flags; every other verb skips the frame. */
+  only?: ("stative" | "indeterminate")[];
   note?: string;
 };
 
@@ -302,6 +334,14 @@ const PRESENT_FRAMES: TimeFrame[] = [
     enVerb: "pres",
     habit: true,
     note: "A habit — the present of an imperfective verb.",
+  },
+  {
+    pl: "Chyba",
+    en: "I think {s} {v} {o}.",
+    aspect: "impf",
+    enVerb: "pres",
+    only: ["stative"],
+    note: "A state, not an action — the present of an imperfective verb.",
   },
 ];
 
@@ -335,6 +375,14 @@ const PAST_FRAMES: TimeFrame[] = [
     enVerb: "past",
     habit: true,
     note: "A habit, repeated — imperfective past.",
+  },
+  {
+    pl: "Wtedy",
+    en: "At that time {s} {v} {o}.",
+    aspect: "impf",
+    enVerb: "past",
+    only: ["stative", "indeterminate"],
+    note: "A state or habit at the time, not a one-off event — imperfective past.",
   },
 ];
 
@@ -373,39 +421,143 @@ const COMPOUND_FRAMES: TimeFrame[] = [
   },
 ];
 
-/** The frames a verb fits: motion verbs have no habit, quick ones no duration. */
-function framesFor(frames: TimeFrame[], verb: Verb): TimeFrame[] {
-  return frames.filter(
-    (f) =>
-      !(f.durative && (verb.motion || verb.momentary)) &&
-      !(f.habit && verb.motion),
+/**
+ * Whether a frame suits a verb: a perfective frame needs a perfective; a
+ * frame marked `only` is for stative / indeterminate verbs alone; stative
+ * verbs take no duration or habit, indeterminate ones nothing but habits;
+ * determinate motion has no habit, quick actions no duration.
+ */
+function fits(frame: TimeFrame, verb: Verb): boolean {
+  if (frame.aspect === "pf" && !verb.pf) return false;
+  if (frame.only) return frame.only.some((flag) => verb[flag]);
+  if (verb.stative && (frame.durative || frame.habit)) return false;
+  if (verb.indeterminate && !frame.habit) return false;
+  return (
+    !(frame.durative && (verb.motion || verb.momentary)) &&
+    !(frame.habit && verb.motion)
   );
 }
 
-const third = (s: Subject) => s.person === 3 && s.number === "sg";
+/** The frames a verb fits, in their order. */
+function framesFor(frames: TimeFrame[], verb: Verb): TimeFrame[] {
+  return frames.filter((f) => fits(f, verb));
+}
 
-/** English 3sg: watch → watches, go → goes, come back → comes back. */
-function englishS(base: string): string {
+// ----------------------------------------------------------------- English
+
+/** Who the English verb agrees with: "I", "she", "you all"... */
+export type EnglishSubject = Pick<Subject, "en" | "person" | "number">;
+
+const third = (s: EnglishSubject) => s.person === 3 && s.number === "sg";
+
+/** "be late" → "late"; null when the base is not "be + something". */
+const afterBe = (base: string): string | null =>
+  /^be /.test(base) ? base.slice(3) : null;
+
+/** Present of "be": I am, she is, we are. */
+export const bePresent = (s: EnglishSubject) =>
+  s.en === "I" ? "am" : third(s) ? "is" : "are";
+
+/** Past of "be": I was, she was, we were. */
+export const bePast = (s: EnglishSubject) =>
+  s.en === "I" || third(s) ? "was" : "were";
+
+/** 3sg of one English verb: studies, watches, goes, does, has, plays. */
+function thirdSingular(verb: string): string {
+  if (verb === "be") return "is";
+  if (verb === "have") return "has";
+  if (/[^aeiou]y$/.test(verb)) return `${verb.slice(0, -1)}ies`;
+  if (/(ch|sh|s|x|z|o)$/.test(verb)) return `${verb}es`;
+  return `${verb}s`;
+}
+
+/** English 3sg of a base: watch → watches, come back → comes back, be late → is late. */
+export function englishS(base: string): string {
   const [head, ...rest] = base.split(" ");
-  const inflected = /(ch|sh|s|x|o)$/.test(head) ? `${head}es` : `${head}s`;
-  return [inflected, ...rest].join(" ");
+  return [thirdSingular(head), ...rest].join(" ");
+}
+
+/** Simple present: I study, she studies, he is late. */
+export function englishPresent(en: EnglishGloss, s: EnglishSubject): string {
+  const rest = afterBe(en.base);
+  if (rest !== null) return `${bePresent(s)} ${rest}`;
+  return third(s) ? englishS(en.base) : en.base;
+}
+
+/** Simple past: I wrote, she was late, they were afraid of dogs. */
+export function englishPast(en: EnglishGloss, s: EnglishSubject): string {
+  const rest = afterBe(en.base);
+  if (rest !== null) return `${bePast(s)} ${rest}`;
+  return en.past ?? en.base;
+}
+
+/**
+ * Present continuous: I am writing. A stative verb or a "be" base keeps the
+ * simple present, which is what English says: I understand, I am late.
+ */
+export function englishPresentCont(
+  en: EnglishGloss,
+  s: EnglishSubject,
+  stative = false,
+): string {
+  if (stative || !en.ing) return englishPresent(en, s);
+  return `${bePresent(s)} ${en.ing}`;
+}
+
+/** Past continuous: I was writing; for a state the simple past (I knew, I was late). */
+export function englishPastCont(
+  en: EnglishGloss,
+  s: EnglishSubject,
+  stative = false,
+): string {
+  if (stative || !en.ing) return englishPast(en, s);
+  return `${bePast(s)} ${en.ing}`;
+}
+
+/** Future: will write, will be late. */
+export const englishWill = (en: EnglishGloss) => `will ${en.base}`;
+
+/** Future continuous: will be writing; for a state plain "will" (will know, will be late). */
+export function englishWillBe(en: EnglishGloss, stative = false): string {
+  if (stative || !en.ing) return englishWill(en);
+  return `will be ${en.ing}`;
+}
+
+/**
+ * An order in English: "Write a letter!", "Don't be late for work, all of
+ * you!", "Let's not worry about money!". The 1pl is "let's".
+ */
+export function englishOrder(
+  base: string,
+  person: Person,
+  number: GramNumber,
+  negated: boolean,
+  object: string,
+): string {
+  if (person === 1) {
+    return negated
+      ? `Let's not ${base} ${object}!`
+      : `Let's ${base} ${object}!`;
+  }
+  const all = number === "pl" ? ", all of you" : "";
+  return `${negated ? `Don't ${base}` : capitalise(base)} ${object}${all}!`;
 }
 
 function englishVerb(verb: Verb, frame: TimeFrame, subject: Subject): string {
-  const be = subject.en === "I" ? "am" : third(subject) ? "is" : "are";
+  const stative = !!verb.stative;
   switch (frame.enVerb) {
     case "pres":
-      return third(subject) ? englishS(verb.en.base) : verb.en.base;
+      return englishPresent(verb.en, subject);
     case "presCont":
-      return `${be} ${verb.en.ing}`;
+      return englishPresentCont(verb.en, subject, stative);
     case "past":
-      return verb.en.past;
+      return englishPast(verb.en, subject);
     case "pastCont":
-      return `${subject.en === "I" || third(subject) ? "was" : "were"} ${verb.en.ing}`;
+      return englishPastCont(verb.en, subject, stative);
     case "will":
-      return `will ${verb.en.base}`;
+      return englishWill(verb.en);
     case "willBe":
-      return `will be ${verb.en.ing}`;
+      return englishWillBe(verb.en, stative);
   }
 }
 
@@ -415,11 +567,38 @@ function englishSentence(
   subject: Subject,
   obj: Complement,
 ): string {
-  const text = frame.en
-    .replace("{s}", subject.en)
-    .replace("{v}", englishVerb(verb, frame, subject))
-    .replace("{o}", obj.en);
-  return capitalise(text);
+  return capitalise(
+    englishClause(
+      frame.en,
+      subject.en,
+      englishVerb(verb, frame, subject),
+      obj.en,
+    ),
+  );
+}
+
+/**
+ * Fills a frame's {s} {v} {o}. A frequency adverb goes after a form of "be"
+ * but before any other verb: "he usually works", "he is usually late".
+ */
+export function englishClause(
+  frame: string,
+  subject: string,
+  verb: string,
+  object: string,
+): string {
+  let text = frame;
+  let v = verb;
+  const be = /^(am|is|are|was|were) (.*)$/.exec(verb);
+  const adverb = / (usually|often|always|never) \{v\}/.exec(text);
+  if (be && adverb) {
+    text = text.replace(adverb[0], " {v}");
+    v = `${be[1]} ${adverb[1]} ${be[2]}`;
+  }
+  return text
+    .replace("{s}", subject)
+    .replace("{v}", v)
+    .replace("{o}", object);
 }
 
 export const TENSE_LABEL: Record<Tense, string> = {
@@ -542,7 +721,8 @@ function buildPast(
   const frames = framesFor(PAST_FRAMES, verb);
   if (frames.length === 0) return null;
   const frame = pick(frames, rng);
-  const forms = verb[frame.aspect];
+  // fits() only lets a perfective frame through when there is a perfective
+  const forms = frame.aspect === "pf" ? verb.pf! : verb.impf;
   const form = pastForm(forms, subject.person, subject.gender);
   const other = frame.aspect === "pf" ? verb.impf : verb.pf;
   const answers = withSie(verb, form);
@@ -562,7 +742,7 @@ function buildPast(
     ),
     candidates: [
       ...SUBJECTS.map((s) => shown(verb, pastForm(forms, s.person, s.gender))),
-      shown(verb, pastForm(other, subject.person, subject.gender)),
+      shown(verb, other ? pastForm(other, subject.person, subject.gender) : null),
       verb.reflexive ? form : null,
     ],
   };
@@ -573,21 +753,26 @@ function buildFuture(
   subject: Subject,
   obj: Complement,
   rng: () => number,
-): Built {
-  const frame = pick(FUTURE_FRAMES, rng);
-  const form = futureSimple(verb, subject.person, subject.number);
+): Built | null {
+  // the simple future is the perfective's: an imperfective-only verb has none
+  const pf = verb.pf;
+  if (!pf) return null;
+  const frames = framesFor(FUTURE_FRAMES, verb);
+  if (frames.length === 0) return null;
+  const frame = pick(frames, rng);
+  const form = nonPast(pf, subject.person, subject.number);
   const answers = withSie(verb, form);
-  const note = `A perfective verb has no present: its "present" endings make the future — ${verb.pf.inf} → ${answers[0]}. The action will be completed.${sieNote(verb)}`;
+  const note = `A perfective verb has no present: its "present" endings make the future — ${pf.inf} → ${answers[0]}. The action will be completed.${sieNote(verb)}`;
 
   return {
     exercise: exerciseBase(
-      `future|${verb.pf.inf}|${subject.pl}|${obj.pl}|${frame.pl}`,
+      `future|${pf.inf}|${subject.pl}|${obj.pl}|${frame.pl}`,
       "future",
       subject,
       `${frame.pl} `,
       ` ${obj.pl}.`,
       answers,
-      `${verb.pf.inf} · ${subject.pl}`,
+      `${pf.inf} · ${subject.pl}`,
       englishSentence(verb, frame, subject, obj),
       note,
     ),
@@ -605,7 +790,7 @@ function buildFuture(
         )[0],
       ),
       shown(verb, presentForm(verb, subject.person, subject.number)),
-      shown(verb, pastForm(verb.pf, subject.person, subject.gender)),
+      shown(verb, pastForm(pf, subject.person, subject.gender)),
       verb.reflexive ? form : null,
     ],
   };
@@ -665,7 +850,7 @@ function buildCompound(
           OTHER_GENDER[subject.gender],
         )[1],
       ),
-      shown(verb, `${aux} ${verb.pf.inf.replace(/ się$/, "")}`),
+      verb.pf ? shown(verb, `${aux} ${verb.pf.inf.replace(/ się$/, "")}`) : null,
       shown(verb, futureSimple(verb, subject.person, subject.number)),
       verb.reflexive ? withInf : null,
     ],
@@ -687,19 +872,21 @@ function buildImperative(
 ): Built | null {
   // affirmative orders lean perfective ("zrób!"); a negated one is imperfective ("nie rób!")
   const negated = rng() < 0.4;
-  const aspect: Aspect = negated || !verb.pf.imp ? "impf" : "pf";
-  const forms = verb[aspect];
+  // "Nie martw się!" but never "Martw się!"; "Pamiętaj o kluczach!" but never "Nie pamiętaj"
+  if (verb.orders === (negated ? "affirmative" : "negated")) return null;
+  const aspect: Aspect = negated || !verb.pf?.imp ? "impf" : "pf";
+  const forms = aspect === "pf" ? verb.pf! : verb.impf;
   const form = imperative(forms, subject.person, subject.number);
   if (!form) return null;
 
   const object = negated ? (obj.neg ?? obj.pl) : obj.pl;
-  const base = verb.en.base;
-  const en =
-    subject.person === 1
-      ? negated
-        ? `Let's not ${base} ${obj.en}!`
-        : `Let's ${base} ${obj.en}!`
-      : `${negated ? `Don't ${base}` : capitalise(base)} ${obj.en}${subject.number === "pl" ? ", all of you" : ""}!`;
+  const en = englishOrder(
+    verb.en.base,
+    subject.person,
+    subject.number,
+    negated,
+    obj.en,
+  );
 
   const who =
     subject.number === "sg" ? "ty" : subject.person === 1 ? "my" : "wy";
@@ -714,8 +901,10 @@ function buildImperative(
   const aspectNote = negated
     ? `A negated order takes the imperfective (${verb.impf.inf}).${obj.neg ? ` The object goes into the genitive after "nie": ${obj.neg}.` : ""}`
     : aspect === "pf"
-      ? `A one-off order usually takes the perfective (${verb.pf.inf}).`
-      : `This verb's perfective has no imperative in everyday use, so the order takes ${verb.impf.inf}.`;
+      ? `A one-off order usually takes the perfective (${forms.inf}).`
+      : verb.pf
+        ? `This verb's perfective has no imperative in everyday use, so the order takes ${verb.impf.inf}.`
+        : `${verb.impf.inf} has no perfective in this sense, so the order is imperfective.`;
   const sie = verb.reflexive
     ? ` "Się" comes right after the verb: ${answer}.`
     : "";
@@ -748,6 +937,17 @@ function buildImperative(
   };
 }
 
+/** Whether a verb makes a sentence in the tense at all, for some subject and polarity. */
+const CAN_BUILD: Record<Tense, (verb: Verb) => boolean> = {
+  present: (v) => framesFor(PRESENT_FRAMES, v).length > 0,
+  past: (v) => framesFor(PAST_FRAMES, v).length > 0,
+  future: (v) => !!v.pf && framesFor(FUTURE_FRAMES, v).length > 0,
+  futureCompound: (v) => framesFor(COMPOUND_FRAMES, v).length > 0,
+  imperative: (v) =>
+    (v.orders !== "affirmative" && !!v.impf.imp) ||
+    (v.orders !== "negated" && !!(v.pf?.imp ?? v.impf.imp)),
+};
+
 const BUILDERS: Record<
   Tense,
   (
@@ -777,41 +977,60 @@ function buildOne(
   );
   if (pool.length === 0 || verbs.length === 0) return null;
 
-  for (let attempt = 0; attempt < 40; attempt++) {
-    const verb = pick(verbs, rng);
-    const built = BUILDERS[tense](
-      verb,
-      pick(pool, rng),
-      pick(verb.objects, rng),
-      rng,
-    );
-    if (!built) continue;
+  const draw = (from: Verb[]): Exercise | null => {
+    for (let attempt = 0; attempt < 40; attempt++) {
+      const verb = pick(from, rng);
+      const built = BUILDERS[tense](
+        verb,
+        pick(pool, rng),
+        pick(verb.objects, rng),
+        rng,
+      );
+      if (!built) continue;
 
-    const { exercise, candidates } = built;
-    if (taken.has(exercise.id) && attempt < 30) continue;
-    taken.add(exercise.id);
+      const { exercise, candidates } = built;
+      if (taken.has(exercise.id) && attempt < 30) continue;
+      taken.add(exercise.id);
 
-    if (answerMode === "choice") {
-      const options = withDistractors(exercise.answers, candidates, rng);
-      if (options.length > 1) exercise.options = options;
+      if (answerMode === "choice") {
+        const options = withDistractors(exercise.answers, candidates, rng);
+        if (options.length > 1) exercise.options = options;
+      }
+      return exercise;
     }
-    return exercise;
-  }
-  return null;
+    return null;
+  };
+  // Draw from every verb first, which keeps the sessions a seed gave before;
+  // should that fail (a pool that is mostly imperfective-only verbs, drilled
+  // in the simple future), draw again from just the verbs that fit the tense.
+  const exercise = draw(verbs);
+  if (exercise) return exercise;
+  const able = verbs.filter(CAN_BUILD[tense]);
+  return able.length > 0 ? draw(able) : null;
 }
 
 /** The verb pool for a session: plain, reflexive or both, up to `maxLevel` when set. */
-export function verbsFor(kind: VerbType | undefined, maxLevel?: Level): Verb[] {
-  const verbs = maxLevel ? VERBS.filter((v) => withinLevel(v, maxLevel)) : VERBS;
+export function verbsFor(
+  kind: VerbType | undefined,
+  maxLevel?: Level,
+  lexicon: Verb[] = VERBS,
+): Verb[] {
+  const verbs = maxLevel
+    ? lexicon.filter((v) => withinLevel(v, maxLevel))
+    : lexicon;
   if (kind === "plain") return verbs.filter((v) => !v.reflexive);
   if (kind === "reflexive") return verbs.filter((v) => v.reflexive);
   return verbs;
 }
 
-/** Builds a full verbs session, spreading the selected tenses evenly. */
+/**
+ * Builds a full verbs session, spreading the selected tenses evenly. `lexicon`
+ * replaces the verb list the session draws from (the tests pass their own).
+ */
 export function buildVerbSession(
   config: Config,
   seed = Date.now(),
+  lexicon: Verb[] = VERBS,
 ): Exercise[] {
   const rng = makeRng(seed);
   const tenses = config.tenses?.length ? config.tenses : [...TENSES];
@@ -820,7 +1039,7 @@ export function buildVerbSession(
     : (["sg", "pl"] as GramNumber[]);
   const answerMode: AnswerMode =
     config.answerMode === "choice" ? "choice" : "typing";
-  const verbs = verbsFor(config.verbType, config.maxLevel);
+  const verbs = verbsFor(config.verbType, config.maxLevel, lexicon);
 
   const taken = new Set<string>();
   const exercises: Exercise[] = [];

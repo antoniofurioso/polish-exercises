@@ -41,7 +41,7 @@ const str = (v: unknown) => (typeof v === "string" ? v : "");
 
 /**
  * How an entry is named in the sheet, unique within its kind: the lemma for a
- * word, "pisać / napisać" for a verb pair, "acc/any: Widzę {NP}." for a
+ * word, "pisać / napisać" for a verb pair ("chodzić" with no perfective), "acc/any: Widzę {NP}." for a
  * sentence, the case for a numeral frame (`key`).
  */
 export function entryId(kind: Kind, entry: Obj, key?: string): string {
@@ -52,7 +52,8 @@ export function entryId(kind: Kind, entry: Obj, key?: string): string {
     case "verb": {
       // reflexive infinitives already carry "się" in the data
       const inf = (aspect: unknown) => str((aspect as Obj | undefined)?.inf);
-      return `${inf(entry.impf)} / ${inf(entry.pf)}`;
+      // an imperfective-only verb (chodzić) is named by its one infinitive
+      return entry.pf === undefined ? inf(entry.impf) : `${inf(entry.impf)} / ${inf(entry.pf)}`;
     }
     case "template":
     case "agreement-frame":

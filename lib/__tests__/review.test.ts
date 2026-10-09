@@ -112,6 +112,7 @@ describe("review import", () => {
     expect(entryId("verb", { impf: { inf: "uczyć się" }, pf: { inf: "nauczyć się" }, reflexive: true })).toBe(
       "uczyć się / nauczyć się",
     );
+    expect(entryId("verb", { impf: { inf: "chodzić" } })).toBe("chodzić");
   });
 
   it("publishes on ok, deletes on reject, reports a fix and leaves it a draft", () => {
