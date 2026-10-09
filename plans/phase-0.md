@@ -23,7 +23,7 @@ data files from 0.2, so they run after it merges.
 0.2 data files ───────────┘
 ```
 
-### 0.1 Drill registry ☐
+### 0.1 Drill registry ☑
 
 **Problem.** Adding a drill means editing a chain of `kind === …` checks in
 `lib/session.ts` (`sessionParams`, `parseSession`),
