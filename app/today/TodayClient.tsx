@@ -78,6 +78,7 @@ function TodaySession({ round, onAnotherRound }: { round: number; onAnotherRound
       restartLabel="Another round"
       homeLabel="Back to the menu"
       reaskWrong
+      source="today"
       summaryExtra={
         <div className="space-y-3">
           <p className="text-sm text-muted">{planSummary(plan)}</p>
