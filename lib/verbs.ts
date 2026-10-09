@@ -9,6 +9,7 @@ import type {
   Freq,
   GramNumber,
   Level,
+  MissKind,
   Review,
   Tense,
   VerbType,
@@ -652,6 +653,7 @@ function withDistractors(
 type Built = { exercise: Exercise; candidates: (string | null)[] };
 
 function exerciseBase(
+  verb: Verb,
   id: string,
   tense: Tense,
   subject: Subject,
@@ -674,6 +676,8 @@ function exerciseBase(
     en,
     answers,
     note,
+    card: verbCardId(verb, tense),
+    skill: verbSkillId(tense, subject.person, subject.number),
   };
 }
 
@@ -691,6 +695,7 @@ function buildPresent(
 
   return {
     exercise: exerciseBase(
+      verb,
       `present|${verb.impf.inf}|${subject.pl}|${obj.pl}|${frame.pl}`,
       "present",
       subject,
@@ -730,6 +735,7 @@ function buildPast(
 
   return {
     exercise: exerciseBase(
+      verb,
       `past|${forms.inf}|${subject.label}|${obj.pl}|${frame.pl}`,
       "past",
       subject,
@@ -766,6 +772,7 @@ function buildFuture(
 
   return {
     exercise: exerciseBase(
+      verb,
       `future|${pf.inf}|${subject.pl}|${obj.pl}|${frame.pl}`,
       "future",
       subject,
@@ -827,6 +834,7 @@ function buildCompound(
 
   return {
     exercise: exerciseBase(
+      verb,
       `compound|${verb.impf.inf}|${subject.label}|${obj.pl}|${frame.pl}`,
       "futureCompound",
       subject,
@@ -911,6 +919,7 @@ function buildImperative(
 
   const other = aspect === "pf" ? verb.impf : verb.pf;
   const exercise = exerciseBase(
+    verb,
     `imp|${forms.inf}|${who}|${obj.pl}|${negated ? "neg" : "pos"}`,
     "imperative",
     subject,
@@ -1051,4 +1060,184 @@ export function buildVerbSession(
     if (exercise) exercises.push(exercise);
   }
   return exercises;
+}
+
+// -------------------------------------------------------------- SRS cards
+
+/**
+ * A verbs card is one verb × one tense: "verbs:pisać|past". The verb is named
+ * by its imperfective infinitive as stored, "się" included ("verbs:uczyć się|present"),
+ * which is unique in data/verbs.json and present on every entry. The skill is
+ * the tense × person cell, "verbs:past|3pl": the person token is the person
+ * digit plus the number, 1sg 2sg 3sg 1pl 2pl 3pl. The imperative only has
+ * 2sg (ty), 1pl (my, "let's") and 2pl (wy).
+ */
+export function verbCardId(verb: Verb, tense: Tense): string {
+  return `verbs:${verb.impf.inf}|${tense}`;
+}
+
+/** The person token of a skill id: 1sg, 3pl… */
+export function personToken(person: Person, number: GramNumber): string {
+  return `${person}${number}`;
+}
+
+export function verbSkillId(tense: Tense, person: Person, number: GramNumber): string {
+  return `verbs:${tense}|${personToken(person, number)}`;
+}
+
+/** Splits "verbs:pisać|past" into the verb's infinitive and the tense; null for anything else. */
+export function parseVerbCard(card: string): { inf: string; tense: Tense } | null {
+  const m = /^verbs:([^|]+)\|([^|]+)$/.exec(card);
+  if (!m || !(TENSES as readonly string[]).includes(m[2])) return null;
+  return { inf: m[1], tense: m[2] as Tense };
+}
+
+/** Splits "verbs:past|3pl" into tense, person and number; null for anything else. */
+export function parseVerbSkill(
+  skill: string,
+): { tense: Tense; person: Person; number: GramNumber } | null {
+  const m = /^verbs:([^|]+)\|([123])(sg|pl)$/.exec(skill);
+  if (!m || !(TENSES as readonly string[]).includes(m[1])) return null;
+  return { tense: m[1] as Tense, person: Number(m[2]) as Person, number: m[3] as GramNumber };
+}
+
+/** Whether the drill can ever build this verb in this tense (some subject, frame and polarity). */
+export function canDrill(verb: Verb, tense: Tense): boolean {
+  return CAN_BUILD[tense](verb);
+}
+
+/**
+ * One exercise for exactly this verb (by imperfective infinitive) in this tense,
+ * deterministic in `seed`: subject, object, frame and polarity are drawn the way
+ * a configured session draws them (the same buildOne), so the verb's flags
+ * (motion, stative, momentary, orders, no perfective…) rule out the same
+ * frames. Null when the verb is not in `lexicon` (removed, or a draft in the
+ * published app) or can't be drilled in the tense.
+ */
+export function buildVerbCard(
+  inf: string,
+  tense: Tense,
+  seed: number,
+  answerMode: AnswerMode = "typing",
+  lexicon: Verb[] = VERBS,
+): Exercise | null {
+  const verb = lexicon.find((v) => v.impf.inf === inf);
+  if (!verb || !canDrill(verb, tense)) return null;
+  // mix the card into the seed, so cards built with one session seed don't all
+  // draw the same person and frame
+  const rng = makeRng((seed ^ hashString(`${inf}|${tense}`)) >>> 0);
+  return buildOne(tense, [verb], ["sg", "pl"], answerMode, rng, new Set());
+}
+
+/** FNV-1a, 32 bits: a stable number from a string. */
+function hashString(text: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+// -------------------------------------------------------------- diagnosis
+
+/** Every way a form may be written, as compared: "się" on either side, no diacritics. */
+function spellings(verb: Verb, form: string | null): string[] {
+  return form ? withSie(verb, form).map((f) => stripDiacritics(normalise(f))) : [];
+}
+
+/** The forms of one aspect of a verb in one tense, for one subject; [] where it has none. */
+function tenseForms(verb: Verb, aspect: Aspect, tense: Tense, s: Subject): string[] {
+  const forms = aspect === "pf" ? verb.pf : verb.impf;
+  if (!forms) return [];
+  switch (tense) {
+    case "present":
+      return aspect === "impf" ? spellings(verb, nonPast(forms, s.person, s.number)) : [];
+    case "future":
+      return aspect === "pf" ? spellings(verb, nonPast(forms, s.person, s.number)) : [];
+    case "past":
+      return spellings(verb, pastForm(forms, s.person, s.gender));
+    case "futureCompound":
+      return aspect === "impf"
+        ? futureCompound(forms, s.person, s.number, s.gender).flatMap((f) => spellings(verb, f))
+        : [];
+    case "imperative":
+      return spellings(verb, imperative(forms, s.person, s.number));
+  }
+}
+
+/**
+ * What an aspect mix-up looks like in each tense, for one subject: the other
+ * aspect's form doing the same job. In the non-past that is the other aspect's
+ * non-past (napiszę for piszę, piszę for napiszę) or a compound future on the
+ * wrong verb (będę pisać for napiszę, będę napisać for będę pisać).
+ */
+function otherAspectForms(verb: Verb, aspect: Aspect, tense: Tense, s: Subject): string[] {
+  const other = aspect === "pf" ? verb.impf : verb.pf;
+  if (!other) return [];
+  switch (tense) {
+    case "present":
+      return spellings(verb, nonPast(other, s.person, s.number));
+    case "future":
+      return [
+        ...spellings(verb, nonPast(other, s.person, s.number)),
+        ...futureCompound(other, s.person, s.number, s.gender).flatMap((f) => spellings(verb, f)),
+      ];
+    case "futureCompound":
+      return [
+        ...spellings(verb, nonPast(other, s.person, s.number)),
+        ...spellings(verb, `${BYC[s.number][s.person - 1]} ${other.inf.replace(/ się$/, "")}`),
+      ];
+    case "past":
+      return spellings(verb, pastForm(other, s.person, s.gender));
+    case "imperative":
+      return spellings(verb, imperative(other, s.person, s.number));
+  }
+}
+
+/**
+ * Why a wrong answer to a verbs exercise was wrong, when it is another real
+ * form of the same verb (diacritics ignored):
+ *
+ *   aspect  the right person and tense of the other aspect (pisałem for napisałem)
+ *   person  the right verb, aspect and tense, another person or number (piszesz for piszę)
+ *   tense   the right verb in another tense, either aspect (pisałem for piszę)
+ *
+ * Anything else, a gender slip in the past included (pisałam for pisałem), is
+ * null. The verb and the cell come from the exercise's `card` and `skill`; an
+ * exercise without them, or whose verb is no longer in `lexicon`, gives null.
+ */
+export function diagnoseVerbMiss(
+  input: string,
+  ex: Exercise,
+  lexicon: Verb[] = VERBS,
+): MissKind | null {
+  const card = ex.card ? parseVerbCard(ex.card) : null;
+  const cell = ex.skill ? parseVerbSkill(ex.skill) : null;
+  if (!card || !cell || card.tense !== cell.tense) return null;
+  const verb = lexicon.find((v) => v.impf.inf === card.inf);
+  if (!verb) return null;
+  const typed = stripDiacritics(normalise(input));
+  const answers = ex.answers.map((a) => stripDiacritics(normalise(a)));
+  if (!typed || answers.includes(typed)) return null;
+
+  const { tense } = cell;
+  const inCell = (s: Subject) => s.person === cell.person && s.number === cell.number;
+  const aspects: Aspect[] = verb.pf ? ["impf", "pf"] : ["impf"];
+  // the aspect the exercise asks for: the one whose form for this cell is an answer
+  const aspect = aspects.find((a) =>
+    SUBJECTS.filter(inCell).some((s) => tenseForms(verb, a, tense, s).some((f) => answers.includes(f))),
+  );
+  if (!aspect) return null;
+
+  if (SUBJECTS.filter(inCell).some((s) => otherAspectForms(verb, aspect, tense, s).includes(typed))) {
+    return "aspect";
+  }
+  const elsewhere = SUBJECTS.filter((s) => !inCell(s));
+  if (elsewhere.some((s) => tenseForms(verb, aspect, tense, s).includes(typed))) return "person";
+  const otherTense = TENSES.some(
+    (t) =>
+      t !== tense && aspects.some((a) => SUBJECTS.some((s) => tenseForms(verb, a, t, s).includes(typed))),
+  );
+  return otherTense ? "tense" : null;
 }

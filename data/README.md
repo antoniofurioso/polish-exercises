@@ -362,7 +362,7 @@ named by its imperfective infinitive.
 | `level`, `freq` | `level` only | As for nouns, for the aspect pair as a whole. |
 | `impf` | yes | The imperfective verb, with the fields below. |
 | `pf` | no | The perfective partner, same fields. Left out for a verb drilled without one (chodzić, mieszkać, wiedzieć, lubić): it has no simple future and no perfective past frame ("Wczoraj"), and is simply not drawn for a tense it has no frame in. |
-| ↳ `inf` | yes | Infinitive, with "się" on reflexive verbs (uczyć się). |
+| ↳ `inf` | yes | Infinitive, with "się" on reflexive verbs (uczyć się). The imperfective `inf` is unique and names the verb's SRS cards (`verbs:uczyć się\|present`, see `lib/cards/verbs.ts`), so renaming it orphans learners' progress on that verb. |
 | ↳ `past` | yes | 3sg masculine `m` (pisał), feminine `f` (pisała), masculine-personal plural `vir` (pisali), and `m1` only when the stem before -em / -eś differs from `m` (mógł → mogłem). |
 | ↳ `pres` | yes | Non-past 1sg, 2sg, 3pl: the present for `impf`, the future for `pf`. |
 | ↳ `imp` | no | 2sg imperative; left out when not in use, or when no order with the verb's objects makes sense (zrozum zadanie!, widź morze!). A verb with no `imp` on either aspect is never drilled in the imperative. |
