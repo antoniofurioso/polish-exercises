@@ -138,7 +138,7 @@ non-commercial, so they are out. Another option is a one-off batch through
 Azure: at about 1.7M characters it is a single small cost, or it can be spread
 over the monthly free tier.
 
-### 1.6 Templates and collocations: 142 → 300 ☐ (wave 3)
+### 1.6 Templates and collocations: 142 → 300 ☑ (319, drafts) (wave 3)
 
 `data/templates.json`, `data/groups.json`, `data/collocations.json`. Cover every
 case at every level A1–B2, with a natural English gloss and a one-line rule
