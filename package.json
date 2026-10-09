@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:drafts": "NEXT_PUBLIC_INCLUDE_DRAFTS=1 next dev",
-    "build": "next build",
+    "build": "next build && tsx scripts/sw-manifest.ts",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
@@ -13,7 +13,8 @@
     "review:import": "tsx scripts/review-import.ts",
     "audio:manifest": "tsx scripts/audio/manifest.ts",
     "audio:render": "tsx scripts/audio/render.ts",
-    "audio:upload": "tsx scripts/audio/upload.ts"
+    "audio:upload": "tsx scripts/audio/upload.ts",
+    "icons": "tsx scripts/icons.ts"
   },
   "dependencies": {
     "next": "16.3.4",
