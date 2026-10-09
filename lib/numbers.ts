@@ -37,6 +37,7 @@ import type {
   NumeralTemplate,
   SpellRange,
   Tag,
+  Template,
   Token,
 } from "./types";
 
@@ -69,6 +70,18 @@ function lexicon(genders?: GenderGroup[], maxLevel?: Level): Noun[] {
   const wanted = countable.filter((n) => genders.includes(genderGroup(n.gender)));
   // a filter that leaves nothing to count would strand the noun-based drills
   return wanted.length > 0 ? wanted : countable;
+}
+
+/**
+ * Whether a frame can count (or number) this noun: it has to fit the frame's
+ * requires / lemmas / excludeLemmas, and a mass noun only counts in portions
+ * (dwie kawy, pięć chlebów), never "dziewiętnaście traw", unless the frame
+ * names it. The candidates are checked one by one after the shuffle, so a
+ * skipped noun costs no random draw and the rest of a session stays as it was.
+ */
+export function countsIn(noun: Noun, tpl: Pick<CountTemplate, "requires" | "lemmas" | "excludeLemmas">): boolean {
+  if (!fitsTemplate(noun, tpl)) return false;
+  return !noun.mass || !!noun.portions || !!tpl.lemmas?.includes(noun.lemma);
 }
 
 /** English for a counted phrase: "five cats", "one cat". */
@@ -121,7 +134,7 @@ function buildCountExercise(
 ): Exercise | null {
   for (const tpl of shuffle(COUNT_TEMPLATES, rng)) {
     for (const noun of shuffle(nouns, rng)) {
-      if (!fitsTemplate(noun, tpl)) continue;
+      if (!countsIn(noun, tpl)) continue;
       const key = `count|${n}|${noun.lemma}|${tpl.pl}`;
       if (taken.has(key)) continue;
       taken.add(key);
@@ -234,7 +247,7 @@ function buildNumeralExercise(
   const tpl = NUMERAL_TEMPLATES[kase];
   if (!tpl) return null;
   for (const noun of shuffle(nouns, rng)) {
-    if (!fitsTemplate(noun, tpl)) continue;
+    if (!countsIn(noun, tpl)) continue;
     const key = `numeral|${n}|${noun.lemma}|${kase}`;
     if (taken.has(key)) continue;
     taken.add(key);
@@ -473,6 +486,26 @@ function buildTimeExercise(
   return null;
 }
 
+/**
+ * The shuffled nouns as a frame takes them: one it cannot take ("Opiekuję się
+ * drugą kolacją", "Widzę jedenastą trawę") gives way to the next one it can of
+ * the same gender, so the ending drilled and the options offered stay the ones
+ * drawn; with none of that gender left it is skipped.
+ */
+function takenBy(tpl: Template, shuffled: Noun[]): Noun[] {
+  const used = new Set<Noun>();
+  const out: Noun[] = [];
+  for (const [i, noun] of shuffled.entries()) {
+    const fit = [noun, ...shuffled.slice(i + 1)].find(
+      (n) => !used.has(n) && n.gender === noun.gender && countsIn(n, tpl),
+    );
+    if (!fit) continue;
+    used.add(fit);
+    out.push(fit);
+  }
+  return out;
+}
+
 /** Ordinals are drilled in the singular — "the twelfth shops" is not a phrase. */
 function buildOrdinalAgreement(
   kase: Case,
@@ -487,7 +520,7 @@ function buildOrdinalAgreement(
     if (templates.length === 0) continue;
 
     for (const tpl of shuffle(templates, rng)) {
-      for (const noun of shuffle(nouns, rng)) {
+      for (const noun of takenBy(tpl, shuffle(nouns, rng))) {
         const n = 1 + Math.floor(rng() * 20);
         const key = `ord|${n}|${noun.lemma}|${tpl.pl}|${number}`;
         if (taken.has(key) && attempt < 15) continue;

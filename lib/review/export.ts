@@ -52,7 +52,8 @@ function nounForms(n: Obj): string[] {
   const alt = (n.alt ?? {}) as Record<string, string[]>;
   const alts = Object.entries(alt).map(([cell, values]) => `${cell}=${values.join("/")}`);
   if (alts.length) lines.push(`also accepted: ${alts.join(" ")}`);
-  const marks = flags(n, ["mass", "onlySg"]);
+  const marks = flags(n, ["mass", "portions", "onlySg", "noPossessive"]);
+  if (n.article) marks.push(`English article: ${str(n.article)}`);
   if (marks.length) lines.push(marks.join(", "));
   return lines;
 }

@@ -1,4 +1,4 @@
-import { ADJ_TYPES, CASES, FREQS, GENDERS, LEVELS, REVIEW_STATES, TAGS } from "./types";
+import { ADJ_TYPES, CASES, FREQS, GENDERS, LEVELS, NOUN_ARTICLES, REVIEW_STATES, TAGS } from "./types";
 import type {
   Adjective,
   Case,
@@ -125,7 +125,25 @@ const label = (o: Obj, key: string, i: number) => (typeof o[key] === "string" ? 
 
 // ------------------------------------------------------------------ nouns
 
-const NOUN_FIELDS = ["lemma", "en", "enPl", "level", "freq", "gender", "tags", "sg", "pl", "mass", "noPlural", "onlySg", "alt", "review"];
+const NOUN_FIELDS = [
+  "lemma",
+  "en",
+  "enPl",
+  "level",
+  "freq",
+  "gender",
+  "tags",
+  "sg",
+  "pl",
+  "mass",
+  "portions",
+  "noPlural",
+  "onlySg",
+  "article",
+  "noPossessive",
+  "alt",
+  "review",
+];
 
 /** A row of seven forms in CASES order: nom, gen, dat, acc, ins, loc, voc. */
 function forms(e: Entry, key: "sg" | "pl"): Forms {
@@ -153,6 +171,12 @@ export function loadNouns(raw: unknown): Noun[] {
     if (e.has("noPlural")) noun.noPlural = e.flag("noPlural");
     if (e.has("onlySg")) noun.onlySg = e.flag("onlySg");
     if (noun.noPlural ? noun.pl : !noun.pl) e.fail(`needs "pl" forms unless it is marked "noPlural"`);
+    if (e.has("portions")) {
+      noun.portions = e.flag("portions", true);
+      if (!noun.mass || !noun.pl) e.fail(`has "portions": only a "mass" noun with "pl" forms is counted in portions`);
+    }
+    if (e.has("article")) noun.article = e.oneOf("article", NOUN_ARTICLES);
+    if (e.has("noPossessive")) noun.noPossessive = e.flag("noPossessive", true);
     if (e.has("alt")) {
       const alt = e.object("alt");
       noun.alt = {};

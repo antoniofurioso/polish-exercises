@@ -70,6 +70,7 @@
     "en": "I'm thinking about {np}.",
     "requires": ["family", "friend", "profession", "animal", "placeIn", "placeTo", "water", "vehicle", "time", "show"],
     "lemmas": ["praca", "imię", "projekt"],
+    "excludeLemmas": ["godzina", "minuta"],
     "subject": "1sg",
     "note": "'o' (about) takes the locative."
   }

@@ -173,9 +173,12 @@ A list of nouns, one object each.
 | `tags` | yes | What the noun is, so templates only pick nouns that fit (may be `[]`). One of `person`, `profession`, `animal`, `food`, `drink`, `placeIn` (takes "w" + locative), `placeTo` (sensible with "do" + genitive), `surface` ("na" / "pod" / "nad"), `vehicle`, `object` (portable things you can buy, own or hold), `text`, `abstract`, `family` (relatives: English glosses them as "my ..."), `friend`, `topic` (muzyka, historia, sport...), `show` (film, mecz, serial), `time`, `body`, `plant`, `water` (morze, jezioro, rzeka). The list lives in `TAGS` in `lib/types.ts`. |
 | `sg` | yes | The 7 singular forms, **always in this order: nom, gen, dat, acc, ins, loc, voc**. |
 | `pl` | unless `noPlural` | The 7 plural forms, same order. |
-| `mass` | no | `true` for a mass noun: never gets "a/an" in the English gloss. |
+| `mass` | no | `true` for a mass noun: never gets "a/an" in the English gloss, stays singular in the case drill, and is never counted (count, numeral and ordinal drills) unless it has `portions` or the frame names it in `lemmas`. |
+| `portions` | no | `true` for a `mass` noun (with `pl`) that is still counted in servings, loaves or bars: dwie kawy, trzy piwa, pięć chlebów. Not for trawa, woda or zupa: "dziewiętnaście traw" is no sentence. |
 | `noPlural` | no | `true` when the plural is not used in practice (mleko, muzyka). Leave out `pl` then. |
-| `onlySg` | no | `true` when there is a plural, but not one a sentence about "my ..." can use (matki, żony). |
+| `onlySg` | no | `true` when there is a plural, but not one a sentence about "my ..." can use (matki, żony), or one the case drill should not drill (the seasons: "To są wiosny", "lata" = years). |
+| `article` | no | The English article the noun takes in the singular, whatever the sentence asks for (`{np}`, `{npDef}` or `{npBare}`). `"none"`: the seasons, "I like spring", "until winter", never "a spring" (an adjective lifts it: "a cold spring", "the long winter"). `"the"`: always definite, adjective or not, where the `topic` / `abstract` rule would leave it bare: "the economy", "the Polish economy", "the environment". Leave it out for the usual rules (a/an, the; `topic` / `abstract` bare, `family` / `friend` "my"). |
+| `noPossessive` | no | `true` when no possessive in front of it reads naturally: people you do not own (Polak, człowiek, pan), wild animals (lew, komar), geography (ocean), time (godzina, wiosna). The possessive drill skips it; the demonstrative and ordinal drills still use it ("Widzę tego człowieka"). |
 | `alt` | no | Extra accepted answers per cell, keyed `"<sg\|pl>.<case>"`: `{ "pl.gen": ["pokojów"] }`. |
 | `review` | no | `"draft"` until a native speaker approves it (see [Drafts and review](#drafts-and-review)). Same on every kind of entry below. |
 
@@ -191,7 +194,7 @@ from `lib/declineAdjective.ts`.
 | Field | Required | Meaning |
 | --- | --- | --- |
 | `lemma` | yes | Masculine nominative singular. |
-| `en` | yes | English gloss. |
+| `en` | yes | English gloss. A gloss starting "other" (inny) fuses with the article: "another plate", "the other plate", "other plates". |
 | `level`, `freq` | `level` only | As for nouns. |
 | `stem` | yes | The lemma minus its ending: dobry → dobr, tani → tan, drogi → drog. |
 | `type` | yes | `hard` (dobry), `soft` (tani) or `velar` (drogi, polski: -k/-g stems). |
@@ -284,6 +287,14 @@ possessives and ordinals. One plain trigger per case, so the only thing tested
 is the agreement. Same schema as `templates.json`; each is levelled like the
 case it drills there.
 
+All three drills honour a frame's `requires`, `lemmas` and `excludeLemmas`
+(`"excludeLemmas": ["godzina", "minuta"]` keeps "Myślę o naszej godzinie" out),
+and `publish` strips draft nouns from both lists as it does for templates. The
+ordinal drill also skips a `mass` noun without `portions` ("Widzę jedenastą
+trawę"), and the possessive drill a `noPossessive` noun ("Tu jest mój Polak").
+For a word that only clashes with a possessive, mark the noun `noPossessive`
+rather than excluding it from the frame, so the demonstrative drill keeps it.
+
 ## count-frames.json
 
 The sentences of the counting drill ("Mam pięć kotów").
@@ -304,7 +315,7 @@ The sentences of the counting drill ("Mam pięć kotów").
 | `pl` | yes | Polish with `{N}` for the numeral and `{NP}` for the counted noun; `{V}` becomes "jest" or "są". |
 | `en` | yes | English with `{np}` for the counted phrase ("five cats"); `{is}` becomes "is" or "are". |
 | `case` | yes | The case the frame itself assigns, `nom` or `acc`: it only shows with "jeden". |
-| `requires`, `lemmas`, `excludeLemmas` | `requires` only | Which nouns fit, as in `templates.json`. |
+| `requires`, `lemmas`, `excludeLemmas` | `requires` only | Which nouns fit, as in `templates.json`. A `mass` noun fits only with `portions` or when `lemmas` names it. |
 
 ## numeral-frames.json
 

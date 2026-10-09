@@ -176,7 +176,8 @@
     "gender": "mPers",
     "tags": ["person"],
     "sg": ["pan", "pana", "panu", "pana", "panem", "panu", "panie"],
-    "pl": ["panowie", "panów", "panom", "panów", "panami", "panach", "panowie"]
+    "pl": ["panowie", "panów", "panom", "panów", "panami", "panach", "panowie"],
+    "noPossessive": true
   },
   {
     "lemma": "kot",
@@ -231,7 +232,8 @@
     "gender": "mAnim",
     "tags": ["animal"],
     "sg": ["słoń", "słonia", "słoniowi", "słonia", "słoniem", "słoniu", "słoniu"],
-    "pl": ["słonie", "słoni", "słoniom", "słonie", "słoniami", "słoniach", "słonie"]
+    "pl": ["słonie", "słoni", "słoniom", "słonie", "słoniami", "słoniach", "słonie"],
+    "noPossessive": true
   },
   {
     "lemma": "stół",
@@ -331,7 +333,8 @@
     "tags": ["food"],
     "sg": ["chleb", "chleba", "chlebowi", "chleb", "chlebem", "chlebie", "chlebie"],
     "pl": ["chleby", "chlebów", "chlebom", "chleby", "chlebami", "chlebach", "chleby"],
-    "mass": true
+    "mass": true,
+    "portions": true
   },
   {
     "lemma": "ser",
@@ -343,7 +346,8 @@
     "tags": ["food"],
     "sg": ["ser", "sera", "serowi", "ser", "serem", "serze", "serze"],
     "pl": ["sery", "serów", "serom", "sery", "serami", "serach", "sery"],
-    "mass": true
+    "mass": true,
+    "portions": true
   },
   {
     "lemma": "sok",
@@ -355,7 +359,8 @@
     "tags": ["drink"],
     "sg": ["sok", "soku", "sokowi", "sok", "sokiem", "soku", "soku"],
     "pl": ["soki", "soków", "sokom", "soki", "sokami", "sokach", "soki"],
-    "mass": true
+    "mass": true,
+    "portions": true
   },
   {
     "lemma": "park",
@@ -601,7 +606,8 @@
     "gender": "f",
     "tags": ["person"],
     "sg": ["pani", "pani", "pani", "panią", "panią", "pani", "pani"],
-    "pl": ["panie", "pań", "paniom", "panie", "paniami", "paniach", "panie"]
+    "pl": ["panie", "pań", "paniom", "panie", "paniami", "paniach", "panie"],
+    "noPossessive": true
   },
   {
     "lemma": "rodzina",
@@ -659,7 +665,8 @@
     "tags": ["drink"],
     "sg": ["herbata", "herbaty", "herbacie", "herbatę", "herbatą", "herbacie", "herbato"],
     "pl": ["herbaty", "herbat", "herbatom", "herbaty", "herbatami", "herbatach", "herbaty"],
-    "mass": true
+    "mass": true,
+    "portions": true
   },
   {
     "lemma": "kawa",
@@ -671,7 +678,8 @@
     "tags": ["drink"],
     "sg": ["kawa", "kawy", "kawie", "kawę", "kawą", "kawie", "kawo"],
     "pl": ["kawy", "kaw", "kawom", "kawy", "kawami", "kawach", "kawy"],
-    "mass": true
+    "mass": true,
+    "portions": true
   },
   {
     "lemma": "zupa",
@@ -909,7 +917,8 @@
     "tags": ["drink"],
     "sg": ["piwo", "piwa", "piwu", "piwo", "piwem", "piwie", "piwo"],
     "pl": ["piwa", "piw", "piwom", "piwa", "piwami", "piwach", "piwa"],
-    "mass": true
+    "mass": true,
+    "portions": true
   },
   {
     "lemma": "morze",
@@ -920,7 +929,8 @@
     "gender": "n",
     "tags": ["water"],
     "sg": ["morze", "morza", "morzu", "morze", "morzem", "morzu", "morze"],
-    "pl": ["morza", "mórz", "morzom", "morza", "morzami", "morzach", "morza"]
+    "pl": ["morza", "mórz", "morzom", "morza", "morzami", "morzach", "morza"],
+    "noPossessive": true
   },
   {
     "lemma": "jezioro",
@@ -1398,7 +1408,8 @@
     "tags": ["food"],
     "sg": ["ciasto", "ciasta", "ciastu", "ciasto", "ciastem", "cieście", "ciasto"],
     "pl": ["ciasta", "ciast", "ciastom", "ciasta", "ciastami", "ciastach", "ciasta"],
-    "mass": true
+    "mass": true,
+    "portions": true
   },
   {
     "lemma": "wino",
@@ -1410,7 +1421,8 @@
     "tags": ["drink"],
     "sg": ["wino", "wina", "winu", "wino", "winem", "winie", "wino"],
     "pl": ["wina", "win", "winom", "wina", "winami", "winach", "wina"],
-    "mass": true
+    "mass": true,
+    "portions": true
   },
   {
     "lemma": "dzień",
@@ -1435,6 +1447,7 @@
     "tags": ["time"],
     "sg": ["miesiąc", "miesiąca", "miesiącowi", "miesiąc", "miesiącem", "miesiącu", "miesiącu"],
     "pl": ["miesiące", "miesięcy", "miesiącom", "miesiące", "miesiącami", "miesiącach", "miesiące"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -1447,6 +1460,7 @@
     "tags": ["time"],
     "sg": ["rok", "roku", "rokowi", "rok", "rokiem", "roku", "roku"],
     "pl": ["lata", "lat", "latom", "lata", "latami", "latach", "lata"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -1459,6 +1473,7 @@
     "tags": ["time"],
     "sg": ["godzina", "godziny", "godzinie", "godzinę", "godziną", "godzinie", "godzino"],
     "pl": ["godziny", "godzin", "godzinom", "godziny", "godzinami", "godzinach", "godziny"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -1471,6 +1486,7 @@
     "tags": ["time"],
     "sg": ["minuta", "minuty", "minucie", "minutę", "minutą", "minucie", "minuto"],
     "pl": ["minuty", "minut", "minutom", "minuty", "minutami", "minutach", "minuty"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -1507,6 +1523,9 @@
     "tags": ["time"],
     "sg": ["lato", "lata", "latu", "lato", "latem", "lecie", "lato"],
     "pl": ["lata", "lat", "latom", "lata", "latami", "latach", "lata"],
+    "onlySg": true,
+    "article": "none",
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -1519,6 +1538,9 @@
     "tags": ["time"],
     "sg": ["zima", "zimy", "zimie", "zimę", "zimą", "zimie", "zimo"],
     "pl": ["zimy", "zim", "zimom", "zimy", "zimami", "zimach", "zimy"],
+    "onlySg": true,
+    "article": "none",
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -1531,6 +1553,9 @@
     "tags": ["time"],
     "sg": ["wiosna", "wiosny", "wiośnie", "wiosnę", "wiosną", "wiośnie", "wiosno"],
     "pl": ["wiosny", "wiosen", "wiosnom", "wiosny", "wiosnami", "wiosnach", "wiosny"],
+    "onlySg": true,
+    "article": "none",
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -1543,6 +1568,9 @@
     "tags": ["time"],
     "sg": ["jesień", "jesieni", "jesieni", "jesień", "jesienią", "jesieni", "jesieni"],
     "pl": ["jesienie", "jesieni", "jesieniom", "jesienie", "jesieniami", "jesieniach", "jesienie"],
+    "onlySg": true,
+    "article": "none",
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -1616,6 +1644,7 @@
     "sg": ["człowiek", "człowieka", "człowiekowi", "człowieka", "człowiekiem", "człowieku", "człowieku"],
     "pl": ["ludzie", "ludzi", "ludziom", "ludzi", "ludźmi", "ludziach", "ludzie"],
     "alt": { "sg.voc": ["człowiecze"] },
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -1652,6 +1681,7 @@
     "tags": ["person"],
     "sg": ["turysta", "turysty", "turyście", "turystę", "turystą", "turyście", "turysto"],
     "pl": ["turyści", "turystów", "turystom", "turystów", "turystami", "turystach", "turyści"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -1688,6 +1718,7 @@
     "tags": ["person"],
     "sg": ["Polak", "Polaka", "Polakowi", "Polaka", "Polakiem", "Polaku", "Polaku"],
     "pl": ["Polacy", "Polaków", "Polakom", "Polaków", "Polakami", "Polakach", "Polacy"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -1700,6 +1731,7 @@
     "tags": ["person"],
     "sg": ["Polka", "Polki", "Polce", "Polkę", "Polką", "Polce", "Polko"],
     "pl": ["Polki", "Polek", "Polkom", "Polki", "Polkami", "Polkach", "Polki"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -1918,6 +1950,7 @@
     "tags": ["person", "profession"],
     "sg": ["polityk", "polityka", "politykowi", "polityka", "politykiem", "polityku", "polityku"],
     "pl": ["politycy", "polityków", "politykom", "polityków", "politykami", "politykach", "politycy"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2062,6 +2095,7 @@
     "tags": ["animal"],
     "sg": ["lew", "lwa", "lwu", "lwa", "lwem", "lwie", "lwie"],
     "pl": ["lwy", "lwów", "lwom", "lwy", "lwami", "lwach", "lwy"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2074,6 +2108,7 @@
     "tags": ["animal"],
     "sg": ["tygrys", "tygrysa", "tygrysowi", "tygrysa", "tygrysem", "tygrysie", "tygrysie"],
     "pl": ["tygrysy", "tygrysów", "tygrysom", "tygrysy", "tygrysami", "tygrysach", "tygrysy"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2086,6 +2121,7 @@
     "tags": ["animal"],
     "sg": ["niedźwiedź", "niedźwiedzia", "niedźwiedziowi", "niedźwiedzia", "niedźwiedziem", "niedźwiedziu", "niedźwiedziu"],
     "pl": ["niedźwiedzie", "niedźwiedzi", "niedźwiedziom", "niedźwiedzie", "niedźwiedziami", "niedźwiedziach", "niedźwiedzie"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2098,6 +2134,7 @@
     "tags": ["animal"],
     "sg": ["wilk", "wilka", "wilkowi", "wilka", "wilkiem", "wilku", "wilku"],
     "pl": ["wilki", "wilków", "wilkom", "wilki", "wilkami", "wilkach", "wilki"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2110,6 +2147,7 @@
     "tags": ["animal"],
     "sg": ["lis", "lisa", "lisowi", "lisa", "lisem", "lisie", "lisie"],
     "pl": ["lisy", "lisów", "lisom", "lisy", "lisami", "lisach", "lisy"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2122,6 +2160,7 @@
     "tags": ["animal"],
     "sg": ["orzeł", "orła", "orłu", "orła", "orłem", "orle", "orle"],
     "pl": ["orły", "orłów", "orłom", "orły", "orłami", "orłach", "orły"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2134,6 +2173,7 @@
     "tags": ["animal"],
     "sg": ["jeż", "jeża", "jeżowi", "jeża", "jeżem", "jeżu", "jeżu"],
     "pl": ["jeże", "jeży", "jeżom", "jeże", "jeżami", "jeżach", "jeże"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2146,6 +2186,7 @@
     "tags": ["animal"],
     "sg": ["pingwin", "pingwina", "pingwinowi", "pingwina", "pingwinem", "pingwinie", "pingwinie"],
     "pl": ["pingwiny", "pingwinów", "pingwinom", "pingwiny", "pingwinami", "pingwinach", "pingwiny"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2170,6 +2211,7 @@
     "tags": ["animal"],
     "sg": ["komar", "komara", "komarowi", "komara", "komarem", "komarze", "komarze"],
     "pl": ["komary", "komarów", "komarom", "komary", "komarami", "komarach", "komary"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2218,6 +2260,7 @@
     "tags": ["animal"],
     "sg": ["małpa", "małpy", "małpie", "małpę", "małpą", "małpie", "małpo"],
     "pl": ["małpy", "małp", "małpom", "małpy", "małpami", "małpach", "małpy"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2367,6 +2410,7 @@
     "sg": ["czekolada", "czekolady", "czekoladzie", "czekoladę", "czekoladą", "czekoladzie", "czekolado"],
     "pl": ["czekolady", "czekolad", "czekoladom", "czekolady", "czekoladami", "czekoladach", "czekolady"],
     "mass": true,
+    "portions": true,
     "review": "draft"
   },
   {
@@ -2454,6 +2498,7 @@
     "sg": ["kurczak", "kurczaka", "kurczakowi", "kurczaka", "kurczakiem", "kurczaku", "kurczaku"],
     "pl": ["kurczaki", "kurczaków", "kurczakom", "kurczaki", "kurczakami", "kurczakach", "kurczaki"],
     "mass": true,
+    "portions": true,
     "review": "draft"
   },
   {
@@ -2467,6 +2512,7 @@
     "sg": ["wódka", "wódki", "wódce", "wódkę", "wódką", "wódce", "wódko"],
     "pl": ["wódki", "wódek", "wódkom", "wódki", "wódkami", "wódkach", "wódki"],
     "mass": true,
+    "portions": true,
     "review": "draft"
   },
   {
@@ -2480,6 +2526,7 @@
     "sg": ["lemoniada", "lemoniady", "lemoniadzie", "lemoniadę", "lemoniadą", "lemoniadzie", "lemoniado"],
     "pl": ["lemoniady", "lemoniad", "lemoniadom", "lemoniady", "lemoniadami", "lemoniadach", "lemoniady"],
     "mass": true,
+    "portions": true,
     "review": "draft"
   },
   {
@@ -2715,6 +2762,7 @@
     "tags": ["water"],
     "sg": ["ocean", "oceanu", "oceanowi", "ocean", "oceanem", "oceanie", "oceanie"],
     "pl": ["oceany", "oceanów", "oceanom", "oceany", "oceanami", "oceanach", "oceany"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2739,6 +2787,7 @@
     "tags": ["water"],
     "sg": ["zatoka", "zatoki", "zatoce", "zatokę", "zatoką", "zatoce", "zatoko"],
     "pl": ["zatoki", "zatok", "zatokom", "zatoki", "zatokami", "zatokach", "zatoki"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2751,6 +2800,7 @@
     "tags": ["water"],
     "sg": ["strumień", "strumienia", "strumieniowi", "strumień", "strumieniem", "strumieniu", "strumieniu"],
     "pl": ["strumienie", "strumieni", "strumieniom", "strumienie", "strumieniami", "strumieniach", "strumienie"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2763,6 +2813,7 @@
     "tags": ["water"],
     "sg": ["kanał", "kanału", "kanałowi", "kanał", "kanałem", "kanale", "kanale"],
     "pl": ["kanały", "kanałów", "kanałom", "kanały", "kanałami", "kanałach", "kanały"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2945,6 +2996,7 @@
     "tags": ["vehicle"],
     "sg": ["metro", "metra", "metru", "metro", "metrem", "metrze", "metro"],
     "noPlural": true,
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -3097,6 +3149,7 @@
     "tags": ["topic"],
     "sg": ["gospodarka", "gospodarki", "gospodarce", "gospodarkę", "gospodarką", "gospodarce", "gospodarko"],
     "mass": true,
+    "article": "the",
     "noPlural": true,
     "review": "draft"
   },
@@ -3238,6 +3291,7 @@
     "tags": ["abstract"],
     "sg": ["środowisko", "środowiska", "środowisku", "środowisko", "środowiskiem", "środowisku", "środowisko"],
     "pl": ["środowiska", "środowisk", "środowiskom", "środowiska", "środowiskami", "środowiskach", "środowiska"],
+    "article": "the",
     "review": "draft"
   },
   {
@@ -3419,6 +3473,7 @@
     "tags": ["placeIn", "placeTo"],
     "sg": ["urząd", "urzędu", "urzędowi", "urząd", "urzędem", "urzędzie", "urzędzie"],
     "pl": ["urzędy", "urzędów", "urzędom", "urzędy", "urzędami", "urzędach", "urzędy"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -3431,6 +3486,7 @@
     "tags": ["placeIn", "placeTo"],
     "sg": ["sąd", "sądu", "sądowi", "sąd", "sądem", "sądzie", "sądzie"],
     "pl": ["sądy", "sądów", "sądom", "sądy", "sądami", "sądach", "sądy"],
+    "noPossessive": true,
     "review": "draft"
   },
   {

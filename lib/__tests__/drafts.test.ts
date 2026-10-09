@@ -161,6 +161,16 @@ describe("publish", () => {
     expect(again.nouns.every((n, i) => n === published.nouns[i])).toBe(true);
   });
 
+  it("strips draft nouns from an agreement frame's lemmas and excludeLemmas, keeping the frame", () => {
+    const data = withDrafts(false);
+    const frame = tpl({ pl: "Myję {NP}.", requires: ["animal"], lemmas: ["kotek", "dom"], excludeLemmas: ["kotek", "słoń"] });
+    data.agreement = [...(data.agreement as object[]), frame];
+    const full = loadLexicon(data).agreement.find((t) => t.pl === "Myję {NP}.");
+    expect(full).toMatchObject({ lemmas: ["kotek", "dom"], excludeLemmas: ["kotek", "słoń"] });
+    const kept = publish(loadLexicon(data)).agreement.find((t) => t.pl === "Myję {NP}.");
+    expect(kept).toMatchObject({ lemmas: ["dom"], excludeLemmas: ["słoń"] });
+  });
+
   it("rejects a review mark other than draft", () => {
     const data = withDrafts();
     data.nouns = [{ ...DRAFT_NOUN, review: "approved" }];

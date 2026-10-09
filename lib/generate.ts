@@ -123,11 +123,17 @@ export function article(phrase: string): string {
   return "aeiou".includes(word[0] ?? "") ? "an" : "a";
 }
 
+/** "a" or "an" in front of the phrase; "a" + "other" is written as one word, "another". */
+export function withArticle(phrase: string): string {
+  if (/^other\b/i.test(phrase)) return `an${phrase}`;
+  return `${article(phrase)} ${phrase}`;
+}
+
 export function capitalise(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-function renderEnglish(
+export function renderEnglish(
   tpl: Template,
   noun: Noun,
   adj: Adjective | undefined,
@@ -135,16 +141,20 @@ function renderEnglish(
 ): string {
   const head = number === "pl" ? noun.enPl : noun.en;
   const bare = adj ? `${adj.en} ${head}` : head;
-  const indefinite =
-    number === "pl" || noun.mass ? bare : `${article(bare)} ${bare}`;
+  // a noun with its own article keeps it in the singular, whatever the slot:
+  // "I like spring", "I'm interested in the economy"; an adjective makes a
+  // season one of many again: "a cold spring", "the long winter"
+  const fixed = number === "pl" || (noun.article === "none" && adj) ? undefined : noun.article;
+  const own = fixed === "the" ? `the ${bare}` : bare;
+  const indefinite = fixed ? own : number === "pl" || noun.mass ? bare : withArticle(bare);
   // a relative or friend with no possessive in Polish is "my ..." in English
   const mine = noun.tags.includes("family") || noun.tags.includes("friend");
   // fields and ideas take no article: "about history", "about work"
   const generic = noun.tags.includes("topic") || noun.tags.includes("abstract");
-  const definite = mine ? `my ${bare}` : generic ? bare : `the ${bare}`;
+  const definite = fixed ? own : mine ? `my ${bare}` : generic ? bare : `the ${bare}`;
   const text = (tpl.enPl && number === "pl" ? tpl.enPl : tpl.en)
     .replace(/\{npDef\}/g, definite)
-    .replace(/\{npBare\}/g, bare)
+    .replace(/\{npBare\}/g, fixed ? own : bare)
     .replace(/\{np\}/g, indefinite);
   return capitalise(text);
 }
@@ -195,6 +205,24 @@ export function casesWithin(cases: Case[], maxLevel: Level | undefined, open: (k
   return kept.length > 0 ? kept : cases;
 }
 
+const blankText = (tokens: Token[]) =>
+  tokens
+    .filter((t) => t.blank)
+    .map((t) => t.text)
+    .join(" ");
+
+/**
+ * True when the plural answer is spelled exactly like the singular one in a
+ * sentence that does not show the number either: "Szukam piekarni" is one
+ * bakery or several. Such a plural drills nothing the singular does not, and
+ * its English ("bakeries") reads as a mistranslation of what the learner
+ * sees, so the generator takes the singular reading instead.
+ */
+function looksSingular(tpl: Template, noun: Noun, adj: Adjective | undefined, kase: Case, mode: WordMode): boolean {
+  if (tpl.number !== "any") return false;
+  return blankText(buildTokens(noun, adj, "pl", kase, mode)) === blankText(buildTokens(noun, adj, "sg", kase, mode));
+}
+
 type Chosen = { tpl: Template; noun: Noun; adj?: Adjective };
 
 function tryPick(
@@ -231,10 +259,11 @@ export function buildExercise(
   maxLevel?: Level,
 ): Exercise | null {
   for (let attempt = 0; attempt < 40; attempt++) {
-    const number = pick(numbers, rng);
+    let number = pick(numbers, rng);
     const chosen = tryPick(kase, number, mode, rng, genders, maxLevel);
     if (!chosen) continue;
     const { tpl, noun, adj } = chosen;
+    if (number === "pl" && numbers.includes("sg") && looksSingular(tpl, noun, adj, kase, mode)) number = "sg";
     const key = `${tpl.pl}|${noun.lemma}|${adj?.lemma ?? ""}|${number}`;
     if (taken.has(key) && attempt < 30) continue;
     taken.add(key);

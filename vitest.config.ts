@@ -9,7 +9,7 @@ import { defineConfig } from "vitest/config";
  *              filter's own test) over everything in data/, drafts included,
  *              so a bad draft fails `npm test` before anyone reviews it.
  */
-const DRAFT_TESTS = ["lib/__tests__/content.test.ts", "lib/__tests__/drafts.test.ts"];
+const DRAFT_TESTS = ["lib/__tests__/content.test.ts", "lib/__tests__/drafts.test.ts", "lib/__tests__/frames.test.ts"];
 
 export default defineConfig({
   test: {

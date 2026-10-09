@@ -111,6 +111,10 @@ export type Forms = Record<Case, string>;
 export const REVIEW_STATES = ["draft"] as const;
 export type Review = (typeof REVIEW_STATES)[number];
 
+/** A noun's fixed English article; see Noun.article. */
+export const NOUN_ARTICLES = ["none", "the"] as const;
+export type NounArticle = (typeof NOUN_ARTICLES)[number];
+
 export type Noun = {
   lemma: string;
   /** English singular, without article. */
@@ -123,8 +127,18 @@ export type Noun = {
   freq?: Freq;
   gender: Gender;
   tags: Tag[];
-  /** Mass noun: never gets "a/an" in the English gloss. */
+  /** Mass noun: never gets "a/an" in the English gloss, never counted unless `portions`. */
   mass?: boolean;
+  /** A mass noun that is still counted in servings or loaves: dwie kawy, pięć chlebów. */
+  portions?: boolean;
+  /**
+   * English article in the singular, whatever the sentence asks for: "none"
+   * for seasons ("I like spring", never "a spring"), "the" for nouns that are
+   * always definite in general statements ("the environment", "the economy").
+   */
+  article?: NounArticle;
+  /** No possessive in front of it reads naturally: "mój Polak", "mój komar". */
+  noPossessive?: boolean;
   /** Plural is not used in practice (mleko, muzyka...). */
   noPlural?: boolean;
   /** Has a plural, but not one a sentence about "my ..." can use (matki, żony). */

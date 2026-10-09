@@ -285,6 +285,8 @@ export function buildPossessiveExercise(
     for (const tpl of shuffle(templates, rng)) {
       const nouns = nounsFor(tpl, number, genders, maxLevel);
       for (const noun of shuffle(nouns, rng)) {
+        // "mój Polak", "mój komar": skipped after the shuffle, so no random draw changes
+        if (noun.noPossessive) continue;
         const key = `${owner}|${tpl.pl}|${noun.lemma}|${number}`;
         if (taken.has(key) && attempt < 30) continue;
         taken.add(key);
