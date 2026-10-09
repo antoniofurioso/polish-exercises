@@ -45,17 +45,27 @@ Delete anything the change made untrue.
 - **Everything is generated on the client, deterministically from a seed.** A
   session is fully described by its URL (`/practice?type=verbs&cases=…&seed=42`,
   see `lib/session.ts`), so the same URL always produces the same questions.
-- Persistence today is localStorage only (`lib/storage.ts`): last config per
-  drill and lifetime accuracy per drill × case. There are no accounts yet.
+- Persistence is localStorage only (`lib/storage.ts`): last config per drill,
+  and schema v2 (`polish.log.v2` answer log, `polish.progress.v2` cache derived
+  from it by replay, `polish.settings.v2` goal and new cards per day). v1
+  per-case stats are migrated once and left in place. There are no accounts yet.
+  Every call from `lib/storage.ts` into the progress logic is wrapped so a throw
+  never stops practice: the log is written first and a stale cache is dropped
+  and rebuilt by replay on the next load.
 
 ## Codebase map
 
 | Path | What it is |
 | --- | --- |
-| `app/page.tsx` | Home menu, built from the drill registry |
+| `app/page.tsx` | Home: the "Today's practice" button (`components/TodayButton`), then the drill menu from the registry |
+| `app/today/` | Today's practice: `buildToday` on a progress snapshot taken at mount, run by the shared `Runner`; a wrong card is asked once more at the end |
+| `app/progress/` | Streak, today's goal ring, the last 28 days, weak spots (each linking to a configured `/practice` session) and the goal / new-per-day settings |
 | `app/<drill>/page.tsx` | One configurator per drill (cases, pronouns, possessives, numbers, verbs, shuffle). They write the session URL |
-| `app/practice/` | The runner: reads the URL, builds the session, grades, records stats |
-| `components/` | `ExerciseCard` (one question, speech, keyboard), `ResultsSummary`, `ui` |
+| `app/practice/` | Reads the URL, builds the session and hands it to `Runner` |
+| `components/` | `Runner` (runs a prebuilt `Exercise[]`, grades, records every answer; shared by `/practice` and `/today`), `ExerciseCard` (one question, speech, keyboard), `ResultsSummary`, `TodayButton`, `today` (`useTodayStatus`, `useNow`, `GoalRing`, `GoalStatus`), `ui` |
+| `lib/storage.ts` | localStorage: configs, sound, the v2 log / progress / settings hooks (`useProgress`, `useSettings`, `recordAnswer`…), v1 migration, compaction past 20,000 events |
+| `lib/progressView.ts` | Pure helpers for the progress UI: `MISS_LABELS` (miss kind → English), `skillConfig` / `skillHref` (weak skill → configured session), `lastDays`, `dueCount`, `safely` |
+| `lib/missKind.ts` | `missKindOf(input, exercise)`: the `MissKind` logged with a wrong answer (to be wired to `diagnoseMiss` / `diagnoseVerbMiss`) |
 | `lib/drills.ts` | **Drill registry** (`DRILLS`, `drillFor`): route, menu text, builder, allowed cases, own URL params, shuffle mix. Single source for "which drills exist" |
 | `lib/session.ts` | Config ⇄ query string. Shared params here; drill-specific ones come from the registry |
 | `lib/generate.ts` | Case drill: template + fitting noun + adjective → exercise. Also `article()`, `resolvePrep()` (z/ze, w/we), `renderPrompt`, `renderSolution` |
