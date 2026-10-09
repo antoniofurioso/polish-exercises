@@ -11,7 +11,7 @@ Status key: ☐ todo · ◐ in progress · ☑ done
 | 0 | Groundwork: registry, data files, levels, content gate | ~1 week | ☑ — see [phase-0.md](./phase-0.md) |
 | 1 | Content ×2–4 and natural audio | 3–5 weeks | ◐ code done; waiting on native review + audio render — see [phase-1.md](./phase-1.md) |
 | 2 | Retention: SRS, "today's practice", streaks | 2–3 weeks | ☑ code done; tune in the Phase 3 beta — see [phase-2.md](./phase-2.md) |
-| 3 | Ship the web app: PWA, brand, landing page, beta | 1–2 weeks | ☐ |
+| 3 | Ship the web app: PWA, brand, landing page, beta | 1–2 weeks | ◐ spec written, in progress — see [phase-3.md](./phase-3.md) |
 | 4 | Accounts, sync, payments | ~2 weeks | ☐ |
 | 5 | Mobile apps (Capacitor) | ~2 weeks | ☐ |
 

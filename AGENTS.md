@@ -66,6 +66,7 @@ Delete anything the change made untrue.
 | `lib/storage.ts` | localStorage: configs, sound, the v2 log / progress / settings hooks (`useProgress`, `useSettings`, `recordAnswer`…), v1 migration, compaction past 20,000 events |
 | `lib/progressView.ts` | Pure helpers for the progress UI: `MISS_LABELS` (miss kind → English), `skillConfig` / `skillHref` (weak skill → configured session), `lastDays`, `dueCount`, `safely` |
 | `lib/missKind.ts` | `missKindOf(input, exercise)`: the `MissKind` logged with a wrong answer (`diagnoseVerbMiss` for verbs, `diagnoseNumberMiss` for numbers, then `diagnoseMiss`) |
+| `lib/brand.ts` | `BRAND`: product name, tagline, description, site URL, owner and contact email. The only place the name is written; titles, manifest, landing and privacy pages read it |
 | `lib/drills.ts` | **Drill registry** (`DRILLS`, `drillFor`): route, menu text, builder, allowed cases, own URL params, shuffle mix. Single source for "which drills exist" |
 | `lib/cards.ts`, `lib/cards/<drill>.ts` | **SRS card sources** (`CardSource`, reached as `DRILLS[kind].cards`): `all(maxLevel)` in introduction order, `build(card, seed)` for one card, `skillLabel`. Card ids per drill: `plans/phase-2.md` §1. Cases build through `buildCardExercise` in `lib/generate.ts`; pronouns and possessives through their builders' `gender` filter, levelled by `cellLevel` in `lib/agreement.ts` |
 | `lib/session.ts` | Config ⇄ query string. Shared params here; drill-specific ones come from the registry |
@@ -192,4 +193,5 @@ See `plans/ROADMAP.md`.
 - **Phase 2 (retention) code is done:** SRS cards for every drill, the v2
   answer log, `/today` and `/progress`. Spec, decisions and open points are in
   `plans/phase-2.md`.
-- **Next is Phase 3** (PWA, brand, landing page, beta).
+- **Phase 3 (ship the web app) is in progress:** spec in `plans/phase-3.md`.
+  The product name is not chosen yet; it lives only in `lib/brand.ts`.
