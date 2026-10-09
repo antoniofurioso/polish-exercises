@@ -642,9 +642,9 @@ export function buildNumberSession(config: Config, seed = Date.now()): Exercise[
   let pool: NumberDrill[] = [];
 
   // a drill that runs dry falls back to the others rather than dropping a question
-  const attempt = (drill: NumberDrill): Exercise | null => {
+  const attempt = (drill: NumberDrill, from = nouns): Exercise | null => {
     for (const candidate of [drill, ...shuffle(drills, rng)]) {
-      const exercise = buildOne(candidate, config, cases, nouns, answerMode, rng, taken);
+      const exercise = buildOne(candidate, config, cases, from, answerMode, rng, taken);
       if (exercise) return exercise;
     }
     return null;
@@ -658,6 +658,11 @@ export function buildNumberSession(config: Config, seed = Date.now()): Exercise[
       // every drill is out of unseen material: forget it all and start repeating
       taken.clear();
       exercise = attempt(drill);
+    }
+    if (!exercise && config.genders?.length) {
+      // the genders chosen have no noun the frame can take (no neuter person is
+      // counted: dziecko wants "dwoje", see @collective), so count any gender
+      exercise = attempt(drill, lexicon(undefined, config.maxLevel));
     }
     if (exercise) exercises.push(exercise);
   }

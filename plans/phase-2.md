@@ -202,11 +202,7 @@ weak spots listed, no console errors).
 
 - **Tune with real learners** (Phase 3 beta): `newPerDay`, the 70% review share,
   the top-up past `newPerDay` on a first day, and the level-cap thresholds.
-- **Miss kinds for numbers** are only `empty` / `other`. Verbs get aspect,
-  person and tense, and past-tense gender slips are now classified as
-  `pastGender` (pisałam for pisałem, pisali for pisały, będę pisała for będę
-  pisał) when the person and number are right; the other aspect with the wrong
-  gender (pisałam for napisałem) still counts as aspect.
-- **"dwa / cztery dzieci"** in the count drill: Polish wants "dwoje / czworo
-  dzieci". Pre-existing; the numbers cards can show it more often. Needs a
-  native speaker's call or a frame exclusion.
+- **Collective numerals** (dwoje, pięcioro dzieci) are not generated, so nouns
+  that need them (`@collective` in `data/groups.json`: dziecko) are kept out of the
+  count and numeral drills, "jedno dziecko" included (frames can't exclude by
+  number).

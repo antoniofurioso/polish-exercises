@@ -65,13 +65,14 @@ Delete anything the change made untrue.
 | `components/` | `Runner` (runs a prebuilt `Exercise[]`, grades, records every answer; shared by `/practice` and `/today`), `ExerciseCard` (one question, speech, keyboard), `ResultsSummary`, `TodayButton`, `today` (`useTodayStatus`, `useNow`, `GoalRing`, `GoalStatus`), `ui` |
 | `lib/storage.ts` | localStorage: configs, sound, the v2 log / progress / settings hooks (`useProgress`, `useSettings`, `recordAnswer`…), v1 migration, compaction past 20,000 events |
 | `lib/progressView.ts` | Pure helpers for the progress UI: `MISS_LABELS` (miss kind → English), `skillConfig` / `skillHref` (weak skill → configured session), `lastDays`, `dueCount`, `safely` |
-| `lib/missKind.ts` | `missKindOf(input, exercise)`: the `MissKind` logged with a wrong answer (`diagnoseVerbMiss` for verbs, then `diagnoseMiss`) |
+| `lib/missKind.ts` | `missKindOf(input, exercise)`: the `MissKind` logged with a wrong answer (`diagnoseVerbMiss` for verbs, `diagnoseNumberMiss` for numbers, then `diagnoseMiss`) |
 | `lib/drills.ts` | **Drill registry** (`DRILLS`, `drillFor`): route, menu text, builder, allowed cases, own URL params, shuffle mix. Single source for "which drills exist" |
 | `lib/cards.ts`, `lib/cards/<drill>.ts` | **SRS card sources** (`CardSource`, reached as `DRILLS[kind].cards`): `all(maxLevel)` in introduction order, `build(card, seed)` for one card, `skillLabel`. Card ids per drill: `plans/phase-2.md` §1. Cases build through `buildCardExercise` in `lib/generate.ts`; pronouns and possessives through their builders' `gender` filter, levelled by `cellLevel` in `lib/agreement.ts` |
 | `lib/session.ts` | Config ⇄ query string. Shared params here; drill-specific ones come from the registry |
 | `lib/generate.ts` | Case drill: template + fitting noun + adjective → exercise. Also `article()`, `resolvePrep()` (z/ze, w/we), `renderPrompt`, `renderSolution` |
 | `lib/pronouns.ts`, `lib/possessives.ts`, `lib/agreement.ts` | Demonstrative and possessive drills, sharing the agreement frames |
 | `lib/numerals.ts`, `lib/numbers.ts` | Numeral grammar, and the four number drills (count, numeral form, spelling, ordinals/dates/time). `numbers.ts` also tags each exercise with its SRS card and builds one exercise per card (`buildNumberCard`) |
+| `lib/diagnoseNumbers.ts` | `diagnoseNumberMiss(input, exercise)`: the `MissKind` of a wrong numbers answer, from its card: `government` (counted noun in the wrong form), `numeralForm` (numeral or ordinal in the wrong gender / case), `typo`, `ending`, `wordCount`, `empty`; null leaves it to `diagnoseMiss` |
 | `lib/cards/numbers.ts` | The numbers `CardSource` (Phase 2): card id scheme, levels, introduction order, skill labels |
 | `lib/verbs.ts` | Verb conjugation from principal parts, the five tenses, time frames, English verb morphology. Also the verbs card / skill ids stamped on every exercise, `buildVerbCard` (one exercise for one verb × tense) and `diagnoseVerbMiss` (aspect, pastGender, person, tense; a gender slip only when person and number are right) |
 | `lib/cards/verbs.ts` | Verbs `CardSource`: one card per drillable verb × tense, `TENSE_LEVEL` (present A1, the rest A2), `skillLabel` |
@@ -172,8 +173,9 @@ Before committing, run test, lint, build, then tsc. All four must be clean.
   for a native speaker's call.
 - **Draft data ships in the JS bundle**, unused. It's harmless, but unreviewed
   words are visible to anyone who reads the bundle.
-- **SRS.** Numbers misses are not classified beyond empty / other. See "Open
-  after Phase 2" in `plans/phase-2.md`.
+- **No collective numerals** (dwoje, pięcioro). Nouns that need them (the
+  `@collective` group: dziecko) are kept out of the count and numeral drills
+  altogether, "jedno dziecko" included.
 - **Pre-rendered audio covers the spelling drill up to 1000.** Above that the
   app falls back to Azure or the browser voice.
 
