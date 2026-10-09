@@ -183,6 +183,9 @@ Everything is generated locally and deterministically — no API calls.
 | `lib/cards/numbers.ts` | The numbers drill's SRS cards: the id scheme (count band, numeral class, spelling magnitude, ordinal flavour × case), their levels, order and learner-facing skill names |
 | `lib/verbs.ts` | Verbs (139 incl. drafts; aspect pairs plus imperfective-only verbs) stored as principal parts (past stems, non-past, imperative); builds the five tense drills, places `się` and builds the English verb. Also the verbs SRS card ids (`verbs:pisać\|past`, skill `verbs:past\|3pl`), one exercise per card (`buildVerbCard`), and `diagnoseVerbMiss` (aspect / person / tense slips) |
 | `lib/cards/verbs.ts` | The verbs drill's SRS card source: every drillable verb × tense, levelled (present A1; past, futures and imperative A2), with learner-facing skill names |
+| `lib/srs.ts` | The spaced-repetition scheduler (SM-2 with right / accents-only / wrong) and local calendar-day helpers |
+| `lib/progress.ts` | Learner progress from the answer log: per-card schedule, per-skill and per-day counts, log replay and compaction, v1 migration, streak (one grace day per 7 days), weak spots and the level cap for new cards |
+| `lib/today.ts` | Builds "Today's practice": due reviews, then the day's new cards, then filler from weak skills, mixed across drills |
 | `lib/session.ts` | Encodes a session in the query string and reads it back (`type=` selects the drill, `lvl=` caps the CEFR level; drill-specific params come from the registry) |
 | `lib/review/`, `scripts/review-*.ts` | The native-speaker review sheet: CSV export and import of draft entries |
 | `lib/grade.ts` | Normalises the answer; a diacritics-only miss is reported separately |
