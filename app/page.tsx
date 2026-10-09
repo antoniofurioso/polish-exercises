@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TodayButton } from "@/components/TodayButton";
 import { DRILLS } from "@/lib/drills";
 import { EXERCISE_KINDS } from "@/lib/types";
 
@@ -8,8 +9,10 @@ export default function HomePage() {
       <header className="mb-10">
         <p className="text-sm uppercase tracking-[0.2em] text-accent">Ćwiczenia</p>
         <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Polish practice</h1>
-        <p className="mt-3 text-muted">Pick an exercise to set up.</p>
+        <p className="mt-3 text-muted">Start today’s practice, or pick an exercise to set up.</p>
       </header>
+
+      <TodayButton />
 
       <div className="grid gap-3 sm:grid-cols-2">
         {EXERCISE_KINDS.map((kind) => DRILLS[kind]).map((drill) => (

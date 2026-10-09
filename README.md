@@ -1,10 +1,13 @@
 # Ćwiczenia — Polish practice
 
 Fill-in-the-blank drills for Polish, in the style of courseofpolish.com. The home
-page (`/`) is a menu of exercises:
+page (`/`) starts with a **Today's practice** button (streak, today's goal, reviews
+due), then a menu of exercises:
 
 | Route | Exercise |
 | --- | --- |
+| `/today` | Today's practice: due reviews first, then new words, then filler, built from your progress with no setup. A wrong answer is asked again at the end. "Extra practice" (weakest skills) once nothing is due. |
+| `/progress` | Streak (with one grace day per week), today's goal, the last 28 days, your weak spots with their most common mistakes and a link to drill each, and the daily goal (10 / 20 / 40) and new words per day settings. |
 | `/cases` | Decline nouns / adjectives across all seven cases. |
 | `/pronouns` | Make the demonstrative `ten` / `tamten` agree with a given noun in gender, number and case. |
 | `/possessives` | Make the possessive (`mój`, `twój`, `nasz`, `wasz`, `swój`) agree with a given noun — and leave `jego` / `jej` / `ich` alone. |
@@ -184,6 +187,10 @@ Everything is generated locally and deterministically — no API calls.
 | `lib/session.ts` | Encodes a session in the query string and reads it back (`type=` selects the drill, `lvl=` caps the CEFR level; drill-specific params come from the registry) |
 | `lib/review/`, `scripts/review-*.ts` | The native-speaker review sheet: CSV export and import of draft entries |
 | `lib/grade.ts` | Normalises the answer; a diacritics-only miss is reported separately |
+| `lib/storage.ts` | localStorage: last config per drill, sound, and the v2 answer log, progress cache and settings (with the one-time v1 migration) |
+| `lib/progressView.ts` | Labels and links for the progress page: miss kinds in English, weak skill → practice URL, the day grid |
+| `lib/missKind.ts` | The miss kind logged with a wrong answer |
+| `components/Runner.tsx` | Runs a list of exercises and records every answer; used by `/practice` and `/today` |
 | `lib/sound.ts` | Synthesised right / near-miss / wrong cues |
 | `lib/speak.ts` | pl-PL speech synthesis for reading sentences aloud (TTS Worker audio when configured, else the browser) |
 | `lib/speaker.ts` | Worker-vs-browser selection and fallback, testable without a browser |
@@ -195,5 +202,6 @@ Semantic tags on each noun (`food`, `vehicle`, `placeIn`, …) keep sentences se
 `Jem …` only ever takes food, `Jadę …` only vehicles.
 
 Sessions are seeded from the URL (`/practice?cases=gen,loc&num=sg&mode=both&count=20&seed=42`),
-so a session can be reproduced or shared. Settings and lifetime per-case accuracy live in
-localStorage.
+so a session can be reproduced or shared. `/today` is the exception: it is built from
+your stored progress. Settings, the answer log and the progress derived from it live in
+localStorage (`polish.log.v2`, `polish.progress.v2`, `polish.settings.v2`).
