@@ -68,7 +68,7 @@ numerals; verb frames and conjugation) — only the lexicon.
 
 **Done when.** Every lexicon entry lives in `data/*.json`; golden test unchanged.
 
-### 0.3 CEFR levels ☐ (after 0.2)
+### 0.3 CEFR levels ☑
 
 - Add `level: "A1" | "A2" | "B1" | "B2"` to every noun, adjective, verb and
   template, and `freq?: 1 | 2 | 3 | 4 | 5` (1 = most common) to the lexicon.
@@ -79,9 +79,10 @@ numerals; verb frames and conjugation) — only the lexicon.
   builders, with no UI yet. When it is omitted, output must be identical
   (golden test unchanged).
 
-### 0.4 Content gate ☐ (after 0.2, with 0.3)
+### 0.4 Content gate ☑
 
-Extend `lib/__tests__/lexicon.test.ts` so a bulk import cannot break the generator:
+Extend `lib/__tests__/lexicon.test.ts` (done as `lib/__tests__/content.test.ts`) so a
+bulk import cannot break the generator:
 - every JSON entry passes the loader's validation;
 - no duplicate lemmas across a file; every lemma a template names exists;
 - every template has at least 3 fitting nouns overall, and at least 1 at its

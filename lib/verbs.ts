@@ -2,12 +2,14 @@ import verbData from "../data/verbs.json";
 import { capitalise, makeRng, pick, shuffle } from "./generate";
 import { normalise, stripDiacritics } from "./grade";
 import { loadVerbs } from "./load";
-import { TENSES } from "./types";
+import { TENSES, withinLevel } from "./types";
 import type {
   AnswerMode,
   Config,
   Exercise,
+  Freq,
   GramNumber,
+  Level,
   Tense,
   VerbType,
 } from "./types";
@@ -60,6 +62,10 @@ type Complement = {
 export type Verb = {
   /** English base, simple past and -ing form. */
   en: { base: string; past: string; ing: string };
+  /** CEFR level of the aspect pair. */
+  level: Level;
+  /** 1 = most common; see data/README.md. */
+  freq?: Freq;
   impf: AspectForms;
   pf: AspectForms;
   objects: Complement[];
@@ -768,7 +774,7 @@ function buildOne(
   const pool = (tense === "imperative" ? IMPERATIVE_SUBJECTS : SUBJECTS).filter(
     (s) => numbers.includes(s.number),
   );
-  if (pool.length === 0) return null;
+  if (pool.length === 0 || verbs.length === 0) return null;
 
   for (let attempt = 0; attempt < 40; attempt++) {
     const verb = pick(verbs, rng);
@@ -793,11 +799,12 @@ function buildOne(
   return null;
 }
 
-/** The verb pool for a session: plain, reflexive or both. */
-export function verbsFor(kind: VerbType | undefined): Verb[] {
-  if (kind === "plain") return VERBS.filter((v) => !v.reflexive);
-  if (kind === "reflexive") return VERBS.filter((v) => v.reflexive);
-  return VERBS;
+/** The verb pool for a session: plain, reflexive or both, up to `maxLevel` when set. */
+export function verbsFor(kind: VerbType | undefined, maxLevel?: Level): Verb[] {
+  const verbs = maxLevel ? VERBS.filter((v) => withinLevel(v, maxLevel)) : VERBS;
+  if (kind === "plain") return verbs.filter((v) => !v.reflexive);
+  if (kind === "reflexive") return verbs.filter((v) => v.reflexive);
+  return verbs;
 }
 
 /** Builds a full verbs session, spreading the selected tenses evenly. */
@@ -812,7 +819,7 @@ export function buildVerbSession(
     : (["sg", "pl"] as GramNumber[]);
   const answerMode: AnswerMode =
     config.answerMode === "choice" ? "choice" : "typing";
-  const verbs = verbsFor(config.verbType);
+  const verbs = verbsFor(config.verbType, config.maxLevel);
 
   const taken = new Set<string>();
   const exercises: Exercise[] = [];

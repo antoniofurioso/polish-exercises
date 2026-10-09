@@ -52,6 +52,19 @@ export type SpellRange = (typeof SPELL_RANGES)[number];
 
 export type GramNumber = "sg" | "pl";
 
+/** CEFR levels the lexicon is graded by, easiest first. */
+export const LEVELS = ["A1", "A2", "B1", "B2"] as const;
+export type Level = (typeof LEVELS)[number];
+
+/** How common a word is, 1 (everyday) to 5 (rare). */
+export const FREQS = [1, 2, 3, 4, 5] as const;
+export type Freq = (typeof FREQS)[number];
+
+/** True when an entry is at `max` or below; no cap lets everything through. */
+export function withinLevel(entry: { level: Level }, max: Level | undefined): boolean {
+  return !max || LEVELS.indexOf(entry.level) <= LEVELS.indexOf(max);
+}
+
 /** Polish genders, split by the distinctions that actually change endings. */
 export const GENDERS = ["mPers", "mAnim", "mInanim", "f", "n"] as const;
 export type Gender = (typeof GENDERS)[number];
@@ -97,6 +110,10 @@ export type Noun = {
   en: string;
   /** English plural. */
   enPl: string;
+  /** CEFR level a learner meets the word at. */
+  level: Level;
+  /** 1 = most common; see data/README.md. */
+  freq?: Freq;
   gender: Gender;
   tags: Tag[];
   /** Mass noun: never gets "a/an" in the English gloss. */
@@ -117,6 +134,8 @@ export type AdjType = (typeof ADJ_TYPES)[number];
 export type Adjective = {
   lemma: string;
   en: string;
+  level: Level;
+  freq?: Freq;
   /** Lemma minus its ending: dobry -> dobr, tani -> tan, drogi -> drog. */
   stem: string;
   type: AdjType;
@@ -131,6 +150,8 @@ export type Adjective = {
 export type Template = {
   case: Case;
   number: GramNumber | "any";
+  /** CEFR level of the construction the sentence drills. */
+  level: Level;
   /** Polish sentence containing the {NP} slot. */
   pl: string;
   /** English gloss containing {np} (indefinite) or {npDef} (definite). */
@@ -184,6 +205,8 @@ export type Config = {
   verbType?: VerbType;
   /** Shuffle only: which drills to mix; omitted means all. */
   mix?: DrillKind[];
+  /** Highest CEFR level of words and sentences to draw; omitted means no cap. */
+  maxLevel?: Level;
 };
 
 export type Token = { text: string; blank: boolean };

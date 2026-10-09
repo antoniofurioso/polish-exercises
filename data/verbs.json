@@ -1,6 +1,8 @@
 [
   {
     "en": { "base": "make", "past": "made", "ing": "making" },
+    "level": "A1",
+    "freq": 1,
     "impf": {
       "inf": "robić",
       "past": { "m": "robił", "f": "robiła", "vir": "robili" },
@@ -21,6 +23,8 @@
   },
   {
     "en": { "base": "write", "past": "wrote", "ing": "writing" },
+    "level": "A1",
+    "freq": 1,
     "impf": {
       "inf": "pisać",
       "past": { "m": "pisał", "f": "pisała", "vir": "pisali" },
@@ -41,6 +45,8 @@
   },
   {
     "en": { "base": "read", "past": "read", "ing": "reading" },
+    "level": "A1",
+    "freq": 2,
     "impf": {
       "inf": "czytać",
       "past": { "m": "czytał", "f": "czytała", "vir": "czytali" },
@@ -61,6 +67,8 @@
   },
   {
     "en": { "base": "drink", "past": "drank", "ing": "drinking" },
+    "level": "A1",
+    "freq": 2,
     "impf": {
       "inf": "pić",
       "past": { "m": "pił", "f": "piła", "vir": "pili" },
@@ -81,6 +89,8 @@
   },
   {
     "en": { "base": "eat", "past": "ate", "ing": "eating" },
+    "level": "A1",
+    "freq": 2,
     "impf": {
       "inf": "jeść",
       "past": { "m": "jadł", "f": "jadła", "vir": "jedli" },
@@ -101,6 +111,8 @@
   },
   {
     "en": { "base": "buy", "past": "bought", "ing": "buying" },
+    "level": "A1",
+    "freq": 2,
     "impf": {
       "inf": "kupować",
       "past": { "m": "kupował", "f": "kupowała", "vir": "kupowali" },
@@ -121,6 +133,8 @@
   },
   {
     "en": { "base": "watch", "past": "watched", "ing": "watching" },
+    "level": "A1",
+    "freq": 2,
     "impf": {
       "inf": "oglądać",
       "past": { "m": "oglądał", "f": "oglądała", "vir": "oglądali" },
@@ -141,6 +155,8 @@
   },
   {
     "en": { "base": "take", "past": "took", "ing": "taking" },
+    "level": "A2",
+    "freq": 1,
     "impf": {
       "inf": "brać",
       "past": { "m": "brał", "f": "brała", "vir": "brali" },
@@ -161,6 +177,8 @@
   },
   {
     "en": { "base": "go", "past": "went", "ing": "going" },
+    "level": "A1",
+    "freq": 1,
     "motion": true,
     "impf": {
       "inf": "iść",
@@ -181,6 +199,8 @@
   },
   {
     "en": { "base": "go", "past": "went", "ing": "going" },
+    "level": "A1",
+    "freq": 1,
     "motion": true,
     "impf": {
       "inf": "jechać",
@@ -202,6 +222,8 @@
   },
   {
     "en": { "base": "clean", "past": "cleaned", "ing": "cleaning" },
+    "level": "A2",
+    "freq": 3,
     "impf": {
       "inf": "sprzątać",
       "past": { "m": "sprzątał", "f": "sprzątała", "vir": "sprzątali" },
@@ -222,6 +244,8 @@
   },
   {
     "en": { "base": "cook", "past": "cooked", "ing": "cooking" },
+    "level": "A1",
+    "freq": 3,
     "impf": {
       "inf": "gotować",
       "past": { "m": "gotował", "f": "gotowała", "vir": "gotowali" },
@@ -242,6 +266,8 @@
   },
   {
     "en": { "base": "pay", "past": "paid", "ing": "paying" },
+    "level": "A2",
+    "freq": 2,
     "impf": {
       "inf": "płacić",
       "past": { "m": "płacił", "f": "płaciła", "vir": "płacili" },
@@ -262,6 +288,8 @@
   },
   {
     "en": { "base": "call", "past": "called", "ing": "calling" },
+    "level": "A1",
+    "freq": 2,
     "impf": {
       "inf": "dzwonić",
       "past": { "m": "dzwonił", "f": "dzwoniła", "vir": "dzwonili" },
@@ -282,6 +310,8 @@
   },
   {
     "en": { "base": "open", "past": "opened", "ing": "opening" },
+    "level": "A1",
+    "freq": 2,
     "impf": {
       "inf": "otwierać",
       "past": { "m": "otwierał", "f": "otwierała", "vir": "otwierali" },
@@ -302,6 +332,8 @@
   },
   {
     "en": { "base": "close", "past": "closed", "ing": "closing" },
+    "level": "A1",
+    "freq": 2,
     "impf": {
       "inf": "zamykać",
       "past": { "m": "zamykał", "f": "zamykała", "vir": "zamykali" },
@@ -322,6 +354,8 @@
   },
   {
     "en": { "base": "help", "past": "helped", "ing": "helping" },
+    "level": "A2",
+    "freq": 2,
     "impf": {
       "inf": "pomagać",
       "past": { "m": "pomagał", "f": "pomagała", "vir": "pomagali" },
@@ -342,6 +376,8 @@
   },
   {
     "en": { "base": "come back", "past": "came back", "ing": "coming back" },
+    "level": "A1",
+    "freq": 2,
     "momentary": true,
     "impf": {
       "inf": "wracać",
@@ -363,6 +399,8 @@
   },
   {
     "en": { "base": "finish", "past": "finished", "ing": "finishing" },
+    "level": "A2",
+    "freq": 2,
     "impf": {
       "inf": "kończyć",
       "past": { "m": "kończył", "f": "kończyła", "vir": "kończyli" },
@@ -383,6 +421,8 @@
   },
   {
     "en": { "base": "wash", "past": "washed", "ing": "washing" },
+    "level": "A2",
+    "freq": 3,
     "impf": {
       "inf": "myć",
       "past": { "m": "mył", "f": "myła", "vir": "myli" },
@@ -403,6 +443,8 @@
   },
   {
     "en": { "base": "rest", "past": "rested", "ing": "resting" },
+    "level": "A2",
+    "freq": 3,
     "impf": {
       "inf": "odpoczywać",
       "past": { "m": "odpoczywał", "f": "odpoczywała", "vir": "odpoczywali" },
@@ -423,6 +465,8 @@
   },
   {
     "en": { "base": "give", "past": "gave", "ing": "giving" },
+    "level": "A2",
+    "freq": 1,
     "impf": {
       "inf": "dawać",
       "past": { "m": "dawał", "f": "dawała", "vir": "dawali" },
@@ -443,6 +487,8 @@
   },
   {
     "en": { "base": "sing", "past": "sang", "ing": "singing" },
+    "level": "A2",
+    "freq": 3,
     "impf": {
       "inf": "śpiewać",
       "past": { "m": "śpiewał", "f": "śpiewała", "vir": "śpiewali" },
@@ -464,6 +510,8 @@
   {
     "reflexive": true,
     "en": { "base": "learn", "past": "learned", "ing": "learning" },
+    "level": "A1",
+    "freq": 2,
     "impf": {
       "inf": "uczyć się",
       "past": { "m": "uczył", "f": "uczyła", "vir": "uczyli" },
@@ -485,6 +533,8 @@
   {
     "reflexive": true,
     "en": { "base": "wash", "past": "washed", "ing": "washing" },
+    "level": "A1",
+    "freq": 3,
     "impf": {
       "inf": "myć się",
       "past": { "m": "mył", "f": "myła", "vir": "myli" },
@@ -506,6 +556,8 @@
   {
     "reflexive": true,
     "en": { "base": "get dressed", "past": "got dressed", "ing": "getting dressed" },
+    "level": "A2",
+    "freq": 3,
     "impf": {
       "inf": "ubierać się",
       "past": { "m": "ubierał", "f": "ubierała", "vir": "ubierali" },
@@ -527,6 +579,8 @@
   {
     "reflexive": true,
     "en": { "base": "meet up", "past": "met up", "ing": "meeting up" },
+    "level": "A2",
+    "freq": 2,
     "impf": {
       "inf": "spotykać się",
       "past": { "m": "spotykał", "f": "spotykała", "vir": "spotykali" },
@@ -548,6 +602,8 @@
   {
     "reflexive": true,
     "en": { "base": "bathe", "past": "bathed", "ing": "bathing" },
+    "level": "A2",
+    "freq": 4,
     "impf": {
       "inf": "kąpać się",
       "past": { "m": "kąpał", "f": "kąpała", "vir": "kąpali" },
@@ -569,6 +625,8 @@
   {
     "reflexive": true,
     "en": { "base": "prepare", "past": "prepared", "ing": "preparing" },
+    "level": "B1",
+    "freq": 3,
     "impf": {
       "inf": "przygotowywać się",
       "past": { "m": "przygotowywał", "f": "przygotowywała", "vir": "przygotowywali" },
@@ -590,6 +648,8 @@
   {
     "reflexive": true,
     "en": { "base": "play", "past": "played", "ing": "playing" },
+    "level": "A2",
+    "freq": 3,
     "impf": {
       "inf": "bawić się",
       "past": { "m": "bawił", "f": "bawiła", "vir": "bawili" },
@@ -612,6 +672,8 @@
     "reflexive": true,
     "momentary": true,
     "en": { "base": "go to bed", "past": "went to bed", "ing": "going to bed" },
+    "level": "A2",
+    "freq": 3,
     "impf": {
       "inf": "kłaść się",
       "past": { "m": "kładł", "f": "kładła", "vir": "kładli" },
@@ -634,6 +696,8 @@
     "reflexive": true,
     "momentary": true,
     "en": { "base": "wake up", "past": "woke up", "ing": "waking up" },
+    "level": "A1",
+    "freq": 3,
     "impf": {
       "inf": "budzić się",
       "past": { "m": "budził", "f": "budziła", "vir": "budzili" },

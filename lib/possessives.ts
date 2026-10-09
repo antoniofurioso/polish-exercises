@@ -5,7 +5,7 @@ import {
   renderAgreementEnglish,
 } from "./agreement";
 import { CASE_INFO } from "./cases";
-import { makeRng, nounForm, nounsFor, pick, shuffle } from "./generate";
+import { casesWithin, makeRng, nounForm, nounsFor, pick, shuffle } from "./generate";
 import { POSSESSIVE_CASES, POSSESSIVES, genderGroup } from "./types";
 import type {
   AnswerMode,
@@ -15,6 +15,7 @@ import type {
   Gender,
   GenderGroup,
   GramNumber,
+  Level,
   Noun,
   Possessive,
   Template,
@@ -215,8 +216,13 @@ const isFixed = (owner: Possessive) => OWNER_INFO[owner].family === "fixed";
  * "swój" only ever refers back to the subject, so it is drilled in the
  * sentences that have one; the rest are open to every possessor.
  */
-function templatesForOwner(owner: Possessive, kase: Case, number: GramNumber): Template[] {
-  const templates = agreementTemplatesFor(kase, number);
+function templatesForOwner(
+  owner: Possessive,
+  kase: Case,
+  number: GramNumber,
+  maxLevel?: Level,
+): Template[] {
+  const templates = agreementTemplatesFor(kase, number, maxLevel);
   return owner === "swoj" ? templates.filter((t) => t.subject === "1sg") : templates;
 }
 
@@ -269,14 +275,15 @@ export function buildPossessiveExercise(
   rng: () => number,
   taken: Set<string> = new Set(),
   genders?: GenderGroup[],
+  maxLevel?: Level,
 ): Exercise | null {
   for (let attempt = 0; attempt < 40; attempt++) {
     const number = pick(numbers, rng);
-    const templates = templatesForOwner(owner, kase, number);
+    const templates = templatesForOwner(owner, kase, number, maxLevel);
     if (templates.length === 0) continue;
 
     for (const tpl of shuffle(templates, rng)) {
-      const nouns = nounsFor(tpl, number, genders);
+      const nouns = nounsFor(tpl, number, genders, maxLevel);
       for (const noun of shuffle(nouns, rng)) {
         const key = `${owner}|${tpl.pl}|${noun.lemma}|${number}`;
         if (taken.has(key) && attempt < 30) continue;
@@ -362,8 +369,12 @@ export function buildPossessiveSession(config: Config, seed = Date.now()): Exerc
   const selected = config.cases.filter((c): c is Case =>
     (POSSESSIVE_CASES as readonly string[]).includes(c),
   );
-  const cases = selected.length ? selected : (["nom"] as Case[]);
   const numbers = config.numbers.length ? config.numbers : (["sg"] as GramNumber[]);
+  const cases = casesWithin(
+    selected.length ? selected : (["nom"] as Case[]),
+    config.maxLevel,
+    (kase) => numbers.some((n) => agreementTemplatesFor(kase, n, config.maxLevel).length > 0),
+  );
   const owners = config.owners?.length ? config.owners : [...POSSESSIVES];
   const answerMode: AnswerMode = config.answerMode === "choice" ? "choice" : "typing";
 
@@ -383,6 +394,7 @@ export function buildPossessiveSession(config: Config, seed = Date.now()): Exerc
         rng,
         taken,
         config.genders,
+        config.maxLevel,
       );
       if (exercise) {
         exercises.push(exercise);

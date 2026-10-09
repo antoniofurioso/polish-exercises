@@ -2,6 +2,7 @@
   {
     "case": "nom",
     "number": "sg",
+    "level": "A1",
     "pl": "To jest {NP}.",
     "en": "This is {np}.",
     "requires": [],
@@ -12,6 +13,7 @@
   {
     "case": "nom",
     "number": "pl",
+    "level": "A1",
     "pl": "To są {NP}.",
     "en": "These are {np}.",
     "requires": [],
@@ -22,6 +24,7 @@
   {
     "case": "nom",
     "number": "sg",
+    "level": "A1",
     "pl": "Czy to jest {NP}?",
     "en": "Is this {np}?",
     "requires": [],
@@ -31,6 +34,7 @@
   {
     "case": "nom",
     "number": "pl",
+    "level": "A1",
     "pl": "Czy to są {NP}?",
     "en": "Are these {np}?",
     "requires": [],
@@ -40,6 +44,7 @@
   {
     "case": "nom",
     "number": "sg",
+    "level": "A1",
     "pl": "Tam jest {NP}.",
     "en": "Over there is {np}.",
     "requires": ["@tangible", "placeIn", "plant"],
@@ -50,6 +55,7 @@
   {
     "case": "nom",
     "number": "pl",
+    "level": "A1",
     "pl": "Tam są {NP}.",
     "en": "Over there are {np}.",
     "requires": ["@tangible", "placeIn", "plant"],
@@ -60,6 +66,7 @@
   {
     "case": "nom",
     "number": "sg",
+    "level": "A1",
     "pl": "Gdzie jest {NP}?",
     "en": "Where is {npDef}?",
     "requires": ["person", "animal", "object", "vehicle", "text", "food", "drink", "placeIn"],
@@ -69,6 +76,7 @@
   {
     "case": "nom",
     "number": "pl",
+    "level": "A1",
     "pl": "Gdzie są {NP}?",
     "en": "Where are {npDef}?",
     "requires": ["person", "animal", "object", "vehicle", "text", "food", "drink"],
@@ -78,6 +86,7 @@
   {
     "case": "nom",
     "number": "sg",
+    "level": "A2",
     "pl": "Na zdjęciu jest {NP}.",
     "en": "In the photo there is {np}.",
     "requires": ["person", "animal", "vehicle", "placeIn", "placeTo", "water", "plant", "food"],
@@ -88,6 +97,7 @@
   {
     "case": "nom",
     "number": "pl",
+    "level": "A2",
     "pl": "Na zdjęciu są {NP}.",
     "en": "In the photo there are {np}.",
     "requires": ["person", "animal", "vehicle", "placeIn", "placeTo", "water", "plant", "food"],
@@ -98,6 +108,7 @@
   {
     "case": "nom",
     "number": "sg",
+    "level": "A2",
     "pl": "Podoba mi się {NP}.",
     "en": "I like {npDef}.",
     "requires": ["placeIn", "placeTo", "water", "vehicle", "text", "show", "plant"],
@@ -108,6 +119,7 @@
   {
     "case": "nom",
     "number": "pl",
+    "level": "A2",
     "pl": "Podobają mi się {NP}.",
     "en": "I like {npDef}.",
     "requires": ["placeIn", "vehicle", "text", "show", "plant"],
@@ -118,6 +130,7 @@
   {
     "case": "nom",
     "number": "sg",
+    "level": "A2",
     "pl": "Interesuje mnie {NP}.",
     "en": "I'm interested in {npBare}.",
     "requires": ["topic"],
@@ -126,6 +139,7 @@
   {
     "case": "nom",
     "number": "pl",
+    "level": "A2",
     "pl": "Interesują mnie {NP}.",
     "en": "I'm interested in {npBare}.",
     "requires": ["show"],
@@ -134,6 +148,7 @@
   {
     "case": "nom",
     "number": "sg",
+    "level": "A1",
     "pl": "Ile kosztuje {NP}?",
     "en": "How much does {npDef} cost?",
     "requires": ["object", "vehicle", "food", "drink"],
@@ -144,6 +159,7 @@
   {
     "case": "nom",
     "number": "pl",
+    "level": "A1",
     "pl": "Ile kosztują {NP}?",
     "en": "How much do {npDef} cost?",
     "requires": ["object", "vehicle", "food"],
@@ -154,6 +170,7 @@
   {
     "case": "nom",
     "number": "sg",
+    "level": "A2",
     "pl": "Zaraz przyjdzie {NP}.",
     "en": "{npDef} is coming in a minute.",
     "requires": ["person"],
@@ -163,6 +180,7 @@
   {
     "case": "nom",
     "number": "pl",
+    "level": "A2",
     "pl": "Zaraz przyjdą {NP}.",
     "en": "{npDef} are coming in a minute.",
     "requires": ["person"],
@@ -171,6 +189,7 @@
   {
     "case": "nom",
     "number": "sg",
+    "level": "A2",
     "pl": "Czeka na ciebie {NP}.",
     "en": "{npDef} is waiting for you.",
     "requires": ["person"],
@@ -180,6 +199,7 @@
   {
     "case": "nom",
     "number": "sg",
+    "level": "A2",
     "pl": "Na stole leży {NP}.",
     "en": "There's {np} on the table.",
     "requires": ["text"],
@@ -189,6 +209,7 @@
   {
     "case": "nom",
     "number": "pl",
+    "level": "A2",
     "pl": "Na stole leżą {NP}.",
     "en": "There are {np} on the table.",
     "requires": ["text"],
@@ -198,6 +219,7 @@
   {
     "case": "nom",
     "number": "sg",
+    "level": "A2",
     "pl": "Dzwoni {NP}.",
     "en": "{npDef} is calling.",
     "requires": ["@close"],
@@ -208,6 +230,7 @@
   {
     "case": "nom",
     "number": "sg",
+    "level": "A2",
     "pl": "Boli mnie {NP}.",
     "en": "My {npBare} hurts.",
     "requires": ["body"],
@@ -217,6 +240,7 @@
   {
     "case": "nom",
     "number": "pl",
+    "level": "A2",
     "pl": "Bolą mnie {NP}.",
     "en": "My {npBare} hurt.",
     "requires": ["body"],
@@ -227,6 +251,7 @@
   {
     "case": "gen",
     "number": "sg",
+    "level": "A1",
     "pl": "Nie mam {NP}.",
     "en": "I don't have {np}.",
     "requires": ["object", "animal", "food", "drink", "family"],
@@ -237,6 +262,7 @@
   {
     "case": "gen",
     "number": "pl",
+    "level": "A2",
     "pl": "Nie mam {NP}.",
     "en": "I don't have {np}.",
     "requires": [],
@@ -246,6 +272,7 @@
   {
     "case": "gen",
     "number": "sg",
+    "level": "A2",
     "pl": "Nie lubię {NP}.",
     "en": "I don't like {np}.",
     "requires": ["drink", "topic"],
@@ -256,6 +283,7 @@
   {
     "case": "gen",
     "number": "pl",
+    "level": "A2",
     "pl": "Nie lubię {NP}.",
     "en": "I don't like {np}.",
     "requires": ["animal", "show", "profession"],
@@ -267,6 +295,7 @@
   {
     "case": "gen",
     "number": "any",
+    "level": "A2",
     "pl": "Szukam {NP}.",
     "en": "I'm looking for {np}.",
     "requires": ["object", "animal", "profession", "placeIn"],
@@ -277,6 +306,7 @@
   {
     "case": "gen",
     "number": "sg",
+    "level": "A1",
     "pl": "Idę do {NP}.",
     "en": "I'm going to {npDef}.",
     "requires": ["placeTo"],
@@ -286,6 +316,7 @@
   {
     "case": "gen",
     "number": "any",
+    "level": "A2",
     "pl": "Jadę do {NP}.",
     "en": "I'm going to see {npDef}.",
     "requires": ["@close"],
@@ -296,6 +327,7 @@
   {
     "case": "gen",
     "number": "any",
+    "level": "B1",
     "pl": "Boję się {NP}.",
     "en": "I'm afraid of {np}.",
     "requires": [],
@@ -306,6 +338,7 @@
   {
     "case": "gen",
     "number": "any",
+    "level": "B1",
     "pl": "Używam {NP}.",
     "en": "I'm using {npDef}.",
     "requires": [],
@@ -315,6 +348,7 @@
   {
     "case": "gen",
     "number": "sg",
+    "level": "A2",
     "pl": "Słucham {NP}.",
     "en": "I'm listening to {npDef}.",
     "requires": [],
@@ -324,6 +358,7 @@
   {
     "case": "gen",
     "number": "sg",
+    "level": "A2",
     "pl": "To jest samochód {NP}.",
     "en": "This is {npDef}'s car.",
     "requires": ["family", "friend", "profession"],
@@ -333,6 +368,7 @@
   {
     "case": "gen",
     "number": "sg",
+    "level": "B1",
     "pl": "Napiję się {NP}.",
     "en": "I'll have some {npBare}.",
     "requires": ["drink"],
@@ -341,6 +377,7 @@
   {
     "case": "gen",
     "number": "sg",
+    "level": "B1",
     "pl": "Jestem u {NP}.",
     "en": "I'm at {npDef}'s.",
     "requires": ["@close"],
@@ -351,6 +388,7 @@
   {
     "case": "gen",
     "number": "any",
+    "level": "A2",
     "pl": "Nie ma {NP}.",
     "en": "There is no {npBare}.",
     "enPl": "There are no {npBare}.",
@@ -362,6 +400,7 @@
   {
     "case": "gen",
     "number": "sg",
+    "level": "A2",
     "pl": "Nie ma tu {NP}.",
     "en": "{npDef} isn't here.",
     "requires": ["person", "animal"],
@@ -372,6 +411,7 @@
   {
     "case": "gen",
     "number": "sg",
+    "level": "A2",
     "pl": "Potrzebuję {NP}.",
     "en": "I need {np}.",
     "requires": ["object", "profession"],
@@ -382,6 +422,7 @@
   {
     "case": "gen",
     "number": "sg",
+    "level": "B1",
     "pl": "To zależy od {NP}.",
     "en": "It depends on {npDef}.",
     "requires": [],
@@ -391,6 +432,7 @@
   {
     "case": "gen",
     "number": "sg",
+    "level": "A2",
     "pl": "Wracam {z} {NP}.",
     "en": "I'm coming back from {npDef}.",
     "requires": ["placeTo"],
@@ -400,6 +442,7 @@
   {
     "case": "gen",
     "number": "any",
+    "level": "A2",
     "pl": "Dzwonię do {NP}.",
     "en": "I'm calling {npDef}.",
     "requires": ["@close", "profession"],
@@ -410,6 +453,7 @@
   {
     "case": "gen",
     "number": "any",
+    "level": "A2",
     "pl": "Kupuję prezent dla {NP}.",
     "en": "I'm buying a present for {npDef}.",
     "requires": ["@close"],
@@ -420,6 +464,7 @@
   {
     "case": "gen",
     "number": "sg",
+    "level": "A2",
     "pl": "Nie znam {NP}.",
     "en": "I don't know {npDef}.",
     "requires": ["profession"],
@@ -429,6 +474,7 @@
   {
     "case": "gen",
     "number": "sg",
+    "level": "A2",
     "pl": "W lodówce nie ma {NP}.",
     "en": "There's no {npBare} in the fridge.",
     "requires": ["food", "drink"],
@@ -438,6 +484,7 @@
   {
     "case": "gen",
     "number": "pl",
+    "level": "A2",
     "pl": "Mam dużo {NP}.",
     "en": "I have a lot of {npBare}.",
     "requires": ["text", "animal", "show"],
@@ -448,6 +495,7 @@
   {
     "case": "dat",
     "number": "any",
+    "level": "A2",
     "pl": "Pomagam {NP}.",
     "en": "I'm helping {npDef}.",
     "requires": ["person"],
@@ -459,6 +507,7 @@
   {
     "case": "dat",
     "number": "any",
+    "level": "B1",
     "pl": "Ufam {NP}.",
     "en": "I trust {npDef}.",
     "requires": ["@close", "profession"],
@@ -469,6 +518,7 @@
   {
     "case": "dat",
     "number": "any",
+    "level": "A2",
     "pl": "Daję prezent {NP}.",
     "en": "I'm giving a present to {npDef}.",
     "requires": ["@close"],
@@ -479,6 +529,7 @@
   {
     "case": "dat",
     "number": "any",
+    "level": "A2",
     "pl": "Dziękuję {NP} za pomoc.",
     "en": "I thank {npDef} for the help.",
     "requires": ["person"],
@@ -488,6 +539,7 @@
   {
     "case": "dat",
     "number": "any",
+    "level": "B1",
     "pl": "Czytam bajkę {NP}.",
     "en": "I'm reading a fairy tale to {npDef}.",
     "requires": [],
@@ -499,6 +551,7 @@
   {
     "case": "dat",
     "number": "sg",
+    "level": "A2",
     "pl": "Kupuję kwiaty {NP}.",
     "en": "I'm buying flowers for {npDef}.",
     "requires": ["family"],
@@ -510,6 +563,7 @@
   {
     "case": "dat",
     "number": "any",
+    "level": "B1",
     "pl": "Przyglądam się {NP}.",
     "en": "I'm looking closely at {npDef}.",
     "requires": ["animal", "plant"],
@@ -520,6 +574,7 @@
   {
     "case": "dat",
     "number": "any",
+    "level": "B1",
     "pl": "Robię zdjęcie {NP}.",
     "en": "I'm taking a photo of {npDef}.",
     "requires": ["@close", "animal"],
@@ -530,6 +585,7 @@
   {
     "case": "dat",
     "number": "any",
+    "level": "B1",
     "pl": "Nie przeszkadzaj {NP}!",
     "en": "Don't disturb {npDef}!",
     "requires": ["person"],
@@ -540,6 +596,7 @@
   {
     "case": "dat",
     "number": "any",
+    "level": "B1",
     "pl": "Ten prezent podoba się {NP}.",
     "en": "{npDef} likes this present.",
     "enPl": "{npDef} like this present.",
@@ -551,6 +608,7 @@
   {
     "case": "dat",
     "number": "any",
+    "level": "A2",
     "pl": "Powiedz to {NP}.",
     "en": "Tell that to {npDef}.",
     "requires": ["person"],
@@ -560,6 +618,7 @@
   {
     "case": "dat",
     "number": "any",
+    "level": "A2",
     "pl": "Wysyłam wiadomość {NP}.",
     "en": "I'm sending a message to {npDef}.",
     "requires": ["person"],
@@ -570,6 +629,7 @@
   {
     "case": "dat",
     "number": "sg",
+    "level": "B1",
     "pl": "Życzę {NP} miłego dnia.",
     "en": "I wish {npDef} a nice day.",
     "requires": [],
@@ -579,6 +639,7 @@
   {
     "case": "dat",
     "number": "any",
+    "level": "B2",
     "pl": "Dzięki {NP} wszystko się udało.",
     "en": "Thanks to {npDef} everything worked out.",
     "requires": ["person"],
@@ -588,6 +649,7 @@
   {
     "case": "dat",
     "number": "any",
+    "level": "B1",
     "pl": "Daję jeść {NP}.",
     "en": "I'm feeding {npDef}.",
     "requires": [],
@@ -598,6 +660,7 @@
   {
     "case": "dat",
     "number": "any",
+    "level": "A2",
     "pl": "Zawsze mówię {NP} prawdę.",
     "en": "I always tell {npDef} the truth.",
     "requires": ["@close"],
@@ -607,6 +670,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A1",
     "pl": "Mam {NP}.",
     "en": "I have {np}.",
     "requires": ["animal", "object", "vehicle", "family"],
@@ -617,6 +681,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A1",
     "pl": "Widzę {NP}.",
     "en": "I can see {np}.",
     "requires": ["person", "animal", "vehicle", "placeIn", "placeTo", "water", "plant"],
@@ -627,6 +692,7 @@
   {
     "case": "acc",
     "number": "sg",
+    "level": "A1",
     "pl": "Lubię {NP}.",
     "en": "I like {np}.",
     "requires": ["drink", "topic"],
@@ -636,6 +702,7 @@
   {
     "case": "acc",
     "number": "pl",
+    "level": "A1",
     "pl": "Lubię {NP}.",
     "en": "I like {np}.",
     "requires": ["animal", "show", "food"],
@@ -646,6 +713,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A1",
     "pl": "Kupuję {NP}.",
     "en": "I'm buying {np}.",
     "requires": ["object", "food", "drink", "vehicle"],
@@ -656,6 +724,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A1",
     "pl": "Jem {NP}.",
     "en": "I'm eating {np}.",
     "requires": ["food"],
@@ -664,6 +733,7 @@
   {
     "case": "acc",
     "number": "sg",
+    "level": "A1",
     "pl": "Piję {NP}.",
     "en": "I'm drinking {np}.",
     "requires": ["drink"],
@@ -672,6 +742,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A1",
     "pl": "Znam {NP}.",
     "en": "I know {npDef}.",
     "requires": ["profession", "friend"],
@@ -682,6 +753,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A1",
     "pl": "Czytam {NP}.",
     "en": "I'm reading {np}.",
     "requires": ["text"],
@@ -690,6 +762,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A1",
     "pl": "Kocham {NP}.",
     "en": "I love {npDef}.",
     "requires": ["family"],
@@ -698,6 +771,7 @@
   {
     "case": "acc",
     "number": "sg",
+    "level": "A2",
     "pl": "Uwielbiam {NP}.",
     "en": "I love {np}.",
     "requires": ["topic"],
@@ -708,6 +782,7 @@
   {
     "case": "acc",
     "number": "pl",
+    "level": "A2",
     "pl": "Uwielbiam {NP}.",
     "en": "I love {np}.",
     "requires": ["show"],
@@ -717,6 +792,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A2",
     "pl": "Zapraszam {NP} na kawę.",
     "en": "I'm inviting {npDef} for a coffee.",
     "requires": ["@close"],
@@ -727,6 +803,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A1",
     "pl": "Poproszę {NP}.",
     "en": "{np}, please.",
     "requires": ["food", "drink"],
@@ -736,6 +813,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A1",
     "pl": "Masz {NP}?",
     "en": "Do you have {np}?",
     "requires": ["object", "animal"],
@@ -746,6 +824,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A1",
     "pl": "Muszę kupić {NP}.",
     "en": "I have to buy {np}.",
     "requires": ["object", "food", "drink"],
@@ -756,6 +835,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A2",
     "pl": "Czekam na {NP}.",
     "en": "I'm waiting for {npDef}.",
     "requires": ["@close", "show"],
@@ -767,6 +847,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A2",
     "pl": "Mam ochotę na {NP}.",
     "en": "I feel like having {np}.",
     "requires": ["food", "drink"],
@@ -775,6 +856,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A2",
     "pl": "Dzięki za {NP}.",
     "en": "Thanks for {npDef}.",
     "requires": ["food", "drink"],
@@ -784,6 +866,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A1",
     "pl": "Oglądam {NP}.",
     "en": "I'm watching {np}.",
     "requires": ["show"],
@@ -792,6 +875,7 @@
   {
     "case": "acc",
     "number": "sg",
+    "level": "A2",
     "pl": "Otwieram {NP}.",
     "en": "I'm opening {npDef}.",
     "requires": [],
@@ -801,6 +885,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "B1",
     "pl": "Martwię się o {NP}.",
     "en": "I'm worried about {npDef}.",
     "requires": ["@close"],
@@ -811,6 +896,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A2",
     "pl": "Odwiedzam {NP}.",
     "en": "I'm visiting {npDef}.",
     "requires": ["@close"],
@@ -821,6 +907,7 @@
   {
     "case": "acc",
     "number": "sg",
+    "level": "A2",
     "pl": "Jadę nad {NP}.",
     "en": "I'm going to {npDef}.",
     "requires": ["water"],
@@ -829,6 +916,7 @@
   {
     "case": "acc",
     "number": "sg",
+    "level": "A2",
     "pl": "Idę na {NP}.",
     "en": "I'm going to {npDef}.",
     "requires": [],
@@ -838,6 +926,7 @@
   {
     "case": "acc",
     "number": "any",
+    "level": "A2",
     "pl": "Zamawiam {NP}.",
     "en": "I'm ordering {np}.",
     "requires": ["food", "drink"],
@@ -847,6 +936,7 @@
   {
     "case": "acc",
     "number": "sg",
+    "level": "B1",
     "pl": "Wynajmuję {NP}.",
     "en": "I'm renting {np}.",
     "requires": [],
@@ -856,6 +946,7 @@
   {
     "case": "ins",
     "number": "sg",
+    "level": "A2",
     "pl": "Interesuję się {NP}.",
     "en": "I'm interested in {npBare}.",
     "requires": ["topic"],
@@ -864,6 +955,7 @@
   {
     "case": "ins",
     "number": "sg",
+    "level": "B1",
     "pl": "Zajmuję się {NP}.",
     "en": "I work in {npBare}.",
     "requires": [],
@@ -874,6 +966,7 @@
   {
     "case": "ins",
     "number": "any",
+    "level": "A2",
     "pl": "Rozmawiam {z} {NP}.",
     "en": "I'm talking with {npDef}.",
     "requires": ["person"],
@@ -884,6 +977,7 @@
   {
     "case": "ins",
     "number": "any",
+    "level": "A2",
     "pl": "Spotykam się {z} {NP}.",
     "en": "I'm meeting {npDef}.",
     "requires": ["@close", "profession"],
@@ -893,6 +987,7 @@
   {
     "case": "ins",
     "number": "any",
+    "level": "A2",
     "pl": "Idę do kina {z} {NP}.",
     "en": "I'm going to the cinema with {npDef}.",
     "requires": ["@close"],
@@ -902,6 +997,7 @@
   {
     "case": "ins",
     "number": "sg",
+    "level": "A2",
     "pl": "Jadę {NP}.",
     "en": "I'm taking {npDef}.",
     "requires": ["vehicle"],
@@ -910,6 +1006,7 @@
   {
     "case": "ins",
     "number": "sg",
+    "level": "A2",
     "pl": "On jest {NP}.",
     "en": "He is {np}.",
     "requires": ["profession"],
@@ -919,6 +1016,7 @@
   {
     "case": "ins",
     "number": "pl",
+    "level": "A2",
     "pl": "Oni są {NP}.",
     "en": "They are {np}.",
     "requires": ["profession"],
@@ -928,6 +1026,7 @@
   {
     "case": "ins",
     "number": "sg",
+    "level": "B1",
     "pl": "Chcę zostać {NP}.",
     "en": "I want to become {np}.",
     "requires": ["profession"],
@@ -938,6 +1037,7 @@
   {
     "case": "ins",
     "number": "sg",
+    "level": "B1",
     "pl": "Obraz wisi nad {NP}.",
     "en": "The picture hangs above {npDef}.",
     "requires": [],
@@ -947,6 +1047,7 @@
   {
     "case": "ins",
     "number": "sg",
+    "level": "A2",
     "pl": "Kot śpi pod {NP}.",
     "en": "The cat sleeps under {npDef}.",
     "requires": [],
@@ -956,6 +1057,7 @@
   {
     "case": "ins",
     "number": "any",
+    "level": "B1",
     "pl": "Opiekuję się {NP}.",
     "en": "I take care of {npDef}.",
     "requires": ["family"],
@@ -967,6 +1069,7 @@
   {
     "case": "ins",
     "number": "sg",
+    "level": "B1",
     "pl": "Opiekuję się {NP}.",
     "en": "I look after {npDef}.",
     "requires": [],
@@ -977,6 +1080,7 @@
   {
     "case": "ins",
     "number": "any",
+    "level": "A2",
     "pl": "Mieszkam {z} {NP}.",
     "en": "I live with {npDef}.",
     "requires": ["family"],
@@ -987,6 +1091,7 @@
   {
     "case": "ins",
     "number": "sg",
+    "level": "A2",
     "pl": "Spotkajmy się przed {NP}.",
     "en": "Let's meet in front of {npDef}.",
     "requires": [],
@@ -997,6 +1102,7 @@
   {
     "case": "ins",
     "number": "sg",
+    "level": "B1",
     "pl": "Coś jest nie tak {z} {NP}.",
     "en": "Something is wrong with {npDef}.",
     "requires": [],
@@ -1006,6 +1112,7 @@
   {
     "case": "ins",
     "number": "sg",
+    "level": "B1",
     "pl": "Pracuję nad {NP}.",
     "en": "I'm working on {npDef}.",
     "requires": [],
@@ -1015,6 +1122,7 @@
   {
     "case": "ins",
     "number": "sg",
+    "level": "B1",
     "pl": "Mieszkam nad {NP}.",
     "en": "I live by {npDef}.",
     "requires": ["water"],
@@ -1023,6 +1131,7 @@
   {
     "case": "ins",
     "number": "sg",
+    "level": "A2",
     "pl": "Poproszę herbatę {z} {NP}.",
     "en": "Tea with {npBare}, please.",
     "requires": [],
@@ -1033,6 +1142,7 @@
   {
     "case": "loc",
     "number": "any",
+    "level": "A2",
     "pl": "Myślę o {NP}.",
     "en": "I'm thinking about {npDef}.",
     "requires": ["@close", "animal", "water"],
@@ -1044,6 +1154,7 @@
   {
     "case": "loc",
     "number": "any",
+    "level": "A2",
     "pl": "Rozmawiamy o {NP}.",
     "en": "We're talking about {npDef}.",
     "requires": ["topic", "show", "profession", "friend"],
@@ -1053,6 +1164,7 @@
   {
     "case": "loc",
     "number": "sg",
+    "level": "A2",
     "pl": "Piszę o {NP}.",
     "en": "I'm writing about {npBare}.",
     "requires": ["topic"],
@@ -1062,6 +1174,7 @@
   {
     "case": "loc",
     "number": "any",
+    "level": "B1",
     "pl": "Opowiadam o {NP}.",
     "en": "I'm telling you about {npDef}.",
     "requires": ["@close", "show"],
@@ -1071,6 +1184,7 @@
   {
     "case": "loc",
     "number": "sg",
+    "level": "B1",
     "pl": "Marzę o {NP}.",
     "en": "I dream of {np}.",
     "requires": [],
@@ -1080,6 +1194,7 @@
   {
     "case": "loc",
     "number": "sg",
+    "level": "A1",
     "pl": "Mieszkam {w} {NP}.",
     "en": "I live in {np}.",
     "requires": [],
@@ -1089,6 +1204,7 @@
   {
     "case": "loc",
     "number": "sg",
+    "level": "A1",
     "pl": "Jestem {w} {NP}.",
     "en": "I'm in {npDef}.",
     "requires": ["placeIn"],
@@ -1098,6 +1214,7 @@
   {
     "case": "loc",
     "number": "sg",
+    "level": "A2",
     "pl": "Byłem wczoraj {w} {NP}.",
     "en": "I was at {npDef} yesterday.",
     "requires": ["placeIn"],
@@ -1107,6 +1224,7 @@
   {
     "case": "loc",
     "number": "sg",
+    "level": "A2",
     "pl": "Książka leży na {NP}.",
     "en": "The book is lying on {npDef}.",
     "requires": ["surface"],
@@ -1115,6 +1233,7 @@
   {
     "case": "loc",
     "number": "sg",
+    "level": "B1",
     "pl": "Przy {NP} stoi krzesło.",
     "en": "There is a chair next to {npDef}.",
     "requires": [],
@@ -1124,6 +1243,7 @@
   {
     "case": "loc",
     "number": "sg",
+    "level": "A1",
     "pl": "Pracuję {w} {NP}.",
     "en": "I work at {np}.",
     "requires": [],
@@ -1133,6 +1253,7 @@
   {
     "case": "loc",
     "number": "sg",
+    "level": "A2",
     "pl": "Spotkajmy się {w} {NP}.",
     "en": "Let's meet at {npDef}.",
     "requires": [],
@@ -1143,6 +1264,7 @@
   {
     "case": "loc",
     "number": "any",
+    "level": "A2",
     "pl": "Co wiesz o {NP}?",
     "en": "What do you know about {npDef}?",
     "requires": ["topic", "profession"],
@@ -1153,6 +1275,7 @@
   {
     "case": "loc",
     "number": "sg",
+    "level": "B2",
     "pl": "Zależy mi na {NP}.",
     "en": "I care about {npDef}.",
     "requires": ["family"],
@@ -1162,6 +1285,7 @@
   {
     "case": "loc",
     "number": "sg",
+    "level": "B1",
     "pl": "Znam się na {NP}.",
     "en": "I know a lot about {npBare}.",
     "requires": ["topic"],
@@ -1171,6 +1295,7 @@
   {
     "case": "loc",
     "number": "pl",
+    "level": "B1",
     "pl": "Znam się na {NP}.",
     "en": "I know a lot about {npBare}.",
     "requires": [],
@@ -1181,6 +1306,7 @@
   {
     "case": "loc",
     "number": "sg",
+    "level": "B1",
     "pl": "Mieszkam przy {NP}.",
     "en": "I live next to {npDef}.",
     "requires": [],
@@ -1190,6 +1316,7 @@
   {
     "case": "loc",
     "number": "sg",
+    "level": "A1",
     "pl": "Jestem na {NP}.",
     "en": "I'm at {npDef}.",
     "requires": [],
@@ -1199,6 +1326,7 @@
   {
     "case": "voc",
     "number": "any",
+    "level": "B1",
     "pl": "Dzień dobry, {NP}!",
     "en": "Good morning, {npBare}!",
     "requires": ["@close"],
@@ -1209,6 +1337,7 @@
   {
     "case": "voc",
     "number": "any",
+    "level": "B1",
     "pl": "Cześć, {NP}!",
     "en": "Hi, {npBare}!",
     "requires": ["@close"],
@@ -1219,6 +1348,7 @@
   {
     "case": "voc",
     "number": "any",
+    "level": "B1",
     "pl": "Dziękuję, {NP}.",
     "en": "Thank you, {npBare}.",
     "requires": ["@close"],
@@ -1229,6 +1359,7 @@
   {
     "case": "voc",
     "number": "sg",
+    "level": "B1",
     "pl": "Chodź tutaj, {NP}!",
     "en": "Come here, {npBare}!",
     "requires": ["family"],
@@ -1240,6 +1371,7 @@
   {
     "case": "voc",
     "number": "pl",
+    "level": "B1",
     "pl": "Chodźcie tutaj, {NP}!",
     "en": "Come here, {npBare}!",
     "requires": [],
@@ -1250,6 +1382,7 @@
   {
     "case": "voc",
     "number": "any",
+    "level": "B1",
     "pl": "Przepraszam, {NP}.",
     "en": "Sorry, {npBare}.",
     "requires": ["@close"],
@@ -1260,6 +1393,7 @@
   {
     "case": "voc",
     "number": "any",
+    "level": "B1",
     "pl": "Dobranoc, {NP}.",
     "en": "Good night, {npBare}.",
     "requires": ["family"],
@@ -1270,6 +1404,7 @@
   {
     "case": "voc",
     "number": "sg",
+    "level": "B1",
     "pl": "Kocham cię, {NP}.",
     "en": "I love you, {npBare}.",
     "requires": ["family"],
@@ -1280,6 +1415,7 @@
   {
     "case": "voc",
     "number": "sg",
+    "level": "B1",
     "pl": "Gdzie jesteś, {NP}?",
     "en": "Where are you, {npBare}?",
     "requires": ["family"],
@@ -1291,6 +1427,7 @@
   {
     "case": "voc",
     "number": "pl",
+    "level": "B1",
     "pl": "Gdzie jesteście, {NP}?",
     "en": "Where are you, {npBare}?",
     "requires": [],
@@ -1301,6 +1438,7 @@
   {
     "case": "voc",
     "number": "sg",
+    "level": "B1",
     "pl": "Uważaj, {NP}!",
     "en": "Watch out, {npBare}!",
     "requires": ["@close"],
@@ -1312,6 +1450,7 @@
   {
     "case": "voc",
     "number": "any",
+    "level": "B1",
     "pl": "Do zobaczenia, {NP}!",
     "en": "See you, {npBare}!",
     "requires": ["@close"],
@@ -1322,6 +1461,7 @@
   {
     "case": "voc",
     "number": "sg",
+    "level": "B1",
     "pl": "Nie martw się, {NP}.",
     "en": "Don't worry, {npBare}.",
     "requires": ["@close"],
@@ -1332,6 +1472,7 @@
   {
     "case": "voc",
     "number": "any",
+    "level": "B1",
     "pl": "Miłego dnia, {NP}!",
     "en": "Have a nice day, {npBare}!",
     "requires": ["@close"],
@@ -1342,6 +1483,7 @@
   {
     "case": "voc",
     "number": "any",
+    "level": "B1",
     "pl": "Wszystkiego najlepszego, {NP}!",
     "en": "Happy birthday, {npBare}!",
     "requires": ["@close"],

@@ -5,7 +5,7 @@ import {
   renderAgreementEnglish,
 } from "./agreement";
 import { CASE_INFO } from "./cases";
-import { makeRng, nounForm, nounsFor, pick, shuffle } from "./generate";
+import { casesWithin, makeRng, nounForm, nounsFor, pick, shuffle } from "./generate";
 import { PRONOUN_CASES, genderGroup } from "./types";
 import type {
   AnswerMode,
@@ -15,6 +15,7 @@ import type {
   Gender,
   GenderGroup,
   GramNumber,
+  Level,
   Noun,
   Token,
 } from "./types";
@@ -165,14 +166,15 @@ export function buildPronounExercise(
   rng: () => number,
   taken: Set<string> = new Set(),
   genders?: GenderGroup[],
+  maxLevel?: Level,
 ): Exercise | null {
   for (let attempt = 0; attempt < 40; attempt++) {
     const number = pick(numbers, rng);
-    const templates = agreementTemplatesFor(kase, number);
+    const templates = agreementTemplatesFor(kase, number, maxLevel);
     if (templates.length === 0) continue;
 
     for (const tpl of shuffle(templates, rng)) {
-      const nouns = nounsFor(tpl, number, genders);
+      const nouns = nounsFor(tpl, number, genders, maxLevel);
       for (const noun of shuffle(nouns, rng)) {
         const key = `${base}|${tpl.pl}|${noun.lemma}|${number}`;
         if (taken.has(key) && attempt < 30) continue;
@@ -243,8 +245,12 @@ export function buildPronounSession(config: Config, seed = Date.now()): Exercise
   const selected = (config.cases.length ? config.cases : (["nom"] as Case[])).filter(
     (c): c is Case => (PRONOUN_CASES as readonly string[]).includes(c),
   );
-  const cases = selected.length ? selected : (["nom"] as Case[]);
   const numbers = config.numbers.length ? config.numbers : (["sg"] as GramNumber[]);
+  const cases = casesWithin(
+    selected.length ? selected : (["nom"] as Case[]),
+    config.maxLevel,
+    (kase) => numbers.some((n) => agreementTemplatesFor(kase, n, config.maxLevel).length > 0),
+  );
   const bases: Demonstrative[] =
     config.demo === "ten" ? ["ten"] : config.demo === "tamten" ? ["tamten"] : [...DEMONSTRATIVES];
   const answerMode: AnswerMode = config.answerMode === "choice" ? "choice" : "typing";
@@ -256,7 +262,16 @@ export function buildPronounSession(config: Config, seed = Date.now()): Exercise
     if (pool.length === 0) pool = shuffle(cases, rng);
     const kase = pool.pop()!;
     const base = pick(bases, rng);
-    const exercise = buildPronounExercise(base, kase, numbers, answerMode, rng, taken, config.genders);
+    const exercise = buildPronounExercise(
+      base,
+      kase,
+      numbers,
+      answerMode,
+      rng,
+      taken,
+      config.genders,
+      config.maxLevel,
+    );
     if (exercise) exercises.push(exercise);
   }
   return exercises;

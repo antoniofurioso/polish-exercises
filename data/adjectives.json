@@ -2,6 +2,8 @@
   {
     "lemma": "dobry",
     "en": "good",
+    "level": "A1",
+    "freq": 1,
     "stem": "dobr",
     "type": "hard",
     "virilePl": "dobrzy"
@@ -9,6 +11,8 @@
   {
     "lemma": "nowy",
     "en": "new",
+    "level": "A1",
+    "freq": 1,
     "stem": "now",
     "type": "hard",
     "virilePl": "nowi"
@@ -16,6 +20,8 @@
   {
     "lemma": "stary",
     "en": "old",
+    "level": "A1",
+    "freq": 1,
     "stem": "star",
     "type": "hard",
     "virilePl": "starzy"
@@ -23,6 +29,8 @@
   {
     "lemma": "mały",
     "en": "small",
+    "level": "A1",
+    "freq": 1,
     "stem": "mał",
     "type": "hard",
     "virilePl": "mali"
@@ -30,6 +38,8 @@
   {
     "lemma": "duży",
     "en": "big",
+    "level": "A1",
+    "freq": 1,
     "stem": "duż",
     "type": "hard",
     "virilePl": "duzi"
@@ -37,6 +47,8 @@
   {
     "lemma": "ładny",
     "en": "pretty",
+    "level": "A1",
+    "freq": 2,
     "stem": "ładn",
     "type": "hard",
     "virilePl": "ładni"
@@ -44,6 +56,8 @@
   {
     "lemma": "piękny",
     "en": "beautiful",
+    "level": "A1",
+    "freq": 2,
     "stem": "piękn",
     "type": "hard",
     "virilePl": "piękni"
@@ -51,6 +65,8 @@
   {
     "lemma": "ciekawy",
     "en": "interesting",
+    "level": "A1",
+    "freq": 2,
     "stem": "ciekaw",
     "type": "hard",
     "virilePl": "ciekawi"
@@ -58,6 +74,8 @@
   {
     "lemma": "ważny",
     "en": "important",
+    "level": "A2",
+    "freq": 1,
     "stem": "ważn",
     "type": "hard",
     "virilePl": "ważni"
@@ -65,6 +83,8 @@
   {
     "lemma": "znany",
     "en": "well-known",
+    "level": "A2",
+    "freq": 2,
     "stem": "znan",
     "type": "hard",
     "virilePl": "znani"
@@ -72,6 +92,8 @@
   {
     "lemma": "czarny",
     "en": "black",
+    "level": "A1",
+    "freq": 2,
     "stem": "czarn",
     "type": "hard",
     "virilePl": "czarni"
@@ -79,6 +101,8 @@
   {
     "lemma": "biały",
     "en": "white",
+    "level": "A1",
+    "freq": 2,
     "stem": "biał",
     "type": "hard",
     "virilePl": "biali"
@@ -86,6 +110,8 @@
   {
     "lemma": "zielony",
     "en": "green",
+    "level": "A1",
+    "freq": 3,
     "stem": "zielon",
     "type": "hard",
     "virilePl": "zieloni"
@@ -93,6 +119,8 @@
   {
     "lemma": "czerwony",
     "en": "red",
+    "level": "A1",
+    "freq": 3,
     "stem": "czerwon",
     "type": "hard",
     "virilePl": "czerwoni"
@@ -100,6 +128,8 @@
   {
     "lemma": "niebieski",
     "en": "blue",
+    "level": "A1",
+    "freq": 3,
     "stem": "niebiesk",
     "type": "velar",
     "virilePl": "niebiescy"
@@ -107,6 +137,8 @@
   {
     "lemma": "żółty",
     "en": "yellow",
+    "level": "A1",
+    "freq": 4,
     "stem": "żółt",
     "type": "hard",
     "virilePl": "żółci"
@@ -114,6 +146,8 @@
   {
     "lemma": "szary",
     "en": "grey",
+    "level": "A2",
+    "freq": 4,
     "stem": "szar",
     "type": "hard",
     "virilePl": "szarzy"
@@ -121,6 +155,8 @@
   {
     "lemma": "kolorowy",
     "en": "colourful",
+    "level": "A2",
+    "freq": 4,
     "stem": "kolorow",
     "type": "hard",
     "virilePl": "kolorowi"
@@ -128,6 +164,8 @@
   {
     "lemma": "polski",
     "en": "Polish",
+    "level": "A1",
+    "freq": 1,
     "stem": "polsk",
     "type": "velar",
     "virilePl": "polscy"
@@ -135,6 +173,8 @@
   {
     "lemma": "włoski",
     "en": "Italian",
+    "level": "A2",
+    "freq": 4,
     "stem": "włosk",
     "type": "velar",
     "virilePl": "włoscy"
@@ -142,6 +182,8 @@
   {
     "lemma": "wysoki",
     "en": "tall",
+    "level": "A1",
+    "freq": 2,
     "stem": "wysok",
     "type": "velar",
     "virilePl": "wysocy",
@@ -150,6 +192,8 @@
   {
     "lemma": "drogi",
     "en": "expensive",
+    "level": "A1",
+    "freq": 2,
     "stem": "drog",
     "type": "velar",
     "virilePl": "drodzy"
@@ -157,6 +201,8 @@
   {
     "lemma": "tani",
     "en": "cheap",
+    "level": "A1",
+    "freq": 3,
     "stem": "tan",
     "type": "soft",
     "virilePl": "tani"
@@ -164,6 +210,8 @@
   {
     "lemma": "głupi",
     "en": "silly",
+    "level": "A2",
+    "freq": 3,
     "stem": "głup",
     "type": "soft",
     "virilePl": "głupi"
@@ -171,6 +219,8 @@
   {
     "lemma": "młody",
     "en": "young",
+    "level": "A1",
+    "freq": 1,
     "stem": "młod",
     "type": "hard",
     "virilePl": "młodzi"
@@ -178,6 +228,8 @@
   {
     "lemma": "mądry",
     "en": "wise",
+    "level": "A2",
+    "freq": 3,
     "stem": "mądr",
     "type": "hard",
     "virilePl": "mądrzy"
@@ -185,6 +237,8 @@
   {
     "lemma": "miły",
     "en": "nice",
+    "level": "A1",
+    "freq": 3,
     "stem": "mił",
     "type": "hard",
     "virilePl": "mili"
@@ -192,6 +246,8 @@
   {
     "lemma": "wesoły",
     "en": "cheerful",
+    "level": "A2",
+    "freq": 3,
     "stem": "wesoł",
     "type": "hard",
     "virilePl": "weseli"
@@ -199,6 +255,8 @@
   {
     "lemma": "przystojny",
     "en": "handsome",
+    "level": "A2",
+    "freq": 4,
     "stem": "przystojn",
     "type": "hard",
     "virilePl": "przystojni",
@@ -207,6 +265,8 @@
   {
     "lemma": "kochany",
     "en": "dear",
+    "level": "A2",
+    "freq": 3,
     "stem": "kochan",
     "type": "hard",
     "virilePl": "kochani",
@@ -215,6 +275,8 @@
   {
     "lemma": "starszy",
     "en": "older",
+    "level": "A2",
+    "freq": 2,
     "stem": "starsz",
     "type": "hard",
     "virilePl": "starsi"
@@ -222,6 +284,8 @@
   {
     "lemma": "młodszy",
     "en": "younger",
+    "level": "A2",
+    "freq": 3,
     "stem": "młodsz",
     "type": "hard",
     "virilePl": "młodsi"
@@ -229,6 +293,8 @@
   {
     "lemma": "dorosły",
     "en": "grown-up",
+    "level": "B1",
+    "freq": 3,
     "stem": "dorosł",
     "type": "hard",
     "virilePl": "dorośli"
@@ -236,6 +302,8 @@
   {
     "lemma": "najlepszy",
     "en": "best",
+    "level": "A2",
+    "freq": 2,
     "stem": "najlepsz",
     "type": "hard",
     "virilePl": "najlepsi"
@@ -243,6 +311,8 @@
   {
     "lemma": "prawdziwy",
     "en": "true",
+    "level": "B1",
+    "freq": 1,
     "stem": "prawdziw",
     "type": "hard",
     "virilePl": "prawdziwi"
@@ -250,6 +320,8 @@
   {
     "lemma": "głośny",
     "en": "loud",
+    "level": "A2",
+    "freq": 4,
     "stem": "głośn",
     "type": "hard",
     "virilePl": "głośni"
@@ -257,6 +329,8 @@
   {
     "lemma": "cichy",
     "en": "quiet",
+    "level": "A2",
+    "freq": 3,
     "stem": "cich",
     "type": "hard",
     "virilePl": "cisi"
@@ -264,6 +338,8 @@
   {
     "lemma": "leniwy",
     "en": "lazy",
+    "level": "A2",
+    "freq": 4,
     "stem": "leniw",
     "type": "hard",
     "virilePl": "leniwi"
@@ -271,6 +347,8 @@
   {
     "lemma": "dziki",
     "en": "wild",
+    "level": "B1",
+    "freq": 3,
     "stem": "dzik",
     "type": "velar",
     "virilePl": "dzicy"
@@ -278,6 +356,8 @@
   {
     "lemma": "smutny",
     "en": "sad",
+    "level": "A2",
+    "freq": 3,
     "stem": "smutn",
     "type": "hard",
     "virilePl": "smutni",
@@ -286,6 +366,8 @@
   {
     "lemma": "chory",
     "en": "ill",
+    "level": "A1",
+    "freq": 3,
     "stem": "chor",
     "type": "hard",
     "virilePl": "chorzy",
@@ -294,6 +376,8 @@
   {
     "lemma": "głodny",
     "en": "hungry",
+    "level": "A1",
+    "freq": 4,
     "stem": "głodn",
     "type": "hard",
     "virilePl": "głodni",
@@ -302,6 +386,8 @@
   {
     "lemma": "były",
     "en": "former",
+    "level": "B1",
+    "freq": 2,
     "stem": "był",
     "type": "hard",
     "virilePl": "byli",
@@ -310,6 +396,8 @@
   {
     "lemma": "smaczny",
     "en": "tasty",
+    "level": "A2",
+    "freq": 4,
     "stem": "smaczn",
     "type": "hard",
     "virilePl": "smaczni"
@@ -317,6 +405,8 @@
   {
     "lemma": "słodki",
     "en": "sweet",
+    "level": "A2",
+    "freq": 3,
     "stem": "słodk",
     "type": "velar",
     "virilePl": "słodcy"
@@ -324,6 +414,8 @@
   {
     "lemma": "świeży",
     "en": "fresh",
+    "level": "A2",
+    "freq": 3,
     "stem": "śwież",
     "type": "hard",
     "virilePl": "świeży"
@@ -331,6 +423,8 @@
   {
     "lemma": "pomidorowy",
     "en": "tomato",
+    "level": "A2",
+    "freq": 5,
     "stem": "pomidorow",
     "type": "hard",
     "virilePl": "pomidorowi"
@@ -338,6 +432,8 @@
   {
     "lemma": "pomarańczowy",
     "en": "orange",
+    "level": "A2",
+    "freq": 5,
     "stem": "pomarańczow",
     "type": "hard",
     "virilePl": "pomarańczowi"
@@ -345,6 +441,8 @@
   {
     "lemma": "mineralny",
     "en": "mineral",
+    "level": "A1",
+    "freq": 5,
     "stem": "mineraln",
     "type": "hard",
     "virilePl": "mineralni"
@@ -352,6 +450,8 @@
   {
     "lemma": "mocny",
     "en": "strong",
+    "level": "A2",
+    "freq": 2,
     "stem": "mocn",
     "type": "hard",
     "virilePl": "mocni"
@@ -359,6 +459,8 @@
   {
     "lemma": "zimny",
     "en": "cold",
+    "level": "A1",
+    "freq": 3,
     "stem": "zimn",
     "type": "hard",
     "virilePl": "zimni"
@@ -366,6 +468,8 @@
   {
     "lemma": "ciepły",
     "en": "warm",
+    "level": "A1",
+    "freq": 2,
     "stem": "ciepł",
     "type": "hard",
     "virilePl": "ciepli"
@@ -373,6 +477,8 @@
   {
     "lemma": "gorący",
     "en": "hot",
+    "level": "A2",
+    "freq": 3,
     "stem": "gorąc",
     "type": "hard",
     "virilePl": "gorący"
@@ -380,6 +486,8 @@
   {
     "lemma": "szybki",
     "en": "fast",
+    "level": "A2",
+    "freq": 2,
     "stem": "szybk",
     "type": "velar",
     "virilePl": "szybcy"
@@ -387,6 +495,8 @@
   {
     "lemma": "wygodny",
     "en": "comfortable",
+    "level": "A2",
+    "freq": 3,
     "stem": "wygodn",
     "type": "hard",
     "virilePl": "wygodni"
@@ -394,6 +504,8 @@
   {
     "lemma": "drewniany",
     "en": "wooden",
+    "level": "B1",
+    "freq": 4,
     "stem": "drewnian",
     "type": "hard",
     "virilePl": "drewniani"
@@ -401,6 +513,8 @@
   {
     "lemma": "ostry",
     "en": "sharp",
+    "level": "B1",
+    "freq": 3,
     "stem": "ostr",
     "type": "hard",
     "virilePl": "ostrzy"
@@ -408,6 +522,8 @@
   {
     "lemma": "czysty",
     "en": "clean",
+    "level": "A2",
+    "freq": 2,
     "stem": "czyst",
     "type": "hard",
     "virilePl": "czyści"
@@ -415,6 +531,8 @@
   {
     "lemma": "brudny",
     "en": "dirty",
+    "level": "A2",
+    "freq": 4,
     "stem": "brudn",
     "type": "hard",
     "virilePl": "brudni"
@@ -422,6 +540,8 @@
   {
     "lemma": "wolny",
     "en": "free",
+    "level": "A2",
+    "freq": 2,
     "stem": "woln",
     "type": "hard",
     "virilePl": "wolni"
@@ -429,6 +549,8 @@
   {
     "lemma": "gruby",
     "en": "thick",
+    "level": "A2",
+    "freq": 3,
     "stem": "grub",
     "type": "hard",
     "virilePl": "grubi"
@@ -436,6 +558,8 @@
   {
     "lemma": "długi",
     "en": "long",
+    "level": "A1",
+    "freq": 1,
     "stem": "dług",
     "type": "velar",
     "virilePl": "dłudzy"
@@ -443,6 +567,8 @@
   {
     "lemma": "krótki",
     "en": "short",
+    "level": "A1",
+    "freq": 2,
     "stem": "krótk",
     "type": "velar",
     "virilePl": "krótcy"
@@ -450,6 +576,8 @@
   {
     "lemma": "trudny",
     "en": "difficult",
+    "level": "A1",
+    "freq": 2,
     "stem": "trudn",
     "type": "hard",
     "virilePl": "trudni"
@@ -457,6 +585,8 @@
   {
     "lemma": "ciężki",
     "en": "hard",
+    "level": "A2",
+    "freq": 2,
     "stem": "ciężk",
     "type": "velar",
     "virilePl": "ciężcy"
@@ -464,6 +594,8 @@
   {
     "lemma": "pierwszy",
     "en": "first",
+    "level": "A1",
+    "freq": 1,
     "stem": "pierwsz",
     "type": "hard",
     "virilePl": "pierwsi"
@@ -471,6 +603,8 @@
   {
     "lemma": "ostatni",
     "en": "last",
+    "level": "A2",
+    "freq": 1,
     "stem": "ostatn",
     "type": "soft",
     "virilePl": "ostatni"
@@ -478,6 +612,8 @@
   {
     "lemma": "przyszły",
     "en": "next",
+    "level": "A2",
+    "freq": 2,
     "stem": "przyszł",
     "type": "hard",
     "virilePl": "przyszli"
@@ -485,6 +621,8 @@
   {
     "lemma": "zeszły",
     "en": "last",
+    "level": "A2",
+    "freq": 3,
     "stem": "zeszł",
     "type": "hard",
     "virilePl": "zeszli"
@@ -492,6 +630,8 @@
   {
     "lemma": "główny",
     "en": "main",
+    "level": "B1",
+    "freq": 1,
     "stem": "główn",
     "type": "hard",
     "virilePl": "główni"
@@ -499,6 +639,8 @@
   {
     "lemma": "wielki",
     "en": "great",
+    "level": "A2",
+    "freq": 1,
     "stem": "wielk",
     "type": "velar",
     "virilePl": "wielcy"
@@ -506,6 +648,8 @@
   {
     "lemma": "klasyczny",
     "en": "classical",
+    "level": "B1",
+    "freq": 3,
     "stem": "klasyczn",
     "type": "hard",
     "virilePl": "klasyczni"
@@ -513,6 +657,8 @@
   {
     "lemma": "lewy",
     "en": "left",
+    "level": "A2",
+    "freq": 3,
     "stem": "lew",
     "type": "hard",
     "virilePl": "lewi"
@@ -520,6 +666,8 @@
   {
     "lemma": "prawy",
     "en": "right",
+    "level": "A2",
+    "freq": 3,
     "stem": "praw",
     "type": "hard",
     "virilePl": "prawi"

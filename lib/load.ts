@@ -1,5 +1,5 @@
-import { ADJ_TYPES, CASES, GENDERS, TAGS } from "./types";
-import type { Adjective, Forms, Noun, Tag, Template } from "./types";
+import { ADJ_TYPES, CASES, FREQS, GENDERS, LEVELS, TAGS } from "./types";
+import type { Adjective, Forms, Freq, Level, Noun, Tag, Template } from "./types";
 import type { Verb } from "./verbs";
 
 /**
@@ -59,6 +59,20 @@ class Entry {
     return value as T;
   }
 
+  /** The required CEFR level. */
+  level(): Level {
+    if (!this.has("level")) this.fail(`needs a "level": ${LEVELS.join(", ")}`);
+    return this.oneOf("level", LEVELS);
+  }
+
+  /** The optional frequency band, 1..5; undefined when the entry has none. */
+  freq(): Freq | undefined {
+    if (!this.has("freq")) return undefined;
+    const value = this.o.freq;
+    if (!FREQS.includes(value as Freq)) this.fail(`needs a whole number 1..5 for "freq", got ${String(value)}`);
+    return value as Freq;
+  }
+
   object(key: string, value: unknown = this.o[key]): Obj {
     if (!isObject(value)) this.fail(`needs an object for "${key}"`);
     return value;
@@ -93,7 +107,7 @@ const label = (o: Obj, key: string, i: number) => (typeof o[key] === "string" ? 
 
 // ------------------------------------------------------------------ nouns
 
-const NOUN_FIELDS = ["lemma", "en", "enPl", "gender", "tags", "sg", "pl", "mass", "noPlural", "onlySg", "alt"];
+const NOUN_FIELDS = ["lemma", "en", "enPl", "level", "freq", "gender", "tags", "sg", "pl", "mass", "noPlural", "onlySg", "alt"];
 
 /** A row of seven forms in CASES order: nom, gen, dat, acc, ins, loc, voc. */
 function forms(e: Entry, key: "sg" | "pl"): Forms {
@@ -109,10 +123,13 @@ export function loadNouns(raw: unknown): Noun[] {
       lemma: e.text("lemma"),
       en: e.text("en"),
       enPl: e.text("enPl"),
+      level: e.level(),
       gender: e.oneOf("gender", GENDERS),
       tags: e.list("tags").map((t) => e.oneOf<Tag>("tag", TAGS, t)),
       sg: forms(e, "sg"),
     };
+    const freq = e.freq();
+    if (freq) noun.freq = freq;
     if (e.has("pl")) noun.pl = forms(e, "pl");
     if (e.has("mass")) noun.mass = e.flag("mass");
     if (e.has("noPlural")) noun.noPlural = e.flag("noPlural");
@@ -135,7 +152,7 @@ export function loadNouns(raw: unknown): Noun[] {
 
 // ------------------------------------------------------------- adjectives
 
-const ADJECTIVE_FIELDS = ["lemma", "en", "stem", "type", "virilePl", "state", "address"];
+const ADJECTIVE_FIELDS = ["lemma", "en", "level", "freq", "stem", "type", "virilePl", "state", "address"];
 
 export function loadAdjectives(raw: unknown): Adjective[] {
   return entries("adjectives.json", raw).map((o, i) => {
@@ -143,11 +160,14 @@ export function loadAdjectives(raw: unknown): Adjective[] {
     const adj: Adjective = {
       lemma: e.text("lemma"),
       en: e.text("en"),
+      level: e.level(),
       stem: e.text("stem"),
       type: e.oneOf("type", ADJ_TYPES),
       virilePl: e.text("virilePl"),
     };
     if (!adj.lemma.startsWith(adj.stem)) e.fail(`has a stem "${adj.stem}" that does not start the lemma`);
+    const freq = e.freq();
+    if (freq) adj.freq = freq;
     if (e.has("state")) adj.state = e.flag("state");
     if (e.has("address")) adj.address = e.flag("address");
     return adj;
@@ -173,6 +193,7 @@ export function loadCollocations(raw: unknown, adjectives: Adjective[]): Record<
 const TEMPLATE_FIELDS = [
   "case",
   "number",
+  "level",
   "pl",
   "en",
   "enPl",
@@ -204,6 +225,7 @@ export function loadTemplates(raw: unknown, groups: Groups): Template[] {
     const tpl: Template = {
       case: e.oneOf("case", CASES),
       number: e.oneOf("number", ["sg", "pl", "any"] as const),
+      level: e.level(),
       pl: e.text("pl"),
       en: e.text("en"),
       requires: e.expand("requires", groups).map((t) => e.oneOf<Tag>("tag", TAGS, t)),
@@ -221,7 +243,7 @@ export function loadTemplates(raw: unknown, groups: Groups): Template[] {
 
 // ------------------------------------------------------------------ verbs
 
-const VERB_FIELDS = ["en", "impf", "pf", "objects", "reflexive", "motion", "momentary"];
+const VERB_FIELDS = ["en", "level", "freq", "impf", "pf", "objects", "reflexive", "motion", "momentary"];
 
 function aspect(e: Entry, key: "impf" | "pf"): Verb["impf"] {
   const o = e.object(key);
@@ -253,6 +275,7 @@ export function loadVerbs(raw: unknown): Verb[] {
     if (!Array.isArray(objects) || objects.length === 0) return e.fail(`needs a non-empty list for "objects"`);
     const verb: Verb = {
       en: { base: gloss.text("en.base", en.base), past: gloss.text("en.past", en.past), ing: gloss.text("en.ing", en.ing) },
+      level: e.level(),
       impf: aspect(e, "impf"),
       pf: aspect(e, "pf"),
       objects: objects.map((value) => {
@@ -264,6 +287,8 @@ export function loadVerbs(raw: unknown): Verb[] {
         };
       }),
     };
+    const freq = e.freq();
+    if (freq) verb.freq = freq;
     if (e.has("reflexive")) verb.reflexive = e.flag("reflexive", true) as true;
     if (e.has("motion")) verb.motion = e.flag("motion", true) as true;
     if (e.has("momentary")) verb.momentary = e.flag("momentary", true) as true;

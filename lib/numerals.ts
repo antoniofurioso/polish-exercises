@@ -1,5 +1,6 @@
 import { declineAdjective } from "./declineAdjective";
-import type { Adjective, Case, Gender, GramNumber } from "./types";
+import type { AdjectiveStem } from "./declineAdjective";
+import type { Case, Gender, GramNumber } from "./types";
 
 /**
  * Polish numerals: the words themselves, how they decline, and — the part
@@ -124,9 +125,8 @@ export const GOVERNMENT_CELL: Record<Government, { case: Case; number: GramNumbe
 
 // ------------------------------------------------------- the numeral itself
 
-const JEDEN: Adjective = {
-  lemma: "jeden",
-  en: "one",
+/** jeden: declined from its stem like an adjective. */
+const JEDEN: AdjectiveStem = {
   stem: "jedn",
   type: "hard",
   virilePl: "jedni",
@@ -204,7 +204,7 @@ function replaceLast(phrase: string, word: string): string {
 
 // -------------------------------------------------------------- ordinals
 
-type OrdinalStem = { lemma: string; stem: string; type: Adjective["type"]; virilePl: string };
+type OrdinalStem = AdjectiveStem & { lemma: string };
 
 const ORDINALS: Record<number, OrdinalStem> = {
   1: { lemma: "pierwszy", stem: "pierwsz", type: "hard", virilePl: "pierwsi" },
@@ -237,8 +237,6 @@ const ORDINALS: Record<number, OrdinalStem> = {
   100: { lemma: "setny", stem: "setn", type: "hard", virilePl: "setni" },
 };
 
-const asAdjective = (o: OrdinalStem): Adjective => ({ ...o, en: o.lemma });
-
 /** The ordinal's parts: only the last one or two words are ordinal in Polish. */
 function ordinalParts(n: number): OrdinalStem[] {
   if (n < 1 || n > 100 || !Number.isInteger(n)) throw new RangeError(`out of range: ${n}`);
@@ -254,7 +252,7 @@ export const ordinalLemma = (n: number): string =>
 /** An ordinal declined to agree with something: 12 + f + loc -> "dwunastej". */
 export function ordinal(n: number, gender: Gender, number: GramNumber, kase: Case): string {
   return ordinalParts(n)
-    .map((p) => declineAdjective(asAdjective(p), gender, number, kase))
+    .map((p) => declineAdjective(p, gender, number, kase))
     .join(" ");
 }
 

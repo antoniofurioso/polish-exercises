@@ -30,6 +30,29 @@ or `false`. Unknown fields are rejected, which catches typos like `noplural`.
 | `templates.json` + `groups.json` | `lib/templates.ts` | `TEMPLATES` |
 | `verbs.json` | `lib/verbs.ts` | `VERBS` |
 
+## Levels and frequency
+
+Every noun, adjective, verb and template has a CEFR `level` (`A1`, `A2`, `B1`
+or `B2`); nouns, adjectives and verbs may also have a `freq` band from `1`
+(everyday) to `5` (rare). A session with `maxLevel` set (`lvl=` in the URL) only
+draws words and sentences at that level or below, and leaves out a case that
+has no sentence there yet.
+
+- A word's level is where a learner meets it on a standard A1–B2 syllabus:
+  everyday concrete vocabulary (dom, kot, woda, dobry, robić) is A1.
+- A template's level is the construction it drills, never lower than the point
+  a learner meets that case after that trigger: "To jest ..." and the
+  accusative after "mam / lubię" are A1; locative after "w / na" A1–A2;
+  genitive, the instrumental ("z ...", "jestem + profession") and most dative
+  frames A2; the vocative and rarer prepositions or verbs (przy, nad + ins,
+  zależy mi na) B1–B2.
+- A template must keep at least one fitting noun at its own level or below
+  (`lib/__tests__/content.test.ts` checks this).
+
+**These are provisional judgment calls.** In Phase 1 a native speaker reviews
+the levels and `freq` is replaced with corpus frequency (the NKJP frequency
+lists); until then treat both as a first draft.
+
 ## nouns.json
 
 A list of nouns, one object each.
@@ -39,6 +62,8 @@ A list of nouns, one object each.
   "lemma": "kot",
   "en": "cat",
   "enPl": "cats",
+  "level": "A1",
+  "freq": 2,
   "gender": "mAnim",
   "tags": ["animal"],
   "sg": ["kot", "kota", "kotu", "kota", "kotem", "kocie", "kocie"],
@@ -50,6 +75,8 @@ A list of nouns, one object each.
 | --- | --- | --- |
 | `lemma` | yes | Nominative singular; must be unique. Templates and collocations refer to the noun by it. |
 | `en`, `enPl` | yes | English singular and plural, without article. |
+| `level` | yes | CEFR level: `A1`, `A2`, `B1` or `B2` (see [Levels and frequency](#levels-and-frequency)). |
+| `freq` | no | Frequency band, `1` (most common) to `5`. |
 | `gender` | yes | `mPers` (masculine personal), `mAnim` (animate), `mInanim` (inanimate), `f` or `n`. |
 | `tags` | yes | What the noun is, so templates only pick nouns that fit (may be `[]`). One of `person`, `profession`, `animal`, `food`, `drink`, `placeIn` (takes "w" + locative), `placeTo` (sensible with "do" + genitive), `surface` ("na" / "pod" / "nad"), `vehicle`, `object` (portable things you can buy, own or hold), `text`, `abstract`, `family` (relatives: English glosses them as "my ..."), `friend`, `topic` (muzyka, historia, sport...), `show` (film, mecz, serial), `time`, `body`, `plant`, `water` (morze, jezioro, rzeka). The list lives in `TAGS` in `lib/types.ts`. |
 | `sg` | yes | The 7 singular forms, **always in this order: nom, gen, dat, acc, ins, loc, voc**. |
@@ -65,13 +92,14 @@ A list of adjectives. Only the stem and its type are stored; the endings come
 from `lib/declineAdjective.ts`.
 
 ```json
-{ "lemma": "dobry", "en": "good", "stem": "dobr", "type": "hard", "virilePl": "dobrzy" }
+{ "lemma": "dobry", "en": "good", "level": "A1", "freq": 1, "stem": "dobr", "type": "hard", "virilePl": "dobrzy" }
 ```
 
 | Field | Required | Meaning |
 | --- | --- | --- |
 | `lemma` | yes | Masculine nominative singular. |
 | `en` | yes | English gloss. |
+| `level`, `freq` | `level` only | As for nouns. |
 | `stem` | yes | The lemma minus its ending: dobry → dobr, tani → tan, drogi → drog. |
 | `type` | yes | `hard` (dobry), `soft` (tani) or `velar` (drogi, polski: -k/-g stems). |
 | `virilePl` | yes | Masculine-personal nominative plural, the one form rules cannot derive reliably (dobrzy, polscy). |
@@ -97,6 +125,7 @@ A list of sentence frames for the case drill.
 {
   "case": "voc",
   "number": "any",
+  "level": "B1",
   "pl": "Dobranoc, {NP}.",
   "en": "Good night, {npBare}.",
   "requires": ["family"],
@@ -110,6 +139,7 @@ A list of sentence frames for the case drill.
 | --- | --- | --- |
 | `case` | yes | The case drilled: `nom`, `gen`, `dat`, `acc`, `ins`, `loc` or `voc`. |
 | `number` | yes | `sg`, `pl` or `any`. |
+| `level` | yes | CEFR level of the construction drilled (no `freq`). |
 | `pl` | yes | The Polish sentence with one `{NP}` slot, never first (capitalisation stays fixed). `{z}` and `{w}` are prepositions that grow an -e before consonant clusters (z psem, ze starym psem). |
 | `en` | yes | English gloss with exactly one of `{np}` (a/an/some), `{npDef}` (the) or `{npBare}` (no article). |
 | `enPl` | no | English gloss to use instead when the noun phrase is plural. |
@@ -153,6 +183,8 @@ rest. In error messages a verb is named by its imperfective infinitive.
 ```json
 {
   "en": { "base": "write", "past": "wrote", "ing": "writing" },
+  "level": "A1",
+  "freq": 1,
   "impf": {
     "inf": "pisać",
     "past": { "m": "pisał", "f": "pisała", "vir": "pisali" },
@@ -172,6 +204,7 @@ rest. In error messages a verb is named by its imperfective infinitive.
 | Field | Required | Meaning |
 | --- | --- | --- |
 | `en` | yes | English `base`, simple `past` and `ing` form. |
+| `level`, `freq` | `level` only | As for nouns, for the aspect pair as a whole. |
 | `impf`, `pf` | yes | The imperfective and perfective verb, each with: |
 | ↳ `inf` | yes | Infinitive (without "się"). |
 | ↳ `past` | yes | 3sg masculine `m` (pisał), feminine `f` (pisała), masculine-personal plural `vir` (pisali), and `m1` only when the stem before -em / -eś differs from `m` (mógł → mogłem). |
@@ -186,11 +219,14 @@ rest. In error messages a verb is named by its imperfective infinitive.
 
 1. Append the object to the end of the right file, following the schema above.
    For a noun, write all 7 forms of each number in nom, gen, dat, acc, ins, loc,
-   voc order, and give it the tags that let the right templates pick it.
+   voc order, and give it the tags that let the right templates pick it. Give
+   every entry a `level`.
 2. For a noun that should take adjectives, add its lemma to `collocations.json`.
 3. Run `npm test`. A malformed entry fails with its lemma in the message; the
    lexicon tests then check that templates only name existing words and that
-   every tag a template requires is carried by enough nouns.
+   every tag a template requires is carried by enough nouns, and the content
+   gate (`lib/__tests__/content.test.ts`) that every level still fills a
+   20-question session in every drill without a broken sentence.
 4. If `golden.test.ts` fails, the new entry changed the sessions generated for
    the fixed seeds. That is expected when adding content: check the diff, then
    update the snapshot on purpose.

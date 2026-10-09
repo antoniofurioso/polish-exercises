@@ -20,7 +20,7 @@ import {
   ordinal,
   ordinalLemma,
 } from "./numerals";
-import { NUMBER_CASES, NUMBER_DRILLS, genderGroup } from "./types";
+import { NUMBER_CASES, NUMBER_DRILLS, genderGroup, withinLevel } from "./types";
 import type {
   AnswerMode,
   Case,
@@ -29,6 +29,7 @@ import type {
   Gender,
   GenderGroup,
   GramNumber,
+  Level,
   Noun,
   NumberDrill,
   SpellRange,
@@ -53,9 +54,13 @@ const COUNTABLE: Tag[] = [
   "placeIn", "placeTo", "surface", "plant", "water", "show",
 ];
 
-function lexicon(genders?: GenderGroup[]): Noun[] {
+/**
+ * The nouns to count, up to `maxLevel` when set. The level only narrows the
+ * words: the frames here are fixed per sub-drill and stay as they are.
+ */
+function lexicon(genders?: GenderGroup[], maxLevel?: Level): Noun[] {
   const countable = NOUNS.filter(
-    (n) => withPlural(n) && fitsTemplate(n, { requires: COUNTABLE }),
+    (n) => withPlural(n) && fitsTemplate(n, { requires: COUNTABLE }) && withinLevel(n, maxLevel),
   );
   if (!genders || genders.length === 0) return countable;
   const wanted = countable.filter((n) => genders.includes(genderGroup(n.gender)));
@@ -609,7 +614,7 @@ export function buildNumberSession(config: Config, seed = Date.now()): Exercise[
     (NUMBER_CASES as readonly string[]).includes(c),
   );
   const cases = selected.length ? selected : [...NUMBER_CASES];
-  const nouns = lexicon(config.genders);
+  const nouns = lexicon(config.genders, config.maxLevel);
   const answerMode: AnswerMode = config.answerMode === "choice" ? "choice" : "typing";
 
   const taken = new Set<string>();

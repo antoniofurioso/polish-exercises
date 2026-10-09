@@ -1,5 +1,5 @@
 import { DRILLS, drillFor } from "./drills";
-import { EXERCISE_KINDS, GENDER_GROUPS } from "./types";
+import { EXERCISE_KINDS, GENDER_GROUPS, LEVELS } from "./types";
 import type {
   AnswerMode,
   Case,
@@ -7,6 +7,7 @@ import type {
   ExerciseKind,
   GenderGroup,
   GramNumber,
+  Level,
   WordMode,
 } from "./types";
 
@@ -27,6 +28,7 @@ export function sessionParams(config: Config, seed: number): string {
     params.set("gen", config.genders.join(","));
   }
   if (config.answerMode === "choice") params.set("ans", "choice");
+  if (config.maxLevel) params.set("lvl", config.maxLevel);
   if (config.kind && config.kind !== "cases") params.set("type", config.kind);
   drillFor(config.kind).serialise?.(config, params);
   return params.toString();
@@ -53,6 +55,7 @@ export function parseSession(params: URLSearchParams): Session | null {
   const count = Number(params.get("count"));
 
   const answerMode = params.get("ans") as AnswerMode;
+  const maxLevel = params.get("lvl") as Level;
 
   const genders = (params.get("gen") ?? "")
     .split(",")
@@ -66,6 +69,7 @@ export function parseSession(params: URLSearchParams): Session | null {
       count: Number.isFinite(count) ? Math.min(200, Math.max(1, Math.round(count))) : 20,
       ...(genders.length > 0 && genders.length < GENDER_GROUPS.length ? { genders } : {}),
       ...(answerMode === "choice" ? { answerMode } : {}),
+      ...(LEVELS.includes(maxLevel) ? { maxLevel } : {}),
       ...(kind !== "cases" ? { kind } : {}),
       ...drill.parse?.(params),
     },

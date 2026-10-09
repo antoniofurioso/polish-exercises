@@ -3,7 +3,7 @@ import { buildOptions } from "./choices";
 import { declineAdjective } from "./declineAdjective";
 import { NOUNS, nounVariants } from "./nouns";
 import { TEMPLATES } from "./templates";
-import { genderGroup } from "./types";
+import { genderGroup, withinLevel } from "./types";
 import type {
   Adjective,
   Case,
@@ -11,6 +11,7 @@ import type {
   Exercise,
   GenderGroup,
   GramNumber,
+  Level,
   Noun,
   Template,
   Token,
@@ -75,26 +76,35 @@ export function fitsTemplate(
 
 const isLiving = (noun: Noun) => noun.tags.includes("person") || noun.tags.includes("animal");
 
-/** The adjectives that read naturally on this noun inside this sentence. */
-export function adjectivesFor(noun: Noun, tpl: Template): Adjective[] {
+/** The adjectives that read naturally on this noun inside this sentence, up to `maxLevel` when set. */
+export function adjectivesFor(noun: Noun, tpl: Template, maxLevel?: Level): Adjective[] {
   const natural = COLLOCATIONS[noun.lemma] ?? [];
   return ADJECTIVES.filter(
     (a) =>
       natural.includes(a.lemma) &&
+      withinLevel(a, maxLevel) &&
       (tpl.adjOnly ? tpl.adjOnly.includes(a.lemma) : !a.address) &&
       // "Kocham chorego psa": a passing state needs a sentence that cares about it
       !(a.state && isLiving(noun) && !tpl.states),
   );
 }
 
-export function templatesFor(kase: Case, number: GramNumber): Template[] {
-  return TEMPLATES.filter((t) => t.case === kase && (t.number === "any" || t.number === number));
+export function templatesFor(kase: Case, number: GramNumber, maxLevel?: Level): Template[] {
+  return TEMPLATES.filter(
+    (t) => t.case === kase && (t.number === "any" || t.number === number) && withinLevel(t, maxLevel),
+  );
 }
 
-export function nounsFor(tpl: Template, number: GramNumber, genders?: GenderGroup[]): Noun[] {
+export function nounsFor(
+  tpl: Template,
+  number: GramNumber,
+  genders?: GenderGroup[],
+  maxLevel?: Level,
+): Noun[] {
   return NOUNS.filter(
     (noun) =>
       fitsTemplate(noun, tpl) &&
+      withinLevel(noun, maxLevel) &&
       // "ciepłe wody", "mocne herbaty": mass nouns stay singular in a sentence
       (number === "sg" || (!noun.noPlural && !noun.onlySg && !noun.mass && noun.pl !== undefined)) &&
       (!genders || genders.length === 0 || genders.includes(genderGroup(noun.gender))),
@@ -166,6 +176,17 @@ function buildAnswers(
   return [primary, ...variants.map((v) => prefix + v)];
 }
 
+/**
+ * With a level cap, keeps only the cases that still have a sentence at that
+ * level (an A1 learner meets no vocative yet), unless that would leave none.
+ * Without one the list comes back as it is.
+ */
+export function casesWithin(cases: Case[], maxLevel: Level | undefined, open: (kase: Case) => boolean): Case[] {
+  if (!maxLevel) return cases;
+  const kept = cases.filter(open);
+  return kept.length > 0 ? kept : cases;
+}
+
 type Chosen = { tpl: Template; noun: Noun; adj?: Adjective };
 
 function tryPick(
@@ -174,15 +195,17 @@ function tryPick(
   mode: WordMode,
   rng: () => number,
   genders?: GenderGroup[],
+  maxLevel?: Level,
 ): Chosen | null {
-  const templates = templatesFor(kase, number);
+  const templates = templatesFor(kase, number, maxLevel);
   if (templates.length === 0) return null;
   for (const tpl of shuffle(templates, rng)) {
-    const nouns = nounsFor(tpl, number, genders);
+    // a level cap can leave a sentence with no noun to fill it: skip it
+    const nouns = nounsFor(tpl, number, genders, maxLevel);
     if (nouns.length === 0) continue;
     for (const noun of shuffle(nouns, rng)) {
       if (mode === "nouns") return { tpl, noun };
-      const adjectives = adjectivesFor(noun, tpl);
+      const adjectives = adjectivesFor(noun, tpl, maxLevel);
       if (adjectives.length === 0) continue;
       return { tpl, noun, adj: pick(adjectives, rng) };
     }
@@ -197,10 +220,11 @@ export function buildExercise(
   rng: () => number,
   taken: Set<string> = new Set(),
   genders?: GenderGroup[],
+  maxLevel?: Level,
 ): Exercise | null {
   for (let attempt = 0; attempt < 40; attempt++) {
     const number = pick(numbers, rng);
-    const chosen = tryPick(kase, number, mode, rng, genders);
+    const chosen = tryPick(kase, number, mode, rng, genders, maxLevel);
     if (!chosen) continue;
     const { tpl, noun, adj } = chosen;
     const key = `${tpl.pl}|${noun.lemma}|${adj?.lemma ?? ""}|${number}`;
@@ -239,8 +263,12 @@ export function buildExercise(
 /** Builds a full session, spreading the selected cases evenly. */
 export function buildSession(config: Config, seed = Date.now()): Exercise[] {
   const rng = makeRng(seed);
-  const cases = config.cases.length ? config.cases : (["nom"] as Case[]);
   const numbers = config.numbers.length ? config.numbers : (["sg"] as GramNumber[]);
+  const cases = casesWithin(
+    config.cases.length ? config.cases : (["nom"] as Case[]),
+    config.maxLevel,
+    (kase) => numbers.some((n) => templatesFor(kase, n, config.maxLevel).length > 0),
+  );
   const taken = new Set<string>();
   const exercises: Exercise[] = [];
 
@@ -248,7 +276,15 @@ export function buildSession(config: Config, seed = Date.now()): Exercise[] {
   for (let i = 0; i < config.count; i++) {
     if (pool.length === 0) pool = shuffle(cases, rng);
     const kase = pool.pop()!;
-    const exercise = buildExercise(kase, numbers, config.mode, rng, taken, config.genders);
+    const exercise = buildExercise(
+      kase,
+      numbers,
+      config.mode,
+      rng,
+      taken,
+      config.genders,
+      config.maxLevel,
+    );
     if (!exercise) continue;
     if (config.answerMode === "choice") {
       const options = buildOptions(exercise, rng);

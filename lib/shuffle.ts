@@ -23,7 +23,12 @@ export function buildShuffleSession(config: Config, seed = Date.now()): Exercise
   const exercises: Exercise[] = [];
   for (const [kind, count] of counts) {
     const drill = DRILLS[kind];
-    const drillConfig: Config = { ...drill.mix, count, answerMode: config.answerMode };
+    const drillConfig: Config = {
+      ...drill.mix,
+      count,
+      answerMode: config.answerMode,
+      ...(config.maxLevel ? { maxLevel: config.maxLevel } : {}),
+    };
     for (const exercise of drill.build(drillConfig, Math.floor(rng() * 1_000_000))) {
       exercises.push({ ...exercise, id: `${kind}:${exercise.id}`, kind });
     }
