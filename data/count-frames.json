@@ -12,20 +12,20 @@
     "en": "I can see {np}.",
     "case": "acc",
     "requires": ["@inView"],
-    "excludeLemmas": ["@notInView"]
+    "excludeLemmas": ["@notInView", "@kin"]
   },
   {
     "pl": "Tu {V} {N} {NP}.",
     "en": "There {is} {np} here.",
     "case": "nom",
     "requires": ["@tangible", "surface", "placeIn"],
-    "excludeLemmas": ["@notHere"]
+    "excludeLemmas": ["@notHere", "@kin"]
   },
   {
     "pl": "Na zdjęciu {V} {N} {NP}.",
     "en": "There {is} {np} in the photo.",
     "case": "nom",
     "requires": ["@inView"],
-    "excludeLemmas": ["@notInView"]
+    "excludeLemmas": ["@notInView", "@kin"]
   }
 ]

@@ -1818,6 +1818,7 @@
     "tags": ["person", "profession"],
     "sg": ["policjant", "policjanta", "policjantowi", "policjanta", "policjantem", "policjancie", "policjancie"],
     "pl": ["policjanci", "policjantów", "policjantom", "policjantów", "policjantami", "policjantach", "policjanci"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -1963,6 +1964,7 @@
     "tags": ["person", "profession"],
     "sg": ["urzędnik", "urzędnika", "urzędnikowi", "urzędnika", "urzędnikiem", "urzędniku", "urzędniku"],
     "pl": ["urzędnicy", "urzędników", "urzędnikom", "urzędników", "urzędnikami", "urzędnikach", "urzędnicy"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -1987,6 +1989,7 @@
     "tags": ["person", "profession"],
     "sg": ["przedsiębiorca", "przedsiębiorcy", "przedsiębiorcy", "przedsiębiorcę", "przedsiębiorcą", "przedsiębiorcy", "przedsiębiorco"],
     "pl": ["przedsiębiorcy", "przedsiębiorców", "przedsiębiorcom", "przedsiębiorców", "przedsiębiorcami", "przedsiębiorcach", "przedsiębiorcy"],
+    "noPossessive": true,
     "review": "draft"
   },
   {
@@ -2448,6 +2451,7 @@
     "sg": ["śniadanie", "śniadania", "śniadaniu", "śniadanie", "śniadaniem", "śniadaniu", "śniadanie"],
     "pl": ["śniadania", "śniadań", "śniadaniom", "śniadania", "śniadaniami", "śniadaniach", "śniadania"],
     "mass": true,
+    "article": "none",
     "review": "draft"
   },
   {
@@ -2461,6 +2465,7 @@
     "sg": ["kolacja", "kolacji", "kolacji", "kolację", "kolacją", "kolacji", "kolacjo"],
     "pl": ["kolacje", "kolacji", "kolacjom", "kolacje", "kolacjami", "kolacjach", "kolacje"],
     "mass": true,
+    "article": "none",
     "review": "draft"
   },
   {
@@ -2762,6 +2767,7 @@
     "tags": ["water"],
     "sg": ["ocean", "oceanu", "oceanowi", "ocean", "oceanem", "oceanie", "oceanie"],
     "pl": ["oceany", "oceanów", "oceanom", "oceany", "oceanami", "oceanach", "oceany"],
+    "article": "the",
     "noPossessive": true,
     "review": "draft"
   },
@@ -3291,6 +3297,7 @@
     "tags": ["abstract"],
     "sg": ["środowisko", "środowiska", "środowisku", "środowisko", "środowiskiem", "środowisku", "środowisko"],
     "pl": ["środowiska", "środowisk", "środowiskom", "środowiska", "środowiskami", "środowiskach", "środowiska"],
+    "onlySg": true,
     "article": "the",
     "review": "draft"
   },
@@ -3461,6 +3468,7 @@
     "tags": ["placeIn", "placeTo"],
     "sg": ["las", "lasu", "lasowi", "las", "lasem", "lesie", "lesie"],
     "pl": ["lasy", "lasów", "lasom", "lasy", "lasami", "lasach", "lasy"],
+    "noPossessive": true,
     "review": "draft"
   },
   {

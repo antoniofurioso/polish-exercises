@@ -6,6 +6,7 @@
     "pl": "Tu jest {NP}.",
     "en": "{np} is here.",
     "requires": ["@tangible", "placeIn"],
+    "excludeLemmas": ["lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin"],
     "note": "The subject of the sentence stays in the nominative."
   },
   {
@@ -15,6 +16,7 @@
     "pl": "Tu są {NP}.",
     "en": "{np} are here.",
     "requires": ["@tangible", "placeIn"],
+    "excludeLemmas": ["lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin"],
     "note": "The subject of the sentence stays in the nominative."
   },
   {

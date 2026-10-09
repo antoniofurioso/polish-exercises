@@ -7,7 +7,7 @@
     "en": "This is {np}.",
     "requires": [],
     "states": true,
-    "excludeLemmas": ["@relatives"],
+    "excludeLemmas": ["@relatives", "@notThis"],
     "note": "After 'to jest' the noun stays in the nominative."
   },
   {
@@ -18,7 +18,7 @@
     "en": "These are {np}.",
     "requires": [],
     "states": true,
-    "excludeLemmas": ["@relatives"],
+    "excludeLemmas": ["@relatives", "@notThis"],
     "note": "After 'to są' the noun stays in the nominative."
   },
   {
@@ -28,7 +28,7 @@
     "pl": "Czy to jest {NP}?",
     "en": "Is this {np}?",
     "requires": [],
-    "excludeLemmas": ["@relatives"],
+    "excludeLemmas": ["@relatives", "@notThis"],
     "note": "After 'to jest' the noun stays in the nominative."
   },
   {
@@ -38,7 +38,7 @@
     "pl": "Czy to są {NP}?",
     "en": "Are these {np}?",
     "requires": [],
-    "excludeLemmas": ["@relatives"],
+    "excludeLemmas": ["@relatives", "@notThis"],
     "note": "After 'to są' the noun stays in the nominative."
   },
   {
@@ -91,7 +91,7 @@
     "en": "In the photo there is {np}.",
     "requires": ["person", "animal", "vehicle", "placeIn", "placeTo", "water", "plant", "food"],
     "states": true,
-    "excludeLemmas": ["@relatives", "bank", "apteka", "biuro", "łazienka", "szpital", "urząd", "sąd", "ambasada"],
+    "excludeLemmas": ["@relatives", "bank", "apteka", "biuro", "łazienka", "szpital", "urząd", "sąd", "ambasada", "śniadanie", "kolacja"],
     "note": "The subject of the sentence is nominative."
   },
   {
@@ -102,7 +102,7 @@
     "en": "In the photo there are {np}.",
     "requires": ["person", "animal", "vehicle", "placeIn", "placeTo", "water", "plant", "food"],
     "states": true,
-    "excludeLemmas": ["@relatives", "bank", "apteka", "biuro", "łazienka", "szpital", "urząd", "sąd", "ambasada"],
+    "excludeLemmas": ["@relatives", "bank", "apteka", "biuro", "łazienka", "szpital", "urząd", "sąd", "ambasada", "śniadanie", "kolacja"],
     "note": "The subject of the sentence is nominative."
   },
   {
@@ -2539,9 +2539,9 @@
     "number": "sg",
     "level": "A2",
     "pl": "Wracam za {NP}.",
-    "en": "I'll be back in a {npBare}.",
+    "en": "I'll be back in {np}.",
     "requires": [],
-    "lemmas": ["minuta", "dzień", "tydzień", "miesiąc", "rok"],
+    "lemmas": ["minuta", "godzina", "dzień", "tydzień", "miesiąc", "rok"],
     "adjOnly": [],
     "note": "'za' meaning 'in' (time from now) takes the accusative.",
     "review": "draft"
@@ -3346,8 +3346,7 @@
     "pl": "Dyskutujemy o {NP}.",
     "en": "We're discussing {npBare}.",
     "requires": ["topic"],
-    "lemmas": ["wolność", "sprawiedliwość", "społeczeństwo", "miłość"],
-    "excludeLemmas": ["gospodarka"],
+    "lemmas": ["wolność", "sprawiedliwość", "społeczeństwo", "miłość", "gospodarka", "środowisko"],
     "adjOnly": [],
     "note": "'o' meaning 'about' takes the locative.",
     "review": "draft"

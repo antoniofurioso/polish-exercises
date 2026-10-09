@@ -237,7 +237,7 @@ A list of sentence frames for the case drill.
 | `number` | yes | `sg`, `pl` or `any`. |
 | `level` | yes | CEFR level of the construction drilled (no `freq`). |
 | `pl` | yes | The Polish sentence with one `{NP}` slot, never first (capitalisation stays fixed). `{z}` and `{w}` are prepositions that grow an -e before consonant clusters (z psem, ze starym psem). |
-| `en` | yes | English gloss with exactly one of `{np}` (a/an/some), `{npDef}` (the) or `{npBare}` (no article). |
+| `en` | yes | English gloss with exactly one of `{np}` (a/an/some), `{npDef}` (the) or `{npBare}` (no article). An adjective glossed best, worst, last, next, previous, same, only or whole makes `{np}` definite too ("Over there is the last train", "I can see my best mate"); a noun's own `article` wins over all three. |
 | `enPl` | no | English gloss to use instead when the noun phrase is plural. |
 | `requires` | yes | Tags; the noun must carry at least one. `[]` with no `lemmas` means any noun. |
 | `lemmas` | no | Nouns that fit even without a matching tag. |
@@ -276,6 +276,8 @@ refer to another group.
 | `@seasons` | `lemmas` | The four seasons: "Lubię wiosnę", "Tęsknię za latem". |
 | `@meals` | `lemmas` | Meals, which take no article in English: "before dinner", "after breakfast". |
 | `@womenAtWork` | `lemmas` | Feminine job titles, tagged `person` rather than `profession`: "Ona jest lekarką". |
+| `@kin` | `excludeLemmas` | Count / numeral frames: relatives nobody has dozens of ("pięćdziesiąt dwie wnuczki", "dziewięćdziesiąt cioć"). |
+| `@notThis` | `excludeLemmas` | "To jest ..." / "Czy to są ...": fields and ideas ("To jest prawda" means "that's true"), body parts ("This is a left shoulder"), hours and minutes ("To jest minuta") and the seasons (they have "Już jest ..."). |
 
 Groups work the same way in the three frame files below.
 

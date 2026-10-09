@@ -133,6 +133,9 @@ export function capitalise(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+/** Adjective glosses that make a noun phrase definite in English, whatever the slot. */
+const SINGLING = /^(best|worst|last|next|previous|same|only|whole)\b/;
+
 export function renderEnglish(
   tpl: Template,
   noun: Noun,
@@ -146,12 +149,18 @@ export function renderEnglish(
   // season one of many again: "a cold spring", "the long winter"
   const fixed = number === "pl" || (noun.article === "none" && adj) ? undefined : noun.article;
   const own = fixed === "the" ? `the ${bare}` : bare;
-  const indefinite = fixed ? own : number === "pl" || noun.mass ? bare : withArticle(bare);
   // a relative or friend with no possessive in Polish is "my ..." in English
   const mine = noun.tags.includes("family") || noun.tags.includes("friend");
   // fields and ideas take no article: "about history", "about work"
   const generic = noun.tags.includes("topic") || noun.tags.includes("abstract");
   const definite = fixed ? own : mine ? `my ${bare}` : generic ? bare : `the ${bare}`;
+  // "last", "best", "previous" single one out: "the last train", "my best friend", never "a"
+  const singling = !!adj && SINGLING.test(adj.en);
+  const indefinite =
+    fixed ? own
+      : singling ? definite
+        : number === "pl" || (noun.mass && !(noun.article === "none" && adj)) ? bare
+          : withArticle(bare);
   const text = (tpl.enPl && number === "pl" ? tpl.enPl : tpl.en)
     .replace(/\{npDef\}/g, definite)
     .replace(/\{npBare\}/g, fixed ? own : bare)

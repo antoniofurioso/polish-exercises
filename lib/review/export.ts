@@ -36,6 +36,8 @@ export const COLUMNS = [
 const EXAMPLES = 3;
 /** Sessions generated per drill setting to find sentences in; fixed seeds keep the sheet stable. */
 const SEEDS = 300;
+/** Seeds tried further, only for an entry the first SEEDS sessions never used (a rare adjective). */
+const MORE_SEEDS = 3000;
 
 // ------------------------------------------------------------------- forms
 
@@ -137,37 +139,40 @@ function english(d: Located): string {
 
 // ---------------------------------------------------------------- examples
 
-/** Exercises from SEEDS sessions of one drill setting, built the first time they are needed. */
-function pool(config: Config): () => Exercise[] {
+/** Exercises from sessions `from`..`to` of one drill setting, built the first time they are needed. */
+function pool(config: Config, from: number, to: number): () => Exercise[] {
   let cache: Exercise[] | undefined;
   return () => {
     if (!cache) {
       const build = DRILLS[config.kind ?? "cases"].build;
       cache = [];
-      for (let seed = 1; seed <= SEEDS; seed++) cache.push(...build(config, seed));
+      for (let seed = from; seed <= to; seed++) cache.push(...build(config, seed));
     }
     return cache;
   };
 }
 
 const base = (kind: DrillKind): Config => ({ ...DRILLS[kind].mix, count: 30 });
-const POOLS = {
-  nouns: pool({ ...base("cases"), mode: "nouns" }),
-  both: pool(base("cases")),
-  adjectives: pool({ ...base("cases"), mode: "adjectives" }),
-  pronouns: pool(base("pronouns")),
-  possessives: pool(base("possessives")),
-  count: pool({ ...base("numbers"), drills: ["count"] }),
-  numeral: pool({ ...base("numbers"), drills: ["numeral"] }),
-  ordinal: pool({ ...base("numbers"), drills: ["ordinal"] }),
-  verbs: pool(base("verbs")),
-};
+const pools = (from: number, to: number) => ({
+  nouns: pool({ ...base("cases"), mode: "nouns" }, from, to),
+  both: pool(base("cases"), from, to),
+  adjectives: pool({ ...base("cases"), mode: "adjectives" }, from, to),
+  pronouns: pool(base("pronouns"), from, to),
+  possessives: pool(base("possessives"), from, to),
+  count: pool({ ...base("numbers"), drills: ["count"] }, from, to),
+  numeral: pool({ ...base("numbers"), drills: ["numeral"] }, from, to),
+  ordinal: pool({ ...base("numbers"), drills: ["ordinal"] }, from, to),
+  verbs: pool(base("verbs"), from, to),
+});
+type Pools = ReturnType<typeof pools>;
+const POOLS = pools(1, SEEDS);
+const MORE_POOLS = pools(SEEDS + 1, MORE_SEEDS);
 
 const parts = (ex: Exercise) => ex.id.split("|");
 const fitsNumber = (e: Obj, ex: Exercise) => e.number === "any" || e.number === ex.number;
 
 /** The sentences that use the entry, drawn from the pools in order, best first. */
-function candidates(d: Located): Exercise[] {
+function candidates(d: Located, POOLS: Pools): Exercise[] {
   const e = d.entry;
   const pick = (pools: (() => Exercise[])[], match: (ex: Exercise) => boolean) =>
     pools.flatMap((p) => p().filter(match));
@@ -210,7 +215,8 @@ function candidates(d: Located): Exercise[] {
 export function examplesFor(d: Located): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
-  for (const ex of candidates(d)) {
+  const found = candidates(d, POOLS);
+  for (const ex of found.length > 0 ? found : candidates(d, MORE_POOLS)) {
     const text = `${renderSolution(ex)} — ${ex.en}`;
     if (seen.has(text)) continue;
     seen.add(text);

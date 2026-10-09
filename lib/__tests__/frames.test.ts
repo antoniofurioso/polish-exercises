@@ -133,6 +133,21 @@ describe("the English article", () => {
     expect(renderEnglish(frame("These are {np}."), season, undefined, "pl")).toBe("These are springs.");
   });
 
+  it("lets a meal go bare, but take 'a' with an adjective, mass noun or not", () => {
+    const supper = noun({ en: "supper", enPl: "suppers", mass: true, article: "none" });
+    expect(renderEnglish(frame("After {npDef}."), supper, undefined, "sg")).toBe("After supper.");
+    expect(renderEnglish(frame("I'm ordering {np}."), supper, adjective("late"), "sg")).toBe("I'm ordering a late supper.");
+  });
+
+  it("makes last, best, previous and whole definite in any slot", () => {
+    const train = noun({ en: "train", enPl: "trains", tags: ["vehicle"] });
+    const mate = noun({ en: "mate", enPl: "mates", tags: ["person", "friend"] });
+    expect(renderEnglish(frame("There is {np}."), train, adjective("last"), "sg")).toBe("There is the last train.");
+    expect(renderEnglish(frame("Are these {np}?"), train, adjective("last"), "pl")).toBe("Are these the last trains?");
+    expect(renderEnglish(frame("I can see {np}."), mate, adjective("best"), "sg")).toBe("I can see my best mate.");
+    expect(renderEnglish(frame("I can see {np}."), train, adjective("big"), "sg")).toBe("I can see a big train.");
+  });
+
   it("writes a + other as another", () => {
     const plate = noun({ en: "plate", enPl: "plates" });
     expect(renderEnglish(frame("I need {np}."), plate, adjective("other"), "sg")).toBe("I need another plate.");

@@ -3,7 +3,7 @@
     "pl": "Tu {V} {NP}.",
     "en": "There {is} {np} here.",
     "requires": ["@tangible", "surface", "placeIn"],
-    "excludeLemmas": ["@notHere"]
+    "excludeLemmas": ["@notHere", "@kin"]
   },
   "gen": {
     "pl": "Szukam {NP}.",
@@ -15,30 +15,30 @@
     "pl": "Pomagam {NP}.",
     "en": "I'm helping {np}.",
     "requires": ["person"],
-    "excludeLemmas": ["@notCounted"]
+    "excludeLemmas": ["@notCounted", "@kin"]
   },
   "acc": {
     "pl": "Widzę {NP}.",
     "en": "I can see {np}.",
     "requires": ["@inView"],
-    "excludeLemmas": ["@notInView"]
+    "excludeLemmas": ["@notInView", "@kin"]
   },
   "ins": {
     "pl": "Rozmawiam {z} {NP}.",
     "en": "I'm talking with {np}.",
     "requires": ["person"],
-    "excludeLemmas": ["@notCounted"]
+    "excludeLemmas": ["@notCounted", "@kin"]
   },
   "loc": {
     "pl": "Myślę o {NP}.",
     "en": "I'm thinking about {np}.",
     "requires": ["person", "animal", "placeIn", "placeTo", "vehicle"],
-    "excludeLemmas": ["pan", "pani", "rodzina", "kuchnia", "pokój", "bank", "apteka", "biuro", "lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin", "jeż", "komar", "krowa", "świnia", "osioł"]
+    "excludeLemmas": ["pan", "pani", "rodzina", "kuchnia", "pokój", "łazienka", "bank", "apteka", "biuro", "sąd", "urząd", "ambasada", "szpital", "uniwersytet", "lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin", "jeż", "komar", "krowa", "świnia", "osioł", "@kin"]
   },
   "voc": {
     "pl": "Widzę {NP}.",
     "en": "I can see {np}.",
     "requires": ["@inView"],
-    "excludeLemmas": ["@notInView"]
+    "excludeLemmas": ["@notInView", "@kin"]
   }
 }
