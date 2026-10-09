@@ -1,12 +1,12 @@
 {
   "tangible": ["person", "animal", "object", "vehicle", "text", "food", "drink"],
   "close": ["family", "friend"],
-  "noVocative": ["matka", "ojciec", "żona", "mąż", "rodzina"],
+  "noVocative": ["matka", "ojciec", "żona", "mąż", "rodzina", "znajomy"],
   "dear": ["kochany"],
   "workplaces": ["sklep", "hotel", "restauracja", "szkoła", "muzeum", "bank", "apteka", "biuro", "kino", "kawiarnia"],
   "meetingPlaces": ["kino", "restauracja", "kawiarnia", "park", "hotel", "muzeum", "sklep", "szkoła", "kościół", "bank"],
-  "notHere": ["kuchnia", "miasto", "ogród", "woda", "obiad", "zupa", "słoń", "rodzina"],
+  "notHere": ["kuchnia", "miasto", "ogród", "woda", "obiad", "zupa", "słoń", "rodzina", "śniadanie", "kolacja", "lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin", "jeż", "komar"],
   "inView": ["person", "animal", "vehicle", "placeIn", "placeTo", "water", "plant", "food"],
-  "notInView": ["kuchnia", "pokój", "bank", "apteka", "biuro", "morze", "zupa", "obiad", "rodzina"],
+  "notInView": ["kuchnia", "pokój", "bank", "apteka", "biuro", "morze", "zupa", "obiad", "rodzina", "śniadanie", "kolacja", "łazienka", "szpital", "urząd", "sąd", "ambasada", "trawa", "ocean"],
   "notCounted": ["pan", "pani", "rodzina"]
 }

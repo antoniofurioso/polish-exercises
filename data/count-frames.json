@@ -5,7 +5,7 @@
     "case": "acc",
     "requires": ["animal", "object", "vehicle", "text", "food"],
     "lemmas": ["dom", "mieszkanie", "pokój"],
-    "excludeLemmas": ["słoń", "zwierzę", "list", "gazeta", "radio", "zupa", "obiad", "samolot", "pociąg", "autobus"]
+    "excludeLemmas": ["słoń", "zwierzę", "list", "gazeta", "radio", "zupa", "obiad", "samolot", "pociąg", "autobus", "lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin", "jeż", "komar", "tramwaj", "metro", "taksówka", "śniadanie", "kolacja"]
   },
   {
     "pl": "Widzę {N} {NP}.",
