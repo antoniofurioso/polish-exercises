@@ -68,9 +68,16 @@ describe("data file layout", () => {
   });
 });
 
-/** Real files with a few entries marked as drafts, in memory only. */
+/**
+ * Real files with a few entries marked as drafts, in memory only. Drafts
+ * already in data/ are unmarked first, so the expectations below hold
+ * whatever content is waiting for review.
+ */
 function filesWithDrafts(): DataFiles {
   const files = readAll();
+  for (const content of Object.values(files)) {
+    for (const entry of Object.values(content as Record<string, Obj>)) delete entry.review;
+  }
   const mark = (file: string, pick: (e: Obj) => boolean) => {
     const list = files[file] as Obj[];
     list.find(pick)!.review = "draft";
