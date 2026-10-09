@@ -1,12 +1,23 @@
 import { describe, expect, it } from "vitest";
+import verbData from "../../data/verbs.json";
 import { renderSolution } from "../generate";
 import { grade } from "../grade";
+import { loadVerbs } from "../load";
 import { parseSession, sessionParams } from "../session";
 import { TENSES, VERB_TYPES } from "../types";
-import type { AnswerMode, Config, GramNumber, Tense } from "../types";
+import type { AnswerMode, Config, Exercise, GramNumber, Tense } from "../types";
 import {
   VERBS,
   buildVerbSession,
+  englishClause,
+  englishOrder,
+  englishPast,
+  englishPastCont,
+  englishPresent,
+  englishPresentCont,
+  englishS,
+  englishWill,
+  englishWillBe,
   futureCompound,
   futureSimple,
   imperative,
@@ -14,15 +25,16 @@ import {
   presentForm,
   withSie,
 } from "../verbs";
+import type { Verb } from "../verbs";
 
 const verb = (inf: string) => {
-  const v = VERBS.find((x) => x.impf.inf === inf || x.pf.inf === inf);
+  const v = VERBS.find((x) => x.impf.inf === inf || x.pf?.inf === inf);
   if (!v) throw new Error(inf);
-  return v.impf.inf === inf ? v.impf : v.pf;
+  return v.impf.inf === inf ? v.impf : v.pf!;
 };
-const pf = (inf: string) => VERBS.find((x) => x.pf.inf === inf)!.pf;
+const pf = (inf: string) => VERBS.find((x) => x.pf?.inf === inf)!.pf!;
 const pair = (inf: string) =>
-  VERBS.find((x) => x.impf.inf === inf || x.pf.inf === inf)!;
+  VERBS.find((x) => x.impf.inf === inf || x.pf?.inf === inf)!;
 
 describe("pastForm", () => {
   it("builds the regular paradigm", () => {
@@ -211,5 +223,342 @@ describe("buildVerbSession", () => {
         }
       }
     }
+  });
+});
+
+// ------------------------------------------------- English, and verb flags
+
+const I = { en: "I", person: 1, number: "sg" } as const;
+const YOU = { en: "you", person: 2, number: "sg" } as const;
+const SHE = { en: "she", person: 3, number: "sg" } as const;
+const WE = { en: "we", person: 1, number: "pl" } as const;
+const YOU_ALL = { en: "you all", person: 2, number: "pl" } as const;
+const THEY = { en: "they", person: 3, number: "pl" } as const;
+
+const WRITE = { base: "write", past: "wrote", ing: "writing" };
+const KNOW = { base: "know", past: "knew", ing: "knowing" };
+const LATE = { base: "be late" };
+const AFRAID = { base: "be afraid of" };
+
+describe("englishS", () => {
+  it("adds -s, -es or -ies to the head verb", () => {
+    const cases: [string, string][] = [
+      ["write", "writes"],
+      ["play", "plays"],
+      ["pay", "pays"],
+      ["study", "studies"],
+      ["try", "tries"],
+      ["worry", "worries"],
+      ["watch", "watches"],
+      ["wash", "washes"],
+      ["kiss", "kisses"],
+      ["fix", "fixes"],
+      ["buzz", "buzzes"],
+      ["go", "goes"],
+      ["do", "does"],
+      ["have", "has"],
+      ["be", "is"],
+      ["come back", "comes back"],
+      ["look after", "looks after"],
+      ["get dressed", "gets dressed"],
+      ["be late", "is late"],
+      ["be interested in", "is interested in"],
+    ];
+    for (const [base, third] of cases) expect(englishS(base), base).toBe(third);
+  });
+});
+
+describe("English tenses", () => {
+  it("conjugates the present, with 'be' per subject", () => {
+    expect(englishPresent(WRITE, I)).toBe("write");
+    expect(englishPresent(WRITE, SHE)).toBe("writes");
+    expect(
+      englishPresent({ base: "study", past: "studied", ing: "studying" }, SHE),
+    ).toBe("studies");
+    expect(englishPresent(LATE, I)).toBe("am late");
+    expect(englishPresent(LATE, YOU)).toBe("are late");
+    expect(englishPresent(LATE, SHE)).toBe("is late");
+    expect(englishPresent(AFRAID, WE)).toBe("are afraid of");
+    expect(englishPresent(AFRAID, THEY)).toBe("are afraid of");
+  });
+
+  it("conjugates the past, with was / were for 'be'", () => {
+    expect(englishPast(WRITE, SHE)).toBe("wrote");
+    expect(englishPast(LATE, I)).toBe("was late");
+    expect(englishPast(LATE, SHE)).toBe("was late");
+    expect(englishPast(LATE, YOU)).toBe("were late");
+    expect(englishPast(AFRAID, YOU_ALL)).toBe("were afraid of");
+  });
+
+  it("keeps states and 'be' out of the progressive", () => {
+    expect(englishPresentCont(WRITE, I)).toBe("am writing");
+    expect(englishPresentCont(WRITE, SHE)).toBe("is writing");
+    expect(englishPresentCont(WRITE, YOU_ALL)).toBe("are writing");
+    expect(englishPresentCont(KNOW, I, true)).toBe("know");
+    expect(englishPresentCont(KNOW, SHE, true)).toBe("knows");
+    expect(englishPresentCont(LATE, I)).toBe("am late");
+    expect(englishPresentCont(LATE, SHE, true)).toBe("is late");
+
+    expect(englishPastCont(WRITE, I)).toBe("was writing");
+    expect(englishPastCont(WRITE, WE)).toBe("were writing");
+    expect(englishPastCont(KNOW, WE, true)).toBe("knew");
+    expect(englishPastCont(LATE, THEY)).toBe("were late");
+  });
+
+  it("builds the future, never 'will be being'", () => {
+    expect(englishWill(WRITE)).toBe("will write");
+    expect(englishWill(LATE)).toBe("will be late");
+    expect(englishWillBe(WRITE)).toBe("will be writing");
+    expect(englishWillBe(KNOW, true)).toBe("will know");
+    expect(englishWillBe(LATE)).toBe("will be late");
+    expect(englishWillBe(AFRAID, true)).toBe("will be afraid of");
+  });
+
+  it("gives orders, 'be' ones included", () => {
+    expect(englishOrder("write", 2, "sg", false, "a letter")).toBe(
+      "Write a letter!",
+    );
+    expect(englishOrder("write", 2, "pl", true, "a letter")).toBe(
+      "Don't write a letter, all of you!",
+    );
+    expect(englishOrder("be late", 2, "sg", true, "for work")).toBe(
+      "Don't be late for work!",
+    );
+    expect(englishOrder("be late", 1, "pl", true, "for work")).toBe(
+      "Let's not be late for work!",
+    );
+    expect(englishOrder("be afraid of", 2, "pl", true, "dogs")).toBe(
+      "Don't be afraid of dogs, all of you!",
+    );
+    expect(englishOrder("worry", 1, "pl", false, "later")).toBe(
+      "Let's worry later!",
+    );
+  });
+
+  it("puts 'usually' after a form of 'be' only", () => {
+    const usually = "{s} usually {v} {o}.";
+    expect(englishClause(usually, "he", "works", "at home")).toBe(
+      "he usually works at home.",
+    );
+    expect(englishClause(usually, "he", "is late", "for work")).toBe(
+      "he is usually late for work.",
+    );
+    expect(englishClause(usually, "we", "are afraid of", "dogs")).toBe(
+      "we are usually afraid of dogs.",
+    );
+    expect(englishClause("{s} {v} {o} now.", "I", "am late", "for work")).toBe(
+      "I am late for work now.",
+    );
+  });
+});
+
+/** Every verb in data/verbs.json, drafts included, whatever the test project. */
+const ALL = loadVerbs(structuredClone(verbData));
+const lemma = (inf: string) => {
+  const v = ALL.find((x) => x.impf.inf === inf);
+  if (!v) throw new Error(inf);
+  return v;
+};
+
+const session = (verbs: Verb[], tenses: Tense[], seed: number, count = 30) =>
+  buildVerbSession(
+    {
+      kind: "verbs",
+      tenses,
+      cases: ["nom"],
+      numbers: ["sg", "pl"],
+      mode: "nouns",
+      count,
+      answerMode: "choice",
+    },
+    seed,
+    verbs,
+  );
+const seeds = Array.from({ length: 20 }, (_, i) => i + 1);
+const frameOf = (ex: Exercise) => ex.id.split("|")[4];
+const infOf = (ex: Exercise) => ex.id.split("|")[1];
+
+describe("verbs without a perfective", () => {
+  const impfOnly = ALL.filter((v) => !v.pf);
+
+  it("are in the data and have no simple future", () => {
+    expect(impfOnly.length).toBeGreaterThan(5);
+    for (const v of impfOnly) expect(futureSimple(v, 1, "sg")).toBeNull();
+    for (const seed of seeds) {
+      expect(session(impfOnly, ["future"], seed)).toEqual([]);
+    }
+  });
+
+  it("never take a perfective frame", () => {
+    for (const seed of seeds) {
+      for (const ex of session(impfOnly, ["past"], seed)) {
+        expect(["Wczoraj", "W sobotę"]).not.toContain(frameOf(ex));
+      }
+    }
+  });
+
+  it("still fill a session in every other tense, and grade their own answers", () => {
+    const tenses: Tense[] = ["present", "past", "futureCompound", "imperative"];
+    for (const tense of tenses) {
+      for (const seed of seeds) {
+        const built = session(impfOnly, [tense], seed);
+        expect(built, `${tense} ${seed}`).toHaveLength(30);
+        for (const ex of built) {
+          for (const a of ex.answers) expect(grade(a, ex)).toBe("correct");
+          const right = (ex.options ?? ex.answers.slice(0, 1)).filter(
+            (o) => grade(o, ex) === "correct",
+          );
+          expect(right).toHaveLength(1);
+        }
+      }
+    }
+  });
+
+  it("fill a simple-future session from the few verbs that have one", () => {
+    // one perfective pair among imperfective-only verbs: the session still fills
+    const pool = [...impfOnly, lemma("pisać")];
+    for (const seed of seeds) {
+      const built = session(pool, ["future"], seed, 20);
+      expect(built).toHaveLength(20);
+      for (const ex of built) expect(infOf(ex)).toBe("napisać");
+    }
+  });
+
+  it("give orders in the imperfective", () => {
+    for (const seed of seeds) {
+      for (const ex of session([lemma("pamiętać")], ["imperative"], seed, 6)) {
+        // "affirmative" orders only: Pamiętaj o kluczach!
+        expect(ex.before).toBe("");
+        expect(ex.answers[0]).toMatch(/^pamiętaj/);
+        expect(ex.en).toMatch(/^(Remember|Let's remember) /);
+      }
+    }
+  });
+});
+
+describe("indeterminate motion: chodzić, jeździć", () => {
+  const verbs = ["chodzić", "jeździć"].map(lemma);
+
+  it("only takes habits, never one trip now", () => {
+    const allowed: [Tense, string[]][] = [
+      ["present", ["Codziennie", "Zwykle"]],
+      ["past", ["Codziennie", "Wtedy"]],
+      ["futureCompound", ["Od jutra codziennie"]],
+    ];
+    for (const [tense, frames] of allowed) {
+      const seen = new Set<string>();
+      for (const seed of seeds) {
+        for (const ex of session(verbs, [tense], seed)) seen.add(frameOf(ex));
+      }
+      expect([...seen].sort()).toEqual([...frames].sort());
+    }
+  });
+
+  it("only forbids: nie chodź!", () => {
+    for (const seed of seeds) {
+      for (const ex of session(verbs, ["imperative"], seed, 10)) {
+        expect(ex.before).toBe("Nie ");
+        expect(ex.en).toMatch(/^(Don't|Let's not) go /);
+      }
+    }
+  });
+
+  it("goes, in the English third person", () => {
+    const she = seeds
+      .flatMap((seed) => session([lemma("chodzić")], ["present"], seed))
+      .filter((ex) => ex.hint.endsWith("ona"));
+    expect(she.length).toBeGreaterThan(0);
+    for (const ex of she) expect(ex.en).toMatch(/she (usually )?goes /i);
+  });
+});
+
+describe("stative verbs", () => {
+  const statives = ALL.filter((v) => v.stative);
+
+  it("are in the data", () => {
+    expect(statives.map((v) => v.impf.inf)).toEqual(
+      expect.arrayContaining(["rozumieć", "wiedzieć", "znać", "lubić", "kochać", "widzieć"]),
+    );
+  });
+
+  it("keep the English simple and drop duration and habit", () => {
+    const banned = ["Cały wieczór", "Codziennie", "Zwykle", "Jutro cały dzień", "Wieczorem"];
+    for (const tense of TENSES) {
+      for (const seed of seeds) {
+        for (const ex of session(statives, [tense], seed)) {
+          expect(banned).not.toContain(frameOf(ex));
+          expect(ex.en, ex.id).not.toMatch(/\b(am|is|are|was|were|be) \w+ing\b/);
+        }
+      }
+    }
+  });
+
+  it("say 'I understand now', 'I am afraid of dogs now'", () => {
+    const now = (inf: string) =>
+      seeds
+        .flatMap((seed) => session([lemma(inf)], ["present"], seed))
+        .filter((ex) => frameOf(ex) === "Teraz");
+    const understand = now("rozumieć");
+    const afraid = now("bać się");
+    expect(understand.length).toBeGreaterThan(0);
+    expect(afraid.length).toBeGreaterThan(0);
+    for (const ex of understand) {
+      expect(ex.en).toMatch(/^(I|You|He|She|We|You all|They) understands? .* now\.$/);
+    }
+    for (const ex of afraid) {
+      expect(ex.en).toMatch(/^(I am|You are|He is|She is|We are|You all are|They are) afraid of .* now\.$/);
+    }
+  });
+});
+
+describe("'be' verbs: spóźniać się", () => {
+  it("uses am / was / will be, and only forbids being late", () => {
+    const verb = lemma("spóźniać się");
+    const all = TENSES.flatMap((t) =>
+      seeds.flatMap((seed) => session([verb], [t], seed, 10)),
+    );
+    for (const ex of all) {
+      expect(ex.en).toMatch(/\b(am|is|are|was|were|be) (usually )?late\b/);
+      expect(ex.en).not.toMatch(/being|usually (am|is|are)\b/);
+      if (ex.id.startsWith("imp")) expect(ex.en).toMatch(/^(Don't|Let's not) be late/);
+    }
+  });
+});
+
+describe("loadVerbs", () => {
+  const [base] = structuredClone(verbData) as Record<string, unknown>[];
+  const without = (key: string) => {
+    const copy = { ...base };
+    delete copy[key];
+    return copy;
+  };
+
+  it("takes a verb without a perfective", () => {
+    const [verb] = loadVerbs([without("pf")]);
+    expect(verb.pf).toBeUndefined();
+  });
+
+  it("wants past and -ing forms, except on a 'be' base", () => {
+    expect(() => loadVerbs([{ ...base, en: { base: "make" } }])).toThrow(/en\.past/);
+    expect(loadVerbs([{ ...base, en: { base: "be late" } }])[0].en).toEqual({
+      base: "be late",
+    });
+    expect(() =>
+      loadVerbs([{ ...base, en: { base: "be late", past: "was late", ing: "being late" } }]),
+    ).toThrow(/come from "be"/);
+  });
+
+  it("checks the new flags", () => {
+    expect(loadVerbs([{ ...base, stative: true }])[0].stative).toBe(true);
+    expect(() => loadVerbs([{ ...base, stative: false }])).toThrow(/stative/);
+    expect(() => loadVerbs([{ ...base, indeterminate: true }])).toThrow(/no "pf"/);
+    expect(() => loadVerbs([{ ...base, motion: true, indeterminate: true }])).toThrow(/both/);
+    expect(loadVerbs([{ ...base, orders: "negated" }])[0].orders).toBe("negated");
+    expect(() => loadVerbs([{ ...base, orders: "never" }])).toThrow(/orders/);
+    const noImp = { ...(base.impf as Record<string, unknown>) };
+    delete noImp.imp;
+    expect(() =>
+      loadVerbs([{ ...without("pf"), impf: noImp, orders: "negated" }]),
+    ).toThrow(/no imperative/);
   });
 });

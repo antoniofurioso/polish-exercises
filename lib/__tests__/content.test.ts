@@ -24,7 +24,7 @@ import {
 import { NOUNS } from "../nouns";
 import { parseSession, sessionParams } from "../session";
 import { TEMPLATES } from "../templates";
-import { EXERCISE_KINDS, LEVELS, withinLevel } from "../types";
+import { EXERCISE_KINDS, LEVELS, TENSES, VERB_TYPES, withinLevel } from "../types";
 import type { Config, Exercise, ExerciseKind, GramNumber, Level, Template } from "../types";
 
 /**
@@ -187,6 +187,34 @@ describe("every level fills every drill", () => {
         }
       });
     }
+  }
+});
+
+describe("every level fills every tense of the verbs drill", () => {
+  // imperfective-only and stative verbs sit some tenses out: the rest must fill in
+  for (const maxLevel of LEVELS) {
+    it(`verbs at ${maxLevel}, one tense at a time`, () => {
+      for (const tense of TENSES) {
+        for (const verbType of VERB_TYPES) {
+          for (let seed = 1; seed <= 5; seed++) {
+            const config: Config = {
+              kind: "verbs",
+              tenses: [tense],
+              verbType,
+              cases: ["nom"],
+              numbers: ["sg", "pl"],
+              mode: "nouns",
+              count: 20,
+              maxLevel,
+              answerMode: seed % 2 ? "choice" : "typing",
+            };
+            const session = build(config, seed);
+            expect(session.length, `${tense} ${verbType} seed ${seed}`).toBe(20);
+            for (const ex of session) expect(problems(ex, maxLevel)).toEqual([]);
+          }
+        }
+      }
+    });
   }
 });
 

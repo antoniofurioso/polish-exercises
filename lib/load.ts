@@ -324,7 +324,7 @@ export function loadNumeralTemplates(raw: unknown, groups: Groups): Partial<Reco
 
 // ------------------------------------------------------------------ verbs
 
-const VERB_FIELDS = ["en", "level", "freq", "impf", "pf", "objects", "reflexive", "motion", "momentary", "review"];
+const VERB_FIELDS = ["en", "level", "freq", "impf", "pf", "objects", "reflexive", "motion", "indeterminate", "momentary", "stative", "orders", "review"];
 
 function aspect(e: Entry, key: "impf" | "pf"): Verb["impf"] {
   const o = e.object(key);
@@ -346,19 +346,36 @@ function aspect(e: Entry, key: "impf" | "pf"): Verb["impf"] {
   };
 }
 
+/**
+ * The English gloss. A "be + adjective" base (be late, be afraid of) is
+ * conjugated from "be" itself (am / was / will be), so it takes no `past` or
+ * `ing`; every other base needs both.
+ */
+function englishGloss(e: Entry): Verb["en"] {
+  const en = e.object("en");
+  const gloss = new Entry(e.file, e.id, en, ["base", "past", "ing"]);
+  const base = gloss.text("en.base", en.base);
+  if (/^be /.test(base)) {
+    if (gloss.has("past") || gloss.has("ing")) {
+      e.fail(`has "be" in "en.base" ("${base}"): leave out "en.past" and "en.ing", they come from "be"`);
+    }
+    return { base };
+  }
+  return { base, past: gloss.text("en.past", en.past), ing: gloss.text("en.ing", en.ing) };
+}
+
 export function loadVerbs(raw: unknown): Verb[] {
   return entries("verbs.json", raw).map((o, i) => {
     const impf = isObject(o.impf) ? o.impf : {};
     const e = new Entry("verbs.json", label(impf, "inf", i), o, VERB_FIELDS);
-    const en = e.object("en");
-    const gloss = new Entry(e.file, e.id, en, ["base", "past", "ing"]);
     const objects = o.objects;
     if (!Array.isArray(objects) || objects.length === 0) return e.fail(`needs a non-empty list for "objects"`);
     const verb: Verb = {
-      en: { base: gloss.text("en.base", en.base), past: gloss.text("en.past", en.past), ing: gloss.text("en.ing", en.ing) },
+      en: englishGloss(e),
       level: e.level(),
       impf: aspect(e, "impf"),
-      pf: aspect(e, "pf"),
+      // optional: imperfective-only verbs (chodzić, mieszkać, wiedzieć) have no partner
+      ...(e.has("pf") ? { pf: aspect(e, "pf") } : {}),
       objects: objects.map((value) => {
         const obj = new Entry(e.file, e.id, e.object("objects[]", value), ["pl", "neg", "en"]);
         return {
@@ -372,7 +389,16 @@ export function loadVerbs(raw: unknown): Verb[] {
     if (freq) verb.freq = freq;
     if (e.has("reflexive")) verb.reflexive = e.flag("reflexive", true) as true;
     if (e.has("motion")) verb.motion = e.flag("motion", true) as true;
+    if (e.has("indeterminate")) verb.indeterminate = e.flag("indeterminate", true) as true;
     if (e.has("momentary")) verb.momentary = e.flag("momentary", true) as true;
+    if (e.has("stative")) verb.stative = e.flag("stative", true) as true;
+    if (verb.motion && verb.indeterminate) e.fail(`cannot be both "motion" (iść) and "indeterminate" (chodzić)`);
+    if (verb.indeterminate && verb.pf) e.fail(`is "indeterminate" (chodzić, jeździć): it has no "pf"`);
+    if (e.has("orders")) {
+      verb.orders = e.oneOf("orders", ["affirmative", "negated"] as const);
+      const imp = verb.orders === "negated" ? verb.impf.imp : (verb.pf?.imp ?? verb.impf.imp);
+      if (!imp) e.fail(`has "orders": "${verb.orders}" but no imperative to give them with`);
+    }
     const review = e.review();
     if (review) verb.review = review;
     return verb;
