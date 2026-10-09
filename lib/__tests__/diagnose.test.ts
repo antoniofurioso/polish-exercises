@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { explainMiss } from "../diagnose";
+import { diagnoseMiss, explainMiss } from "../diagnose";
+import { possessivesCards } from "../cards/possessives";
+import { pronounsCards } from "../cards/pronouns";
+import { buildPossessiveSession } from "../possessives";
+import { buildPronounSession } from "../pronouns";
+import { MISS_KINDS, PRONOUN_CASES } from "../types";
 import { ADJECTIVES } from "../adjectives";
 import { declineAdjective } from "../declineAdjective";
 import { NOUNS } from "../nouns";
@@ -132,5 +137,104 @@ describe("explainMiss", () => {
         }
       }
     }
+  });
+});
+
+/** A demonstrative or possessive question, as its card source would build it. */
+function agreementEx(card: string, answer: string): Exercise {
+  const parts = card.split(":")[1].split("|");
+  const [kase, number] = card.startsWith("pronouns:") ? [parts[0], parts[2]] : [parts[1], parts[3]];
+  return {
+    id: "t",
+    case: kase as Case,
+    number: number as GramNumber,
+    before: "",
+    after: ".",
+    tokens: [{ text: answer, blank: true }],
+    hint: "",
+    en: "",
+    answers: [answer],
+    note: "",
+    card,
+  };
+}
+
+describe("diagnoseMiss", () => {
+  const kind = (input: string, e: Exercise) => diagnoseMiss(input, e)?.kind;
+
+  it("is null for a right answer", () => {
+    expect(diagnoseMiss("kotem", ex("kot", "ins", "sg"))).toBeNull();
+    expect(diagnoseMiss("tego", agreementEx("pronouns:gen|n|sg", "tego"))).toBeNull();
+  });
+
+  it("classifies case-drill misses", () => {
+    expect(kind("", ex("kot", "ins", "sg"))).toBe("empty");
+    expect(kind("kota", ex("kot", "ins", "sg"))).toBe("case");
+    expect(kind("kotami", ex("kot", "ins", "sg"))).toBe("number");
+    expect(kind("kotów", ex("kot", "ins", "sg"))).toBe("caseNumber");
+    expect(kind("stołu", ex("stół", "acc", "sg"))).toBe("accAnimacy");
+    expect(kind("kot", ex("kot", "acc", "sg"))).toBe("accAnimacy");
+    expect(kind("czarną kotem", ex("kot", "ins", "sg", { adj: "czarny" }))).toBe("gender");
+    expect(kind("kotum", ex("kot", "ins", "sg"))).toBe("ending");
+    expect(kind("ktoem", ex("kot", "ins", "sg"))).toBe("typo");
+    expect(kind("banan", ex("kot", "ins", "sg"))).toBe("other");
+    expect(kind("kotem", ex("kot", "ins", "sg", { adj: "czarny" }))).toBe("wordCount");
+    expect(kind("czarnym kotem", ex("kot", "ins", "sg"))).toBe("wordCount");
+  });
+
+  it("carries exactly the text explainMiss shows", () => {
+    for (const mode of ["nouns", "adjectives", "both"] as WordMode[]) {
+      const config: Config = { cases: [...CASES], numbers: ["sg", "pl"], mode, count: 30 };
+      for (const exercise of buildSession(config, 5)) {
+        for (const attempt of ["banan", "", exercise.answers[0] + "u", "x y z", exercise.answers[0]]) {
+          const d = diagnoseMiss(attempt, exercise);
+          expect(d?.text ?? null).toBe(explainMiss(attempt, exercise));
+          if (grade(attempt, exercise) === "wrong") expect(MISS_KINDS).toContain(d!.kind);
+        }
+      }
+    }
+  });
+
+  it("reads demonstrative misses off the paradigm", () => {
+    // ten stół in the accusative: "tego" is the animate (genitive) form
+    expect(kind("tego", agreementEx("pronouns:acc|mInanim|sg", "ten"))).toBe("accAnimacy");
+    expect(kind("ten", agreementEx("pronouns:acc|mAnim|sg", "tego"))).toBe("accAnimacy");
+    expect(kind("ta", agreementEx("pronouns:acc|f|sg", "tę"))).toBe("case");
+    expect(kind("tych", agreementEx("pronouns:gen|f|sg", "tej"))).toBe("number");
+    expect(kind("tego", agreementEx("pronouns:gen|f|sg", "tej"))).toBe("gender");
+    expect(kind("tamtę", agreementEx("pronouns:acc|f|sg", "tamtą"))).toBe("ending");
+    expect(kind("ten pies", agreementEx("pronouns:nom|mAnim|sg", "ten"))).toBe("wordCount");
+    expect(kind("", agreementEx("pronouns:nom|mAnim|sg", "ten"))).toBe("empty");
+  });
+
+  it("reads possessive misses off the paradigm", () => {
+    expect(kind("mój", agreementEx("possessives:moj|acc|mAnim|sg", "mojego"))).toBe("accAnimacy");
+    expect(kind("moja", agreementEx("possessives:moj|nom|n|sg", "moje"))).toBe("gender");
+    expect(kind("naszym", agreementEx("possessives:nasz|ins|f|sg", "naszą"))).toBe("gender");
+    expect(kind("naszymi", agreementEx("possessives:nasz|ins|f|sg", "naszą"))).toBe("number");
+    expect(kind("naszych", agreementEx("possessives:nasz|ins|f|sg", "naszą"))).toBe("caseNumber");
+    expect(kind("jego", agreementEx("possessives:jej|gen|f|sg", "jej"))).toBe("other");
+  });
+
+  it("gives no text outside the case drill, and a kind for every wrong answer", () => {
+    const config = { cases: [...PRONOUN_CASES], numbers: ["sg", "pl"], mode: "nouns", count: 20 } as Config;
+    const exercises = [...buildPronounSession(config, 4), ...buildPossessiveSession(config, 4)];
+    for (const card of [...pronounsCards.all().slice(0, 10), ...possessivesCards.all().slice(0, 10)]) {
+      exercises.push((card.id.startsWith("pronouns") ? pronounsCards : possessivesCards).build(card.id, 1)!);
+    }
+    for (const e of exercises) {
+      for (const attempt of ["", "banan", "tych", "moje", e.answers[0] + "a"]) {
+        const d = diagnoseMiss(attempt, e);
+        if (grade(attempt, e) !== "wrong") continue;
+        expect(d).not.toBeNull();
+        expect(d!.text).toBeNull();
+        expect(MISS_KINDS).toContain(d!.kind);
+      }
+    }
+    // a question from no known drill: just "other"
+    expect(diagnoseMiss("x", { ...agreementEx("pronouns:gen|f|sg", "tej"), card: undefined })).toEqual({
+      kind: "other",
+      text: null,
+    });
   });
 });
