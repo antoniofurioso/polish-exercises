@@ -1,7 +1,7 @@
 # Roadmap: from side project to paid product
 
 Goal: sell Ćwiczenia, first as a web app (PWA) and then in the iOS and Android
-stores. Content comes first: a paying learner who meets the same 85 nouns after
+stores. Content comes first: a paying learner who meets the same 125 nouns after
 a week will cancel, however polished the rest of the app is.
 
 Status key: ☐ todo · ◐ in progress · ☑ done
@@ -9,7 +9,7 @@ Status key: ☐ todo · ◐ in progress · ☑ done
 | Phase | Theme | Size | Status |
 | --- | --- | --- | --- |
 | 0 | Groundwork: registry, data files, levels, content gate | ~1 week | ☑ — see [phase-0.md](./phase-0.md) |
-| 1 | Content ×4 and natural audio | 3–5 weeks | ☐ |
+| 1 | Content ×2–4 and natural audio | 3–5 weeks | ☐ |
 | 2 | Retention: SRS, "today's practice", streaks | 2–3 weeks | ☐ |
 | 3 | Ship the web app: PWA, brand, landing page, beta | 1–2 weeks | ☐ |
 | 4 | Accounts, sync, payments | ~2 weeks | ☐ |
@@ -35,10 +35,10 @@ Changes that make content cheap to add. Full spec: [phase-0.md](./phase-0.md).
 
 | | Today | Launch target |
 | --- | --- | --- |
-| Nouns | ~85 | 300 |
-| Adjectives | ~40 | 120 |
+| Nouns | 125 | 300 |
+| Adjectives | 74 | 150 |
 | Verb pairs | ~32 | 120 |
-| Case templates | ~80 | 250 |
+| Case templates | 142 | 300 |
 
 - Source paradigms from a morphological dictionary (SGJP / Morfeusz), and check
   its licence before shipping. Avoid Wiktionary as the bulk source: it is
