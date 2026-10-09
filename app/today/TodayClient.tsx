@@ -73,7 +73,7 @@ function TodaySession({ round, onAnotherRound }: { round: number; onAnotherRound
     <Runner
       exercises={plan.exercises}
       kind="shuffle"
-      home="/"
+      home="/learn"
       onRestart={onAnotherRound}
       restartLabel="Another round"
       homeLabel="Back to the menu"
@@ -101,7 +101,7 @@ function planSummary(plan: TodayPlan): string {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:py-14">
-      <Link href="/" className="text-sm uppercase tracking-[0.2em] text-accent">
+      <Link href="/learn" className="text-sm uppercase tracking-[0.2em] text-accent">
         Ćwiczenia
       </Link>
       <div className="mt-8">{children}</div>
@@ -112,7 +112,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 function HomeLink() {
   return (
     <Link
-      href="/"
+      href="/learn"
       className="mt-6 inline-block rounded-xl border border-line bg-surface px-6 py-3 font-medium hover:border-accent/50"
     >
       Back to the menu

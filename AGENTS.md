@@ -57,15 +57,20 @@ Delete anything the change made untrue.
 
 | Path | What it is |
 | --- | --- |
-| `app/page.tsx` | Home: the "Today's practice" button (`components/TodayButton`), then the drill menu from the registry |
+| `app/page.tsx` | Landing page (server component): headline, `SampleQuestion` (fixed-seed questions from `sampleQuestions()`), drills, how it works, `StartButton` → `/today` |
+| `app/learn/` | The app's home: the "Today's practice" button (`components/TodayButton`), then the drill menu from the registry. Links that mean "back to the app" go here, never to `/` |
+| `app/polish-cases/`, `polish-pronouns/`, `polish-numbers/`, `polish-verbs/` | Grammar reference pages for search, static, built from `lib/guides.ts` with `components/Guide.tsx`. Polish text goes in `<Pl>` (`lang="pl"`) |
+| `app/sitemap.ts`, `app/robots.ts` | Metadata routes (`dynamic = "force-static"`, required by the static export). Sitemap empty and no `Sitemap:` line while `BRAND.url` is empty |
 | `app/today/` | Today's practice: `buildToday` on a progress snapshot taken at mount, run by the shared `Runner`; a wrong card is asked once more at the end |
 | `app/progress/` | Streak, today's goal ring, the last 28 days, weak spots (each linking to a configured `/practice` session) and the goal / new-per-day settings |
 | `app/<drill>/page.tsx` | One configurator per drill (cases, pronouns, possessives, numbers, verbs, shuffle). They write the session URL |
 | `app/practice/` | Reads the URL, builds the session and hands it to `Runner` |
-| `components/` | `Runner` (runs a prebuilt `Exercise[]`, grades, records every answer; shared by `/practice` and `/today`), `ExerciseCard` (one question, speech, keyboard), `ResultsSummary`, `TodayButton`, `today` (`useTodayStatus`, `useNow`, `GoalRing`, `GoalStatus`), `ui` |
+| `components/` | `SiteHeader`, `SiteFooter` (in `app/layout.tsx`, every page; links Learn, Today, Progress, Privacy and the guides), `StartButton`, `SampleQuestion`, `Guide`, `Runner` (runs a prebuilt `Exercise[]`, grades, records every answer; shared by `/practice` and `/today`), `ExerciseCard` (one question, speech, keyboard), `ResultsSummary`, `TodayButton`, `today` (`useTodayStatus`, `useNow`, `GoalRing`, `GoalStatus`), `ui` |
 | `lib/storage.ts` | localStorage: configs, sound, the v2 log / progress / settings hooks (`useProgress`, `useSettings`, `recordAnswer`…), v1 migration, compaction past 20,000 events |
 | `lib/progressView.ts` | Pure helpers for the progress UI: `MISS_LABELS` (miss kind → English), `skillConfig` / `skillHref` (weak skill → configured session), `lastDays`, `dueCount`, `safely` |
 | `lib/missKind.ts` | `missKindOf(input, exercise)`: the `MissKind` logged with a wrong answer (`diagnoseVerbMiss` for verbs, `diagnoseNumberMiss` for numbers, then `diagnoseMiss`) |
+| `lib/guides.ts` | Reference-page content: ending tables, case triggers (one per distinct template `note`, each with a sentence from `exampleExercise` in `lib/generate.ts`), pronoun / numeral / verb tables, example sentences from the drill builders with fixed seeds, configured `/practice` hrefs, the landing samples. **Every Polish form comes from the grammar code or the lexicon**; model words (student, kot, dom, kobieta, okno, pisać…) throw at build time if they leave the lexicon. Tested in `lib/__tests__/guides.test.ts` |
+| `lib/site.ts` | `TOPIC_PAGES`, `INDEXED_PATHS` (sitemap), `pageMetadata` (title, description, Open Graph, canonical when `BRAND.url` is set) and `NOINDEX` (on `/practice`, `/today`) |
 | `lib/brand.ts` | `BRAND`: product name, tagline, description, site URL, owner and contact email. The only place the name is written; titles, manifest, landing and privacy pages read it |
 | `lib/drills.ts` | **Drill registry** (`DRILLS`, `drillFor`): route, menu text, builder, allowed cases, own URL params, shuffle mix. Single source for "which drills exist" |
 | `lib/cards.ts`, `lib/cards/<drill>.ts` | **SRS card sources** (`CardSource`, reached as `DRILLS[kind].cards`): `all(maxLevel)` in introduction order, `build(card, seed)` for one card, `skillLabel`. Card ids per drill: `plans/phase-2.md` §1. Cases build through `buildCardExercise` in `lib/generate.ts`; pronouns and possessives through their builders' `gender` filter, levelled by `cellLevel` in `lib/agreement.ts` |

@@ -1,11 +1,16 @@
 # Ćwiczenia — Polish practice
 
-Fill-in-the-blank drills for Polish, in the style of courseofpolish.com. The home
-page (`/`) starts with a **Today's practice** button (streak, today's goal, reviews
-due), then a menu of exercises:
+Fill-in-the-blank drills for Polish, in the style of courseofpolish.com. The site
+opens on a landing page (`/`); the app's own home is `/learn`, which starts with a
+**Today's practice** button (streak, today's goal, reviews due), then a menu of
+exercises:
 
-| Route | Exercise |
+| Route | Page |
 | --- | --- |
+| `/` | Landing page: the pitch, three live sample questions (built at build time, nothing recorded), the drills, how daily practice and spaced repetition work, and "Start practising" → `/today` (a returning learner sees "Continue — N due"). |
+| `/learn` | The app's home: the Today's practice button and the drill menu. Every "back to the menu" link points here. |
+| `/polish-cases`, `/polish-pronouns`, `/polish-numbers`, `/polish-verbs` | Grammar reference pages written for search: explanations, paradigm tables and example sentences, all generated at build time from the grammar code and the published lexicon (`lib/guides.ts`), each with "Practise …" links to configured `/practice` sessions. |
+| `/sitemap.xml`, `/robots.txt` | Built from `NEXT_PUBLIC_SITE_URL` (`BRAND.url`): without it the sitemap is empty and robots.txt has no `Sitemap:` line. `/practice` and `/today` are `noindex`. |
 | `/today` | Today's practice: due reviews first, then new words, then filler, built from your progress with no setup. A wrong answer is asked again at the end. "Extra practice" (weakest skills) once nothing is due. |
 | `/progress` | Streak (with one grace day per week), today's goal, the last 28 days, your weak spots with their most common mistakes and a link to drill each, and the daily goal (10 / 20 / 40) and new words per day settings. |
 | `/cases` | Decline nouns / adjectives across all seven cases. |
@@ -199,6 +204,9 @@ Everything is generated locally and deterministically — no API calls.
 | `lib/progressView.ts` | Labels and links for the progress page: miss kinds in English, weak skill → practice URL, the day grid |
 | `lib/missKind.ts` | The miss kind logged with a wrong answer |
 | `components/Runner.tsx` | Runs a list of exercises and records every answer; used by `/practice` and `/today` |
+| `lib/guides.ts` | Content of the grammar reference pages and the landing page's sample questions, built from the grammar code and lexicon (no Polish typed by hand) |
+| `lib/site.ts` | The public pages (`TOPIC_PAGES`, `INDEXED_PATHS` for the sitemap) and `pageMetadata` (title, description, Open Graph, canonical once `BRAND.url` is set) |
+| `components/SiteHeader.tsx`, `SiteFooter.tsx`, `StartButton.tsx`, `SampleQuestion.tsx`, `Guide.tsx` | Landing and reference-page pieces: top bar, the footer on every page, the "Start practising / Continue — N due" button, the live sample question, the reference-page layout and tables |
 | `lib/sound.ts` | Synthesised right / near-miss / wrong cues |
 | `lib/speak.ts` | pl-PL speech synthesis for reading sentences aloud (TTS Worker audio when configured, else the browser) |
 | `lib/speaker.ts` | Worker-vs-browser selection and fallback, testable without a browser |

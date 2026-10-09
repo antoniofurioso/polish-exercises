@@ -20,7 +20,7 @@ export function PracticePage() {
     return (
       <main className="mx-auto w-full max-w-2xl px-5 py-20 text-center">
         <p className="text-muted">This practice link has no settings in it.</p>
-        <Link href="/" className="mt-4 inline-block text-accent underline underline-offset-4">
+        <Link href="/learn" className="mt-4 inline-block text-accent underline underline-offset-4">
           Set up a session
         </Link>
       </main>
