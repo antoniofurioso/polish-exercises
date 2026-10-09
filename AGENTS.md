@@ -76,6 +76,9 @@ Delete anything the change made untrue.
 | `lib/verbs.ts` | Verb conjugation from principal parts, the five tenses, time frames, English verb morphology. Also the verbs card / skill ids stamped on every exercise, `buildVerbCard` (one exercise for one verb × tense) and `diagnoseVerbMiss` (aspect, person, tense) |
 | `lib/cards/verbs.ts` | Verbs `CardSource`: one card per drillable verb × tense, `TENSE_LEVEL` (present A1, the rest A2), `skillLabel` |
 | `lib/shuffle.ts` | Mixes drills, using the registry's `mix` configs |
+| `lib/srs.ts` | SM-2 scheduler with three grades (`schedule`: 1 → 3 → interval × ease days, due at local midnight; wrong → 10 min), and the local-day helpers (`dayKey`, `startOfDay`, `dayNumber`, `addDays`) |
+| `lib/progress.ts` | Progress v2, pure: answer log → cache (`apply`, `replay`, `compact` into `base`, `migrateV1`), streak with grace day, `weakSpots`, `levelCap`, `todayCount`, `dueCards`, `introducedToday`. Card sources are injectable (`Sources`); storage lives in `lib/storage.ts` |
+| `lib/today.ts` | `buildToday`: today's session from due reviews (≤ 70% while new cards exist), new cards (level, freq, drill round robin) within the daily budget, then weakest-skill / soonest-due filler; interleaved by drill; `daySeed`, `cardSeed` |
 | `lib/grade.ts`, `lib/diagnose.ts`, `lib/choices.ts` | Grading (a diacritics-only miss is separate), why-you-were-wrong explanations (`explainMiss`) and their `MissKind` (`diagnoseMiss`), multiple-choice distractors |
 | `lib/types.ts` | Every shared type and enum list (cases, tags, genders, levels, `Config`, `Exercise`) |
 | `data/*.json` | **The lexicon**: nouns, adjectives, collocations, templates, groups, verbs, agreement/count/numeral frames. Schema and rules in `data/README.md` |
