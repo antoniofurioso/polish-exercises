@@ -9,7 +9,7 @@
     "pl": "Szukam {NP}.",
     "en": "I'm looking for {np}.",
     "requires": ["animal", "object", "profession"],
-    "excludeLemmas": ["słoń", "radio", "stół", "łóżko", "biurko"]
+    "excludeLemmas": ["słoń", "radio", "stół", "łóżko", "biurko", "lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin", "jeż", "komar"]
   },
   "dat": {
     "pl": "Pomagam {NP}.",
@@ -33,7 +33,7 @@
     "pl": "Myślę o {NP}.",
     "en": "I'm thinking about {np}.",
     "requires": ["person", "animal", "placeIn", "placeTo", "vehicle"],
-    "excludeLemmas": ["pan", "pani", "rodzina", "kuchnia", "pokój", "bank", "apteka", "biuro"]
+    "excludeLemmas": ["pan", "pani", "rodzina", "kuchnia", "pokój", "bank", "apteka", "biuro", "lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin", "jeż", "komar", "krowa", "świnia", "osioł"]
   },
   "voc": {
     "pl": "Widzę {NP}.",

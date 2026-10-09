@@ -49,7 +49,7 @@
     "en": "Over there is {np}.",
     "requires": ["@tangible", "placeIn", "plant"],
     "states": true,
-    "excludeLemmas": ["@relatives", "list", "kuchnia", "pokój"],
+    "excludeLemmas": ["@relatives", "list", "kuchnia", "pokój", "łazienka"],
     "note": "The subject of the sentence is nominative."
   },
   {
@@ -60,7 +60,7 @@
     "en": "Over there are {np}.",
     "requires": ["@tangible", "placeIn", "plant"],
     "states": true,
-    "excludeLemmas": ["@relatives", "list", "kuchnia", "pokój"],
+    "excludeLemmas": ["@relatives", "list", "kuchnia", "pokój", "łazienka"],
     "note": "The subject of the sentence is nominative."
   },
   {
@@ -70,7 +70,7 @@
     "pl": "Gdzie jest {NP}?",
     "en": "Where is {npDef}?",
     "requires": ["person", "animal", "object", "vehicle", "text", "food", "drink", "placeIn"],
-    "excludeLemmas": ["rodzina", "stół", "łóżko", "biurko", "kwiat", "prezent", "dom", "mieszkanie", "słoń", "koń"],
+    "excludeLemmas": ["rodzina", "stół", "łóżko", "biurko", "kwiat", "prezent", "dom", "mieszkanie", "słoń", "koń", "lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin", "jeż", "komar", "człowiek", "Polak", "Polka"],
     "note": "The subject of the sentence is nominative."
   },
   {
@@ -91,7 +91,7 @@
     "en": "In the photo there is {np}.",
     "requires": ["person", "animal", "vehicle", "placeIn", "placeTo", "water", "plant", "food"],
     "states": true,
-    "excludeLemmas": ["@relatives", "bank", "apteka", "biuro"],
+    "excludeLemmas": ["@relatives", "bank", "apteka", "biuro", "łazienka", "szpital", "urząd", "sąd", "ambasada"],
     "note": "The subject of the sentence is nominative."
   },
   {
@@ -102,7 +102,7 @@
     "en": "In the photo there are {np}.",
     "requires": ["person", "animal", "vehicle", "placeIn", "placeTo", "water", "plant", "food"],
     "states": true,
-    "excludeLemmas": ["@relatives", "bank", "apteka", "biuro"],
+    "excludeLemmas": ["@relatives", "bank", "apteka", "biuro", "łazienka", "szpital", "urząd", "sąd", "ambasada"],
     "note": "The subject of the sentence is nominative."
   },
   {
@@ -113,7 +113,7 @@
     "en": "I like {npDef}.",
     "requires": ["placeIn", "placeTo", "water", "vehicle", "text", "show", "plant"],
     "lemmas": ["imię", "praca", "komputer", "telefon", "prezent", "pogoda"],
-    "excludeLemmas": ["list", "bank", "apteka", "poczta"],
+    "excludeLemmas": ["list", "bank", "apteka", "poczta", "szpital", "urząd", "sąd", "ambasada", "supermarket"],
     "note": "With 'podobać się' the thing you like is the subject — nominative."
   },
   {
@@ -124,7 +124,7 @@
     "en": "I like {npDef}.",
     "requires": ["placeIn", "vehicle", "text", "show", "plant"],
     "lemmas": ["komputer", "telefon", "prezent"],
-    "excludeLemmas": ["list", "bank", "apteka", "kuchnia", "pokój"],
+    "excludeLemmas": ["list", "bank", "apteka", "kuchnia", "pokój", "szpital", "urząd", "sąd", "ambasada", "supermarket", "łazienka"],
     "note": "With 'podobać się' the thing you like is the subject — nominative."
   },
   {
@@ -153,7 +153,7 @@
     "en": "How much does {npDef} cost?",
     "requires": ["object", "vehicle", "food", "drink"],
     "lemmas": ["książka", "dom", "mieszkanie", "pokój"],
-    "excludeLemmas": ["klucz", "portfel", "prezent", "obiad", "autobus", "pociąg", "samolot"],
+    "excludeLemmas": ["klucz", "portfel", "prezent", "obiad", "autobus", "pociąg", "samolot", "śniadanie", "kolacja", "tramwaj", "metro"],
     "note": "The subject of the sentence is nominative."
   },
   {
@@ -164,7 +164,7 @@
     "en": "How much do {npDef} cost?",
     "requires": ["object", "vehicle", "food"],
     "lemmas": ["książka"],
-    "excludeLemmas": ["klucz", "portfel", "prezent", "obiad", "ciasto", "autobus", "pociąg", "samolot"],
+    "excludeLemmas": ["klucz", "portfel", "prezent", "obiad", "ciasto", "autobus", "pociąg", "samolot", "śniadanie", "kolacja", "tramwaj", "metro", "taksówka"],
     "note": "The subject of the sentence is nominative."
   },
   {
@@ -256,7 +256,7 @@
     "en": "I don't have {np}.",
     "requires": ["object", "animal", "food", "drink", "family"],
     "lemmas": ["czas", "samochód", "rower", "dom", "mieszkanie", "pokój"],
-    "excludeLemmas": ["matka", "ojciec", "mama", "tata", "rodzina", "babcia", "dziadek", "list", "gazeta", "kwiat", "radio", "pająk", "słoń", "zwierzę", "koń", "stół", "łóżko", "biurko"],
+    "excludeLemmas": ["matka", "ojciec", "mama", "tata", "rodzina", "babcia", "dziadek", "list", "gazeta", "kwiat", "radio", "pająk", "słoń", "zwierzę", "koń", "stół", "łóżko", "biurko", "lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin", "jeż", "komar", "krowa", "świnia", "osioł", "śniadanie", "kolacja"],
     "note": "A negated verb turns its accusative object into the genitive."
   },
   {
@@ -300,7 +300,7 @@
     "en": "I'm looking for {np}.",
     "requires": ["object", "animal", "profession", "placeIn"],
     "lemmas": ["praca", "samochód", "rower", "książka"],
-    "excludeLemmas": ["kuchnia", "miasto", "kościół", "stół", "łóżko", "biurko", "kwiat", "radio", "prezent", "pisarz", "student", "słoń", "zwierzę", "dom", "park", "ogród", "szkoła", "muzeum", "kino", "biuro"],
+    "excludeLemmas": ["kuchnia", "miasto", "kościół", "stół", "łóżko", "biurko", "kwiat", "radio", "prezent", "pisarz", "student", "słoń", "zwierzę", "dom", "park", "ogród", "szkoła", "muzeum", "kino", "biuro", "lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin", "jeż", "komar", "łazienka"],
     "note": "'szukać' always takes the genitive."
   },
   {
@@ -331,7 +331,7 @@
     "pl": "Boję się {NP}.",
     "en": "I'm afraid of {np}.",
     "requires": [],
-    "lemmas": ["pies", "pająk", "dentysta", "lekarz", "koń", "ptak", "szef"],
+    "lemmas": ["pies", "pająk", "dentysta", "lekarz", "koń", "ptak", "szef", "wilk", "niedźwiedź", "lew", "tygrys"],
     "adjOnly": ["duży", "czarny", "dziki", "głośny", "nowy"],
     "note": "'bać się' always takes the genitive."
   },
@@ -362,7 +362,7 @@
     "pl": "To jest samochód {NP}.",
     "en": "This is {npDef}'s car.",
     "requires": ["family", "friend", "profession"],
-    "excludeLemmas": ["rodzina", "dziecko", "student", "córka", "syn"],
+    "excludeLemmas": ["rodzina", "dziecko", "student", "córka", "syn", "studentka"],
     "note": "Possession is expressed with the genitive."
   },
   {
@@ -393,8 +393,8 @@
     "en": "There is no {npBare}.",
     "enPl": "There are no {npBare}.",
     "requires": ["food", "drink"],
-    "lemmas": ["autobus", "pociąg", "pokój", "bilet", "czas", "cukier"],
-    "excludeLemmas": ["obiad"],
+    "lemmas": ["autobus", "pociąg", "pokój", "bilet", "czas", "cukier", "tramwaj", "taksówka"],
+    "excludeLemmas": ["obiad", "śniadanie", "kolacja"],
     "note": "'nie ma' (there isn't) always takes the genitive."
   },
   {
@@ -405,7 +405,7 @@
     "en": "{npDef} isn't here.",
     "requires": ["person", "animal"],
     "lemmas": ["klucz", "telefon", "portfel"],
-    "excludeLemmas": ["pan", "pani", "rodzina", "słoń", "zwierzę", "koń"],
+    "excludeLemmas": ["pan", "pani", "rodzina", "słoń", "zwierzę", "koń", "lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin", "jeż", "komar"],
     "note": "'nie ma' (there isn't) always takes the genitive."
   },
   {
@@ -478,7 +478,7 @@
     "pl": "W lodówce nie ma {NP}.",
     "en": "There's no {npBare} in the fridge.",
     "requires": ["food", "drink"],
-    "excludeLemmas": ["herbata", "kawa", "chleb", "obiad", "woda"],
+    "excludeLemmas": ["herbata", "kawa", "chleb", "obiad", "woda", "śniadanie", "kolacja"],
     "note": "'nie ma' (there isn't) always takes the genitive."
   },
   {
@@ -489,7 +489,7 @@
     "en": "I have a lot of {npBare}.",
     "requires": ["text", "animal", "show"],
     "lemmas": ["klucz", "prezent", "kwiat"],
-    "excludeLemmas": ["list", "słoń", "koń", "zwierzę", "pająk", "mecz", "koncert"],
+    "excludeLemmas": ["list", "słoń", "koń", "zwierzę", "pająk", "mecz", "koncert", "lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin", "jeż", "komar", "program", "spektakl", "przedstawienie", "opera", "wystawa", "teleturniej"],
     "note": "'dużo' (a lot of) takes the genitive plural."
   },
   {
@@ -501,7 +501,7 @@
     "requires": ["person"],
     "states": true,
     "excludeLemmas": ["pan", "pani"],
-    "adjOnly": ["nowy", "starszy", "młodszy", "chory", "mały", "stary"],
+    "adjOnly": ["nowy", "starszy", "młodszy", "chory", "mały", "stary", "biedny", "ubogi"],
     "note": "'pomagać' always takes the dative."
   },
   {
@@ -512,7 +512,7 @@
     "en": "I trust {npDef}.",
     "requires": ["@close", "profession"],
     "excludeLemmas": ["dziecko", "student", "pisarz"],
-    "adjOnly": ["dobry", "stary", "najlepszy", "prawdziwy", "starszy", "nowy"],
+    "adjOnly": ["dobry", "stary", "najlepszy", "prawdziwy", "starszy", "nowy", "bliski", "szczery"],
     "note": "'ufać' always takes the dative."
   },
   {
@@ -579,7 +579,7 @@
     "en": "I'm taking a photo of {npDef}.",
     "requires": ["@close", "animal"],
     "lemmas": ["dziewczyna", "chłopiec"],
-    "excludeLemmas": ["rodzina", "pająk"],
+    "excludeLemmas": ["rodzina", "pająk", "komar"],
     "note": "The person the action is done for takes the dative."
   },
   {
@@ -653,7 +653,7 @@
     "pl": "Daję jeść {NP}.",
     "en": "I'm feeding {npDef}.",
     "requires": [],
-    "lemmas": ["kot", "pies", "koń", "ptak", "dziecko"],
+    "lemmas": ["kot", "pies", "koń", "ptak", "dziecko", "królik", "chomik", "żółw", "krowa", "świnia", "osioł"],
     "states": true,
     "note": "'dać jeść' (to feed) takes the dative of the one being fed."
   },
@@ -675,7 +675,7 @@
     "en": "I have {np}.",
     "requires": ["animal", "object", "vehicle", "family"],
     "lemmas": ["czas", "dom", "mieszkanie"],
-    "excludeLemmas": ["matka", "ojciec", "mama", "tata", "rodzina", "babcia", "dziadek", "list", "gazeta", "kwiat", "radio", "rzecz", "słoń", "pająk", "zwierzę", "stół", "łóżko", "biurko", "autobus", "pociąg", "samolot"],
+    "excludeLemmas": ["matka", "ojciec", "mama", "tata", "rodzina", "babcia", "dziadek", "list", "gazeta", "kwiat", "radio", "rzecz", "słoń", "pająk", "zwierzę", "stół", "łóżko", "biurko", "autobus", "pociąg", "samolot", "lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin", "jeż", "komar", "krowa", "świnia", "osioł", "tramwaj", "metro", "taksówka"],
     "note": "The direct object of a positive verb takes the accusative."
   },
   {
@@ -686,7 +686,7 @@
     "en": "I can see {np}.",
     "requires": ["person", "animal", "vehicle", "placeIn", "placeTo", "water", "plant"],
     "states": true,
-    "excludeLemmas": ["@relatives", "kuchnia", "pokój", "bank", "biuro"],
+    "excludeLemmas": ["@relatives", "kuchnia", "pokój", "bank", "biuro", "łazienka"],
     "note": "The direct object of a positive verb takes the accusative."
   },
   {
@@ -707,7 +707,7 @@
     "en": "I like {np}.",
     "requires": ["animal", "show", "food"],
     "lemmas": ["książka", "kwiat"],
-    "excludeLemmas": ["pająk"],
+    "excludeLemmas": ["pająk", "komar", "pizza", "kiełbasa"],
     "note": "The direct object of a positive verb takes the accusative."
   },
   {
@@ -718,7 +718,7 @@
     "en": "I'm buying {np}.",
     "requires": ["object", "food", "drink", "vehicle"],
     "lemmas": ["książka", "gazeta", "mieszkanie", "dom"],
-    "excludeLemmas": ["klucz", "list", "zupa", "obiad"],
+    "excludeLemmas": ["klucz", "list", "zupa", "obiad", "tramwaj", "metro", "taksówka", "śniadanie", "kolacja"],
     "note": "The direct object of a positive verb takes the accusative."
   },
   {
@@ -776,7 +776,7 @@
     "en": "I love {np}.",
     "requires": ["topic"],
     "lemmas": ["kawa", "herbata", "wino", "ciasto", "ser"],
-    "excludeLemmas": ["polityka"],
+    "excludeLemmas": ["polityka", "gospodarka"],
     "note": "The direct object of a positive verb takes the accusative."
   },
   {
@@ -818,7 +818,7 @@
     "en": "Do you have {np}?",
     "requires": ["object", "animal"],
     "lemmas": ["czas", "brat", "siostra", "dziecko"],
-    "excludeLemmas": ["stół", "łóżko", "biurko", "list", "gazeta", "kwiat", "radio", "prezent", "słoń", "pająk", "zwierzę", "koń"],
+    "excludeLemmas": ["stół", "łóżko", "biurko", "list", "gazeta", "kwiat", "radio", "prezent", "słoń", "pająk", "zwierzę", "koń", "lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin", "jeż", "komar", "krowa", "świnia", "osioł", "tramwaj", "metro", "taksówka"],
     "note": "The direct object of a positive verb takes the accusative."
   },
   {
@@ -829,7 +829,7 @@
     "en": "I have to buy {np}.",
     "requires": ["object", "food", "drink"],
     "lemmas": ["bilet", "gazeta", "samochód", "rower"],
-    "excludeLemmas": ["klucz", "list", "zupa", "obiad"],
+    "excludeLemmas": ["klucz", "list", "zupa", "obiad", "tramwaj", "metro", "taksówka", "śniadanie", "kolacja"],
     "note": "The direct object of a positive verb takes the accusative."
   },
   {
@@ -839,8 +839,8 @@
     "pl": "Czekam na {NP}.",
     "en": "I'm waiting for {npDef}.",
     "requires": ["@close", "show"],
-    "lemmas": ["autobus", "pociąg", "obiad", "pogoda", "lekarz", "szef"],
-    "excludeLemmas": ["rodzina", "serial", "film"],
+    "lemmas": ["autobus", "pociąg", "obiad", "pogoda", "lekarz", "szef", "tramwaj", "taksówka", "metro", "śniadanie", "kolacja"],
+    "excludeLemmas": ["rodzina", "serial", "film", "program", "teleturniej", "spektakl", "przedstawienie", "opera", "wystawa"],
     "adjOnly": ["ostatni", "pierwszy", "nowy", "ważny", "starszy", "młodszy", "najlepszy"],
     "note": "'na' meaning 'waiting for' takes the accusative."
   },
@@ -920,7 +920,7 @@
     "pl": "Idę na {NP}.",
     "en": "I'm going to {npDef}.",
     "requires": [],
-    "lemmas": ["mecz", "koncert", "poczta", "film"],
+    "lemmas": ["mecz", "koncert", "poczta", "film", "spektakl", "przedstawienie", "opera", "wystawa"],
     "note": "'na' with movement towards an event takes the accusative."
   },
   {
@@ -1030,7 +1030,7 @@
     "pl": "Chcę zostać {NP}.",
     "en": "I want to become {np}.",
     "requires": ["profession"],
-    "excludeLemmas": ["student"],
+    "excludeLemmas": ["student", "studentka"],
     "adjOnly": ["dobry", "znany"],
     "note": "After 'zostać' (to become) a profession takes the instrumental."
   },
@@ -1061,7 +1061,7 @@
     "pl": "Opiekuję się {NP}.",
     "en": "I take care of {npDef}.",
     "requires": ["family"],
-    "lemmas": ["kot", "pies", "koń"],
+    "lemmas": ["kot", "pies", "koń", "królik", "chomik", "żółw"],
     "states": true,
     "excludeLemmas": ["rodzina"],
     "note": "'opiekować się' always takes the instrumental."
@@ -1148,7 +1148,7 @@
     "requires": ["@close", "animal", "water"],
     "lemmas": ["praca", "tydzień", "samochód", "mieszkanie", "dom"],
     "states": true,
-    "excludeLemmas": ["pająk", "słoń", "zwierzę"],
+    "excludeLemmas": ["pająk", "słoń", "zwierzę", "lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin", "jeż", "komar", "krowa", "świnia", "osioł"],
     "note": "'o' meaning 'about' takes the locative."
   },
   {
@@ -1218,7 +1218,7 @@
     "pl": "Byłem wczoraj {w} {NP}.",
     "en": "I was at {npDef} yesterday.",
     "requires": ["placeIn"],
-    "excludeLemmas": ["kuchnia", "pokój", "mieszkanie", "dom", "ogród", "biuro"],
+    "excludeLemmas": ["kuchnia", "pokój", "mieszkanie", "dom", "ogród", "biuro", "łazienka"],
     "note": "'w' meaning 'inside' takes the locative."
   },
   {
@@ -1320,7 +1320,7 @@
     "pl": "Jestem na {NP}.",
     "en": "I'm at {npDef}.",
     "requires": [],
-    "lemmas": ["mecz", "koncert", "poczta"],
+    "lemmas": ["mecz", "koncert", "poczta", "spektakl", "przedstawienie", "opera", "wystawa"],
     "note": "'na' with events (and a few places) takes the locative when there is no movement."
   },
   {

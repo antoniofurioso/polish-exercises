@@ -58,7 +58,7 @@
     "en": "I take care of {np}.",
     "requires": ["family", "animal"],
     "lemmas": ["chłopiec", "ogród", "dom", "mieszkanie"],
-    "excludeLemmas": ["pająk", "słoń"],
+    "excludeLemmas": ["pająk", "słoń", "lew", "tygrys", "niedźwiedź", "wilk", "lis", "orzeł", "małpa", "pingwin", "jeż", "komar"],
     "subject": "1sg",
     "note": "'opiekować się' takes the instrumental."
   },
