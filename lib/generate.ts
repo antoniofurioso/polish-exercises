@@ -335,6 +335,16 @@ function assembleExercise(
 }
 
 /**
+ * One sentence built from exactly this template and noun, with no RNG: the
+ * worked examples on the reference pages (lib/guides.ts). The noun is the
+ * blank, as in a "nouns" session.
+ */
+export function exampleExercise(tpl: Template, noun: Noun, number: GramNumber): Exercise {
+  const key = `${tpl.pl}|${noun.lemma}||${number}`;
+  return assembleExercise(tpl, noun, undefined, number, tpl.case, "nouns", key);
+}
+
+/**
  * A sentence that can drill one noun in one cell. `needs` is set when only an
  * adjective shows the number: the plural noun is spelled like the singular in
  * a frame open to both ("Szukam piekarni"), which buildSession would read as a

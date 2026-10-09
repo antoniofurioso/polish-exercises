@@ -97,7 +97,7 @@ export default function VerbsConfiguratorPage() {
   return (
     <main className="mx-auto w-full max-w-3xl px-5 py-10 sm:py-16">
       <header className="mb-10">
-        <Link href="/" className="text-sm uppercase tracking-[0.2em] text-accent">
+        <Link href="/learn" className="text-sm uppercase tracking-[0.2em] text-accent">
           Ćwiczenia
         </Link>
         <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Verbs</h1>

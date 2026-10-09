@@ -12,7 +12,7 @@ export function ResultsSummary({
   results,
   onRetryMissed,
   onRestart,
-  home = "/",
+  home = "/learn",
   restartLabel = "New sentences, same settings",
   homeLabel = "Change settings",
 }: {
