@@ -78,7 +78,7 @@ Delete anything the change made untrue.
 | `lib/shuffle.ts` | Mixes drills, using the registry's `mix` configs |
 | `lib/srs.ts` | SM-2 scheduler with three grades (`schedule`: 1 → 3 → interval × ease days, due at local midnight; wrong → 10 min), and the local-day helpers (`dayKey`, `startOfDay`, `dayNumber`, `addDays`) |
 | `lib/progress.ts` | Progress v2, pure: answer log → cache (`apply`, `replay`, `compact` into `base`, `migrateV1`), streak with grace day, `weakSpots`, `levelCap`, `todayCount`, `dueCards`, `introducedToday`. Card sources are injectable (`Sources`); storage lives in `lib/storage.ts` |
-| `lib/today.ts` | `buildToday`: today's session from due reviews (≤ 70% while new cards exist), new cards (level, freq, drill round robin) within the daily budget, then weakest-skill / soonest-due filler; interleaved by drill; `daySeed`, `cardSeed` |
+| `lib/today.ts` | `buildToday`: today's session from due reviews (≤ 70% while new cards exist), new cards (by level, drills taking turns, no word or skill twice in a row) within the daily budget, then weakest-skill / soonest-due filler, then more new cards up to the goal; interleaved by drill; `daySeed`, `cardSeed` |
 | `lib/grade.ts`, `lib/diagnose.ts`, `lib/choices.ts` | Grading (a diacritics-only miss is separate), why-you-were-wrong explanations (`explainMiss`) and their `MissKind` (`diagnoseMiss`), multiple-choice distractors |
 | `lib/types.ts` | Every shared type and enum list (cases, tags, genders, levels, `Config`, `Exercise`) |
 | `data/*.json` | **The lexicon**: nouns, adjectives, collocations, templates, groups, verbs, agreement/count/numeral frames. Schema and rules in `data/README.md` |
@@ -172,6 +172,9 @@ Before committing, run test, lint, build, then tsc. All four must be clean.
   for a native speaker's call.
 - **Draft data ships in the JS bundle**, unused. It's harmless, but unreviewed
   words are visible to anyone who reads the bundle.
+- **SRS.** Numbers misses are not classified beyond empty / other, and a
+  plural-only cases session can log a card `all()` does not list (never
+  scheduled). See "Open after Phase 2" in `plans/phase-2.md`.
 - **Pre-rendered audio covers the spelling drill up to 1000.** Above that the
   app falls back to Azure or the browser voice.
 
@@ -185,4 +188,7 @@ See `plans/ROADMAP.md`.
   - native review of the drafts (`review:export`, about 540 rows);
   - audio rendering and upload (`audio:render`, `audio:upload`);
   - deploying `workers/tts`.
-- **Next is Phase 2 (retention).** The brief is in `plans/phase-2.md`.
+- **Phase 2 (retention) code is done:** SRS cards for every drill, the v2
+  answer log, `/today` and `/progress`. Spec, decisions and open points are in
+  `plans/phase-2.md`.
+- **Next is Phase 3** (PWA, brand, landing page, beta).

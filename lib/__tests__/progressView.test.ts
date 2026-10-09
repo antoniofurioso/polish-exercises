@@ -74,7 +74,7 @@ describe("lastDays", () => {
 
 describe("dueCount", () => {
   it("counts the cards due at the given time", () => {
-    const card = (due: number) => ({ due, interval: 1, ease: 2.5, reps: 1, lapses: 0, last: 0, seen: 1, right: 1 });
+    const card = (due: number) => ({ due, interval: 1, ease: 2.5, reps: 1, lapses: 0, first: 0, last: 0, seen: 1, right: 1 });
     const progress: Progress = { ...EMPTY_PROGRESS, cards: { a: card(100), b: card(200), c: card(300) } };
     expect(dueCount(progress, 200)).toBe(2);
     expect(dueCount(EMPTY_PROGRESS, 200)).toBe(0);

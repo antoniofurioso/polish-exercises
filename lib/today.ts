@@ -58,25 +58,42 @@ export function cardSeed(seed: number, card: string): number {
   return hash(`${seed}|${card}`);
 }
 
+/** The part of a card id its skill doesn't name: the word ("kot"), or the owner / gender. */
+function wordKey(info: CardInfo): string {
+  const skill = new Set(info.skill.split(/[:|]/));
+  return info.id
+    .split(/[:|]/)
+    .filter((part) => !skill.has(part))
+    .join("|");
+}
+
+/** How far ahead a drill's list is searched for a card that doesn't repeat the last word or skill. */
+const SPREAD_LOOKAHEAD = 64;
+
 /**
- * New cards in introduction order (§5): level, then freq, then drill round robin, then
- * file order. `lists` holds each drill's unseen cards in file order.
+ * New cards in introduction order (§5): by level, the drills taking turns within a level,
+ * each drill's own cards in its `all()` order (freq, then file order). Within a drill the
+ * next card skips ahead a little when it would repeat the word or skill just introduced,
+ * so a first session doesn't decline one noun four times in a row. `lists` holds each
+ * drill's unseen cards in `all()` order.
  */
 export function orderNew(lists: CardInfo[][]): CardInfo[] {
-  const groups = new Map<string, CardInfo[][]>();
-  lists.forEach((list, d) => {
-    for (const info of list) {
-      const key = `${LEVELS.indexOf(info.level)}|${info.freq}`;
-      const perDrill = groups.get(key) ?? lists.map(() => []);
-      perDrill[d].push(info);
-      groups.set(key, perDrill);
-    }
-  });
   const out: CardInfo[] = [];
-  for (const key of [...groups.keys()].sort()) {
-    const perDrill = groups.get(key)!;
-    for (let i = 0; perDrill.some((list) => i < list.length); i++) {
-      for (const list of perDrill) if (i < list.length) out.push(list[i]);
+  for (const level of LEVELS) {
+    const queues = lists.map((list) => list.filter((info) => info.level === level));
+    const recent = lists.map(() => ({ word: "", skill: "" }));
+    while (queues.some((q) => q.length > 0)) {
+      queues.forEach((queue, d) => {
+        if (queue.length === 0) return;
+        const last = recent[d];
+        let at = queue.findIndex(
+          (info, i) => i < SPREAD_LOOKAHEAD && wordKey(info) !== last.word && info.skill !== last.skill,
+        );
+        if (at < 0) at = 0;
+        const [info] = queue.splice(at, 1);
+        recent[d] = { word: wordKey(info), skill: info.skill };
+        out.push(info);
+      });
     }
   }
   return out;
@@ -104,7 +121,8 @@ export function buildToday(progress: Progress, now: number, seed: number, opts: 
 
   const due = dueCards(progress, now).filter((id) => drillOf(id));
   const newLeft = Math.max(0, opts.settings.newPerDay - introducedToday(progress, now));
-  const fresh = newLeft > 0 ? orderNew(unseen).map((info) => info.id) : [];
+  const freshAll = orderNew(unseen).map((info) => info.id);
+  const fresh = newLeft > 0 ? freshAll : [];
 
   const picked: Picked[] = [];
   const used = new Set<string>();
@@ -147,13 +165,16 @@ export function buildToday(progress: Progress, now: number, seed: number, opts: 
     const extra = fillerOrder(progress, now, allowed, infos, Math.ceil(size * WEAK_SHARE));
     nExtra = draw(extra, { i: 0 }, size - picked.length, 2);
   }
+  // nothing else left to practise (a first day, or every seen card is far off): more new cards
+  const extraOnly = nDue === 0 && nFresh === 0;
+  const nOver = draw(freshAll, freshAt, size - picked.length, 1);
 
   return {
     exercises: interleave(picked),
     due: nDue,
-    fresh: nFresh,
+    fresh: nFresh + nOver,
     extra: nExtra,
-    extraOnly: nDue === 0 && nFresh === 0,
+    extraOnly,
     level,
     size,
     dueTotal: due.length,

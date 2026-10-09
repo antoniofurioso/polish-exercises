@@ -47,11 +47,11 @@ function fake(cards: CardInfo[], broken: string[] = []): CardSource {
   };
 }
 
-/** Three drills, each with A1 cards of freq 1 and 2, and some A2 ones. */
+/** Three drills, each with A1 cards of freq 1 and 2, and some A2 ones, in `all()` order. */
 function registry(): Sources {
   const make = (drill: DrillKind) => [
-    ...Array.from({ length: 8 }, (_, i) => card(drill, `a1f2-${i}`, "A1", 2, `k${i % 2}`)),
     ...Array.from({ length: 4 }, (_, i) => card(drill, `a1f1-${i}`, "A1", 1, `k${i % 2}`)),
+    ...Array.from({ length: 8 }, (_, i) => card(drill, `a1f2-${i}`, "A1", 2, `k${i % 2}`)),
     ...Array.from({ length: 6 }, (_, i) => card(drill, `a2-${i}`, "A2", 1, "k9")),
   ];
   return { cases: fake(make("cases")), pronouns: fake(make("pronouns")), verbs: fake(make("verbs")) };
@@ -80,19 +80,33 @@ function answer(progress: Progress, exercises: Exercise[], t: number, verdict: (
 describe("buildToday", () => {
   it("gives a first-time learner A1 new cards across drills, everyday words first", () => {
     const plan = buildToday(EMPTY_PROGRESS, DAY1, 1, opts());
-    expect(plan).toMatchObject({ due: 0, fresh: 10, extra: 0, extraOnly: false, level: "A1", size: 20, newLeft: 10 });
-    expect(plan.exercises).toHaveLength(10);
+    // nothing else to practise yet, so new cards fill the whole goal, not just the budget
+    expect(plan).toMatchObject({ due: 0, fresh: 20, extra: 0, extraOnly: false, level: "A1", size: 20, newLeft: 10 });
+    expect(plan.exercises).toHaveLength(20);
     const cards = plan.exercises.map((e) => e.card!);
-    expect(cards.every((c) => c.includes(":a1f1-"))).toBe(true);
+    expect(cards.every((c) => c.includes(":a1"))).toBe(true);
+    expect(cards.filter((c) => c.includes(":a1f1-"))).toHaveLength(12);
     expect(new Set(plan.exercises.map((e) => e.kind))).toEqual(new Set(["cases", "pronouns", "verbs"]));
   });
 
-  it("orders new cards by level, freq, drill round robin, then file order", () => {
+  it("orders new cards by level, then drill round robin, each drill in its all() order", () => {
     const order = orderNew([
       [card("cases", "x", "A1", 2), card("cases", "y", "A1", 1), card("cases", "z", "A1", 1)],
       [card("verbs", "p", "A2", 1), card("verbs", "q", "A1", 1)],
     ]).map((c) => c.id);
-    expect(order).toEqual(["cases:y", "verbs:q", "cases:z", "cases:x", "verbs:p"]);
+    expect(order).toEqual(["cases:x", "verbs:q", "cases:y", "cases:z", "verbs:p"]);
+  });
+
+  it("does not introduce the same word or skill twice in a row within a drill", () => {
+    const order = orderNew([
+      [
+        { id: "cases:kot|nom|sg", skill: "cases:nom|sg", level: "A1", freq: 1 },
+        { id: "cases:kot|acc|sg", skill: "cases:acc|sg", level: "A1", freq: 1 },
+        { id: "cases:pies|nom|sg", skill: "cases:nom|sg", level: "A1", freq: 1 },
+        { id: "cases:pies|acc|sg", skill: "cases:acc|sg", level: "A1", freq: 1 },
+      ],
+    ]).map((c) => c.id);
+    expect(order).toEqual(["cases:kot|nom|sg", "cases:pies|acc|sg", "cases:kot|acc|sg", "cases:pies|nom|sg"]);
   });
 
   it("marks each exercise with its drill, card and skill, ids prefixed and unique", () => {
@@ -123,10 +137,11 @@ describe("buildToday", () => {
     const first = buildToday(EMPTY_PROGRESS, DAY1, 1, opts());
     const progress = answer(EMPTY_PROGRESS, first.exercises, DAY1);
     const plan = buildToday(progress, DAY2, 2, opts());
-    expect(plan).toMatchObject({ due: 10, fresh: 10, extraOnly: false, dueTotal: 10, newLeft: 10 });
+    // 20 cards met yesterday are all due; reviews take 70% while new cards remain
+    expect(plan).toMatchObject({ due: 14, fresh: 6, extraOnly: false, dueTotal: 20, newLeft: 10 });
     const seen = new Set(first.exercises.map((e) => e.card));
-    expect(plan.exercises.slice(0, 10).every((e) => seen.has(e.card))).toBe(true);
-    expect(plan.exercises.slice(10).every((e) => !seen.has(e.card))).toBe(true);
+    expect(plan.exercises.slice(0, 14).every((e) => seen.has(e.card))).toBe(true);
+    expect(plan.exercises.slice(14).every((e) => !seen.has(e.card))).toBe(true);
   });
 
   it("takes the most overdue reviews first", () => {
@@ -178,10 +193,9 @@ describe("buildToday", () => {
     expect(first.fresh).toBe(7);
     const progress = answer(EMPTY_PROGRESS, first.exercises, DAY1);
     const later = buildToday(progress, DAY1 + 2 * HOUR, 1, opts());
-    expect(later).toMatchObject({ newLeft: 3, fresh: 3, due: 0 });
-    // the filler is the cards seen earlier today
-    expect(later.extra).toBe(7);
-    expect(later.exercises).toHaveLength(10);
+    // 3 new from the budget, the 7 cards seen earlier today as filler, then new cards to the goal
+    expect(later).toMatchObject({ newLeft: 3, fresh: 13, due: 0, extra: 7 });
+    expect(later.exercises).toHaveLength(20);
   });
 
   it("switches to extra practice when nothing is due and the budget is spent", () => {
@@ -254,7 +268,8 @@ describe("buildToday", () => {
 
   it("only uses the chosen drills, and passes the answer mode on", () => {
     const plan = buildToday(EMPTY_PROGRESS, DAY1, 1, opts({ drills: ["verbs"], answerMode: "choice" }));
-    expect(plan.exercises.length).toBe(10);
+    // all 12 A1 verbs cards: 10 from the budget, 2 more to get as close to the goal as A1 allows
+    expect(plan.exercises.length).toBe(12);
     expect(plan.exercises.every((e) => e.kind === "verbs" && e.options)).toBe(true);
   });
 
