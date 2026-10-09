@@ -60,19 +60,19 @@ Human    native-speaker review of every draft → approve → golden snapshot up
   same loader treatment as 0.2. The golden snapshot must stay unchanged.
 - Document all of this in `data/README.md`.
 
-### 1.2 Nouns: 125 → 300 ☐ (wave 2)
+### 1.2 Nouns: 125 → 300 ☑ (306, drafts) (wave 2)
 
 `data/nouns.json` only. Fill the semantic tags templates use (food, placeIn,
 vehicle…), with special care for thin ones; every tag should end up with at least
 8 nouns. Watch gender (`mPers` / `mAnim` / `mInan` / `f` / `n`), mobile vowels,
 consonant alternations in the locative and dative, and the vocative.
 
-### 1.3 Adjectives: 74 → 150 ☐ (wave 2)
+### 1.3 Adjectives: 74 → 150 ☑ (drafts) (wave 2)
 
 `data/adjectives.json` only. Include a balanced share of soft-stem and velar
 adjectives, and check `virilePl` alternations (-szy, -cy, -dzy, -rzy).
 
-### 1.4 Verbs: 32 → 120 pairs ☐ (wave 2)
+### 1.4 Verbs: 32 → 120 pairs ☑ (drafts) (wave 2)
 
 `data/verbs.json` only. Aspect pairs with exact past stems, the non-past 1sg /
 2sg / 3pl, and imperatives. Include about 25% reflexive verbs and the common
