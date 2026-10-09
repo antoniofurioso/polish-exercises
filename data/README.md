@@ -344,7 +344,7 @@ rest. In error messages a verb is named by its imperfective infinitive.
 | `en` | yes | English `base`, simple `past` and `ing` form. |
 | `level`, `freq` | `level` only | As for nouns, for the aspect pair as a whole. |
 | `impf`, `pf` | yes | The imperfective and perfective verb, each with: |
-| ↳ `inf` | yes | Infinitive (without "się"). |
+| ↳ `inf` | yes | Infinitive, with "się" on reflexive verbs (uczyć się). |
 | ↳ `past` | yes | 3sg masculine `m` (pisał), feminine `f` (pisała), masculine-personal plural `vir` (pisali), and `m1` only when the stem before -em / -eś differs from `m` (mógł → mogłem). |
 | ↳ `pres` | yes | Non-past 1sg, 2sg, 3pl: the present for `impf`, the future for `pf`. |
 | ↳ `imp` | no | 2sg imperative; left out when not in use. |

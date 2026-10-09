@@ -109,7 +109,7 @@ describe("review import", () => {
       "template acc/any: Widzę {NP}.",
       "numeral-frame voc",
     ]);
-    expect(entryId("verb", { impf: { inf: "uczyć" }, pf: { inf: "nauczyć" }, reflexive: true })).toBe(
+    expect(entryId("verb", { impf: { inf: "uczyć się" }, pf: { inf: "nauczyć się" }, reflexive: true })).toBe(
       "uczyć się / nauczyć się",
     );
   });

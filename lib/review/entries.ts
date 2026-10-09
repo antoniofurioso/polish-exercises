@@ -50,8 +50,8 @@ export function entryId(kind: Kind, entry: Obj, key?: string): string {
     case "adjective":
       return str(entry.lemma);
     case "verb": {
-      const sie = entry.reflexive ? " się" : "";
-      const inf = (aspect: unknown) => str((aspect as Obj | undefined)?.inf) + sie;
+      // reflexive infinitives already carry "się" in the data
+      const inf = (aspect: unknown) => str((aspect as Obj | undefined)?.inf);
       return `${inf(entry.impf)} / ${inf(entry.pf)}`;
     }
     case "template":
