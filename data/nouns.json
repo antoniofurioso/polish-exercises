@@ -1,0 +1,1165 @@
+[
+  {
+    "lemma": "student",
+    "en": "student",
+    "enPl": "students",
+    "gender": "mPers",
+    "tags": ["person", "profession"],
+    "sg": ["student", "studenta", "studentowi", "studenta", "studentem", "studencie", "studencie"],
+    "pl": ["studenci", "studentów", "studentom", "studentów", "studentami", "studentach", "studenci"]
+  },
+  {
+    "lemma": "nauczyciel",
+    "en": "teacher",
+    "enPl": "teachers",
+    "gender": "mPers",
+    "tags": ["person", "profession"],
+    "sg": ["nauczyciel", "nauczyciela", "nauczycielowi", "nauczyciela", "nauczycielem", "nauczycielu", "nauczycielu"],
+    "pl": ["nauczyciele", "nauczycieli", "nauczycielom", "nauczycieli", "nauczycielami", "nauczycielach", "nauczyciele"]
+  },
+  {
+    "lemma": "lekarz",
+    "en": "doctor",
+    "enPl": "doctors",
+    "gender": "mPers",
+    "tags": ["person", "profession"],
+    "sg": ["lekarz", "lekarza", "lekarzowi", "lekarza", "lekarzem", "lekarzu", "lekarzu"],
+    "pl": ["lekarze", "lekarzy", "lekarzom", "lekarzy", "lekarzami", "lekarzach", "lekarze"]
+  },
+  {
+    "lemma": "pisarz",
+    "en": "writer",
+    "enPl": "writers",
+    "gender": "mPers",
+    "tags": ["person", "profession"],
+    "sg": ["pisarz", "pisarza", "pisarzowi", "pisarza", "pisarzem", "pisarzu", "pisarzu"],
+    "pl": ["pisarze", "pisarzy", "pisarzom", "pisarzy", "pisarzami", "pisarzach", "pisarze"]
+  },
+  {
+    "lemma": "dentysta",
+    "en": "dentist",
+    "enPl": "dentists",
+    "gender": "mPers",
+    "tags": ["person", "profession"],
+    "sg": ["dentysta", "dentysty", "dentyście", "dentystę", "dentystą", "dentyście", "dentysto"],
+    "pl": ["dentyści", "dentystów", "dentystom", "dentystów", "dentystami", "dentystach", "dentyści"]
+  },
+  {
+    "lemma": "brat",
+    "en": "brother",
+    "enPl": "brothers",
+    "gender": "mPers",
+    "tags": ["person", "family"],
+    "sg": ["brat", "brata", "bratu", "brata", "bratem", "bracie", "bracie"],
+    "pl": ["bracia", "braci", "braciom", "braci", "braćmi", "braciach", "bracia"]
+  },
+  {
+    "lemma": "ojciec",
+    "en": "father",
+    "enPl": "fathers",
+    "gender": "mPers",
+    "tags": ["person", "family"],
+    "sg": ["ojciec", "ojca", "ojcu", "ojca", "ojcem", "ojcu", "ojcze"],
+    "pl": ["ojcowie", "ojców", "ojcom", "ojców", "ojcami", "ojcach", "ojcowie"],
+    "onlySg": true
+  },
+  {
+    "lemma": "syn",
+    "en": "son",
+    "enPl": "sons",
+    "gender": "mPers",
+    "tags": ["person", "family"],
+    "sg": ["syn", "syna", "synowi", "syna", "synem", "synu", "synu"],
+    "pl": ["synowie", "synów", "synom", "synów", "synami", "synach", "synowie"]
+  },
+  {
+    "lemma": "mąż",
+    "en": "husband",
+    "enPl": "husbands",
+    "gender": "mPers",
+    "tags": ["person", "family"],
+    "sg": ["mąż", "męża", "mężowi", "męża", "mężem", "mężu", "mężu"],
+    "pl": ["mężowie", "mężów", "mężom", "mężów", "mężami", "mężach", "mężowie"],
+    "onlySg": true
+  },
+  {
+    "lemma": "dziadek",
+    "en": "grandfather",
+    "enPl": "grandfathers",
+    "gender": "mPers",
+    "tags": ["person", "family"],
+    "sg": ["dziadek", "dziadka", "dziadkowi", "dziadka", "dziadkiem", "dziadku", "dziadku"],
+    "pl": ["dziadkowie", "dziadków", "dziadkom", "dziadków", "dziadkami", "dziadkach", "dziadkowie"],
+    "onlySg": true
+  },
+  {
+    "lemma": "chłopiec",
+    "en": "boy",
+    "enPl": "boys",
+    "gender": "mPers",
+    "tags": ["person"],
+    "sg": ["chłopiec", "chłopca", "chłopcu", "chłopca", "chłopcem", "chłopcu", "chłopcze"],
+    "pl": ["chłopcy", "chłopców", "chłopcom", "chłopców", "chłopcami", "chłopcach", "chłopcy"]
+  },
+  {
+    "lemma": "mężczyzna",
+    "en": "man",
+    "enPl": "men",
+    "gender": "mPers",
+    "tags": ["person"],
+    "sg": ["mężczyzna", "mężczyzny", "mężczyźnie", "mężczyznę", "mężczyzną", "mężczyźnie", "mężczyzno"],
+    "pl": ["mężczyźni", "mężczyzn", "mężczyznom", "mężczyzn", "mężczyznami", "mężczyznach", "mężczyźni"]
+  },
+  {
+    "lemma": "kolega",
+    "en": "friend",
+    "enPl": "friends",
+    "gender": "mPers",
+    "tags": ["person", "friend"],
+    "sg": ["kolega", "kolegi", "koledze", "kolegę", "kolegą", "koledze", "kolego"],
+    "pl": ["koledzy", "kolegów", "kolegom", "kolegów", "kolegami", "kolegach", "koledzy"]
+  },
+  {
+    "lemma": "przyjaciel",
+    "en": "close friend",
+    "enPl": "close friends",
+    "gender": "mPers",
+    "tags": ["person", "friend"],
+    "sg": ["przyjaciel", "przyjaciela", "przyjacielowi", "przyjaciela", "przyjacielem", "przyjacielu", "przyjacielu"],
+    "pl": ["przyjaciele", "przyjaciół", "przyjaciołom", "przyjaciół", "przyjaciółmi", "przyjaciołach", "przyjaciele"]
+  },
+  {
+    "lemma": "sąsiad",
+    "en": "neighbour",
+    "enPl": "neighbours",
+    "gender": "mPers",
+    "tags": ["person", "friend"],
+    "sg": ["sąsiad", "sąsiada", "sąsiadowi", "sąsiada", "sąsiadem", "sąsiedzie", "sąsiedzie"],
+    "pl": ["sąsiedzi", "sąsiadów", "sąsiadom", "sąsiadów", "sąsiadami", "sąsiadach", "sąsiedzi"]
+  },
+  {
+    "lemma": "pan",
+    "en": "gentleman",
+    "enPl": "gentlemen",
+    "gender": "mPers",
+    "tags": ["person"],
+    "sg": ["pan", "pana", "panu", "pana", "panem", "panu", "panie"],
+    "pl": ["panowie", "panów", "panom", "panów", "panami", "panach", "panowie"]
+  },
+  {
+    "lemma": "kot",
+    "en": "cat",
+    "enPl": "cats",
+    "gender": "mAnim",
+    "tags": ["animal"],
+    "sg": ["kot", "kota", "kotu", "kota", "kotem", "kocie", "kocie"],
+    "pl": ["koty", "kotów", "kotom", "koty", "kotami", "kotach", "koty"]
+  },
+  {
+    "lemma": "pies",
+    "en": "dog",
+    "enPl": "dogs",
+    "gender": "mAnim",
+    "tags": ["animal"],
+    "sg": ["pies", "psa", "psu", "psa", "psem", "psie", "psie"],
+    "pl": ["psy", "psów", "psom", "psy", "psami", "psach", "psy"]
+  },
+  {
+    "lemma": "koń",
+    "en": "horse",
+    "enPl": "horses",
+    "gender": "mAnim",
+    "tags": ["animal"],
+    "sg": ["koń", "konia", "koniowi", "konia", "koniem", "koniu", "koniu"],
+    "pl": ["konie", "koni", "koniom", "konie", "końmi", "koniach", "konie"]
+  },
+  {
+    "lemma": "ptak",
+    "en": "bird",
+    "enPl": "birds",
+    "gender": "mAnim",
+    "tags": ["animal"],
+    "sg": ["ptak", "ptaka", "ptakowi", "ptaka", "ptakiem", "ptaku", "ptaku"],
+    "pl": ["ptaki", "ptaków", "ptakom", "ptaki", "ptakami", "ptakach", "ptaki"]
+  },
+  {
+    "lemma": "słoń",
+    "en": "elephant",
+    "enPl": "elephants",
+    "gender": "mAnim",
+    "tags": ["animal"],
+    "sg": ["słoń", "słonia", "słoniowi", "słonia", "słoniem", "słoniu", "słoniu"],
+    "pl": ["słonie", "słoni", "słoniom", "słonie", "słoniami", "słoniach", "słonie"]
+  },
+  {
+    "lemma": "stół",
+    "en": "table",
+    "enPl": "tables",
+    "gender": "mInanim",
+    "tags": ["object", "surface"],
+    "sg": ["stół", "stołu", "stołowi", "stół", "stołem", "stole", "stole"],
+    "pl": ["stoły", "stołów", "stołom", "stoły", "stołami", "stołach", "stoły"]
+  },
+  {
+    "lemma": "dom",
+    "en": "house",
+    "enPl": "houses",
+    "gender": "mInanim",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["dom", "domu", "domowi", "dom", "domem", "domu", "domu"],
+    "pl": ["domy", "domów", "domom", "domy", "domami", "domach", "domy"]
+  },
+  {
+    "lemma": "samochód",
+    "en": "car",
+    "enPl": "cars",
+    "gender": "mInanim",
+    "tags": ["vehicle", "object"],
+    "sg": ["samochód", "samochodu", "samochodowi", "samochód", "samochodem", "samochodzie", "samochodzie"],
+    "pl": ["samochody", "samochodów", "samochodom", "samochody", "samochodami", "samochodach", "samochody"]
+  },
+  {
+    "lemma": "sklep",
+    "en": "shop",
+    "enPl": "shops",
+    "gender": "mInanim",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["sklep", "sklepu", "sklepowi", "sklep", "sklepem", "sklepie", "sklepie"],
+    "pl": ["sklepy", "sklepów", "sklepom", "sklepy", "sklepami", "sklepach", "sklepy"]
+  },
+  {
+    "lemma": "komputer",
+    "en": "computer",
+    "enPl": "computers",
+    "gender": "mInanim",
+    "tags": ["object"],
+    "sg": ["komputer", "komputera", "komputerowi", "komputer", "komputerem", "komputerze", "komputerze"],
+    "pl": ["komputery", "komputerów", "komputerom", "komputery", "komputerami", "komputerach", "komputery"]
+  },
+  {
+    "lemma": "telefon",
+    "en": "phone",
+    "enPl": "phones",
+    "gender": "mInanim",
+    "tags": ["object"],
+    "sg": ["telefon", "telefonu", "telefonowi", "telefon", "telefonem", "telefonie", "telefonie"],
+    "pl": ["telefony", "telefonów", "telefonom", "telefony", "telefonami", "telefonach", "telefony"]
+  },
+  {
+    "lemma": "długopis",
+    "en": "pen",
+    "enPl": "pens",
+    "gender": "mInanim",
+    "tags": ["object"],
+    "sg": ["długopis", "długopisu", "długopisowi", "długopis", "długopisem", "długopisie", "długopisie"],
+    "pl": ["długopisy", "długopisów", "długopisom", "długopisy", "długopisami", "długopisach", "długopisy"]
+  },
+  {
+    "lemma": "nóż",
+    "en": "knife",
+    "enPl": "knives",
+    "gender": "mInanim",
+    "tags": ["object"],
+    "sg": ["nóż", "noża", "nożowi", "nóż", "nożem", "nożu", "nożu"],
+    "pl": ["noże", "noży", "nożom", "noże", "nożami", "nożach", "noże"]
+  },
+  {
+    "lemma": "chleb",
+    "en": "bread",
+    "enPl": "loaves of bread",
+    "gender": "mInanim",
+    "tags": ["food"],
+    "sg": ["chleb", "chleba", "chlebowi", "chleb", "chlebem", "chlebie", "chlebie"],
+    "pl": ["chleby", "chlebów", "chlebom", "chleby", "chlebami", "chlebach", "chleby"],
+    "mass": true
+  },
+  {
+    "lemma": "ser",
+    "en": "cheese",
+    "enPl": "cheeses",
+    "gender": "mInanim",
+    "tags": ["food"],
+    "sg": ["ser", "sera", "serowi", "ser", "serem", "serze", "serze"],
+    "pl": ["sery", "serów", "serom", "sery", "serami", "serach", "sery"],
+    "mass": true
+  },
+  {
+    "lemma": "sok",
+    "en": "juice",
+    "enPl": "juices",
+    "gender": "mInanim",
+    "tags": ["drink"],
+    "sg": ["sok", "soku", "sokowi", "sok", "sokiem", "soku", "soku"],
+    "pl": ["soki", "soków", "sokom", "soki", "sokami", "sokach", "soki"],
+    "mass": true
+  },
+  {
+    "lemma": "park",
+    "en": "park",
+    "enPl": "parks",
+    "gender": "mInanim",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["park", "parku", "parkowi", "park", "parkiem", "parku", "parku"],
+    "pl": ["parki", "parków", "parkom", "parki", "parkami", "parkach", "parki"]
+  },
+  {
+    "lemma": "hotel",
+    "en": "hotel",
+    "enPl": "hotels",
+    "gender": "mInanim",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["hotel", "hotelu", "hotelowi", "hotel", "hotelem", "hotelu", "hotelu"],
+    "pl": ["hotele", "hoteli", "hotelom", "hotele", "hotelami", "hotelach", "hotele"]
+  },
+  {
+    "lemma": "ogród",
+    "en": "garden",
+    "enPl": "gardens",
+    "gender": "mInanim",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["ogród", "ogrodu", "ogrodowi", "ogród", "ogrodem", "ogrodzie", "ogrodzie"],
+    "pl": ["ogrody", "ogrodów", "ogrodom", "ogrody", "ogrodami", "ogrodach", "ogrody"]
+  },
+  {
+    "lemma": "kościół",
+    "en": "church",
+    "enPl": "churches",
+    "gender": "mInanim",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["kościół", "kościoła", "kościołowi", "kościół", "kościołem", "kościele", "kościele"],
+    "pl": ["kościoły", "kościołów", "kościołom", "kościoły", "kościołami", "kościołach", "kościoły"]
+  },
+  {
+    "lemma": "pokój",
+    "en": "room",
+    "enPl": "rooms",
+    "gender": "mInanim",
+    "tags": ["placeIn"],
+    "sg": ["pokój", "pokoju", "pokojowi", "pokój", "pokojem", "pokoju", "pokoju"],
+    "pl": ["pokoje", "pokoi", "pokojom", "pokoje", "pokojami", "pokojach", "pokoje"],
+    "alt": { "pl.gen": ["pokojów"] }
+  },
+  {
+    "lemma": "list",
+    "en": "letter",
+    "enPl": "letters",
+    "gender": "mInanim",
+    "tags": ["text"],
+    "sg": ["list", "listu", "listowi", "list", "listem", "liście", "liście"],
+    "pl": ["listy", "listów", "listom", "listy", "listami", "listach", "listy"]
+  },
+  {
+    "lemma": "kwiat",
+    "en": "flower",
+    "enPl": "flowers",
+    "gender": "mInanim",
+    "tags": ["object", "plant"],
+    "sg": ["kwiat", "kwiatu", "kwiatowi", "kwiat", "kwiatem", "kwiecie", "kwiecie"],
+    "pl": ["kwiaty", "kwiatów", "kwiatom", "kwiaty", "kwiatami", "kwiatach", "kwiaty"]
+  },
+  {
+    "lemma": "samolot",
+    "en": "plane",
+    "enPl": "planes",
+    "gender": "mInanim",
+    "tags": ["vehicle"],
+    "sg": ["samolot", "samolotu", "samolotowi", "samolot", "samolotem", "samolocie", "samolocie"],
+    "pl": ["samoloty", "samolotów", "samolotom", "samoloty", "samolotami", "samolotach", "samoloty"]
+  },
+  {
+    "lemma": "tydzień",
+    "en": "week",
+    "enPl": "weeks",
+    "gender": "mInanim",
+    "tags": ["time"],
+    "sg": ["tydzień", "tygodnia", "tygodniowi", "tydzień", "tygodniem", "tygodniu", "tygodniu"],
+    "pl": ["tygodnie", "tygodni", "tygodniom", "tygodnie", "tygodniami", "tygodniach", "tygodnie"]
+  },
+  {
+    "lemma": "pociąg",
+    "en": "train",
+    "enPl": "trains",
+    "gender": "mInanim",
+    "tags": ["vehicle"],
+    "sg": ["pociąg", "pociągu", "pociągowi", "pociąg", "pociągiem", "pociągu", "pociągu"],
+    "pl": ["pociągi", "pociągów", "pociągom", "pociągi", "pociągami", "pociągach", "pociągi"]
+  },
+  {
+    "lemma": "autobus",
+    "en": "bus",
+    "enPl": "buses",
+    "gender": "mInanim",
+    "tags": ["vehicle"],
+    "sg": ["autobus", "autobusu", "autobusowi", "autobus", "autobusem", "autobusie", "autobusie"],
+    "pl": ["autobusy", "autobusów", "autobusom", "autobusy", "autobusami", "autobusach", "autobusy"]
+  },
+  {
+    "lemma": "rower",
+    "en": "bicycle",
+    "enPl": "bicycles",
+    "gender": "mInanim",
+    "tags": ["vehicle", "object"],
+    "sg": ["rower", "roweru", "rowerowi", "rower", "rowerem", "rowerze", "rowerze"],
+    "pl": ["rowery", "rowerów", "rowerom", "rowery", "rowerami", "rowerach", "rowery"]
+  },
+  {
+    "lemma": "łóżko",
+    "en": "bed",
+    "enPl": "beds",
+    "gender": "n",
+    "tags": ["object", "surface"],
+    "sg": ["łóżko", "łóżka", "łóżku", "łóżko", "łóżkiem", "łóżku", "łóżko"],
+    "pl": ["łóżka", "łóżek", "łóżkom", "łóżka", "łóżkami", "łóżkach", "łóżka"]
+  },
+  {
+    "lemma": "podłoga",
+    "en": "floor",
+    "enPl": "floors",
+    "gender": "f",
+    "tags": ["surface"],
+    "sg": ["podłoga", "podłogi", "podłodze", "podłogę", "podłogą", "podłodze", "podłogo"],
+    "pl": ["podłogi", "podłóg", "podłogom", "podłogi", "podłogami", "podłogach", "podłogi"]
+  },
+  {
+    "lemma": "kobieta",
+    "en": "woman",
+    "enPl": "women",
+    "gender": "f",
+    "tags": ["person"],
+    "sg": ["kobieta", "kobiety", "kobiecie", "kobietę", "kobietą", "kobiecie", "kobieto"],
+    "pl": ["kobiety", "kobiet", "kobietom", "kobiety", "kobietami", "kobietach", "kobiety"]
+  },
+  {
+    "lemma": "dziewczyna",
+    "en": "girl",
+    "enPl": "girls",
+    "gender": "f",
+    "tags": ["person"],
+    "sg": ["dziewczyna", "dziewczyny", "dziewczynie", "dziewczynę", "dziewczyną", "dziewczynie", "dziewczyno"],
+    "pl": ["dziewczyny", "dziewczyn", "dziewczynom", "dziewczyny", "dziewczynami", "dziewczynach", "dziewczyny"]
+  },
+  {
+    "lemma": "siostra",
+    "en": "sister",
+    "enPl": "sisters",
+    "gender": "f",
+    "tags": ["person", "family"],
+    "sg": ["siostra", "siostry", "siostrze", "siostrę", "siostrą", "siostrze", "siostro"],
+    "pl": ["siostry", "sióstr", "siostrom", "siostry", "siostrami", "siostrach", "siostry"]
+  },
+  {
+    "lemma": "matka",
+    "en": "mother",
+    "enPl": "mothers",
+    "gender": "f",
+    "tags": ["person", "family"],
+    "sg": ["matka", "matki", "matce", "matkę", "matką", "matce", "matko"],
+    "pl": ["matki", "matek", "matkom", "matki", "matkami", "matkach", "matki"],
+    "onlySg": true
+  },
+  {
+    "lemma": "córka",
+    "en": "daughter",
+    "enPl": "daughters",
+    "gender": "f",
+    "tags": ["person", "family"],
+    "sg": ["córka", "córki", "córce", "córkę", "córką", "córce", "córko"],
+    "pl": ["córki", "córek", "córkom", "córki", "córkami", "córkach", "córki"]
+  },
+  {
+    "lemma": "żona",
+    "en": "wife",
+    "enPl": "wives",
+    "gender": "f",
+    "tags": ["person", "family"],
+    "sg": ["żona", "żony", "żonie", "żonę", "żoną", "żonie", "żono"],
+    "pl": ["żony", "żon", "żonom", "żony", "żonami", "żonach", "żony"],
+    "onlySg": true
+  },
+  {
+    "lemma": "babcia",
+    "en": "grandmother",
+    "enPl": "grandmothers",
+    "gender": "f",
+    "tags": ["person", "family"],
+    "sg": ["babcia", "babci", "babci", "babcię", "babcią", "babci", "babciu"],
+    "pl": ["babcie", "babć", "babciom", "babcie", "babciami", "babciach", "babcie"],
+    "onlySg": true
+  },
+  {
+    "lemma": "pani",
+    "en": "lady",
+    "enPl": "ladies",
+    "gender": "f",
+    "tags": ["person"],
+    "sg": ["pani", "pani", "pani", "panią", "panią", "pani", "pani"],
+    "pl": ["panie", "pań", "paniom", "panie", "paniami", "paniach", "panie"]
+  },
+  {
+    "lemma": "rodzina",
+    "en": "family",
+    "enPl": "families",
+    "gender": "f",
+    "tags": ["person", "family"],
+    "sg": ["rodzina", "rodziny", "rodzinie", "rodzinę", "rodziną", "rodzinie", "rodzino"],
+    "pl": ["rodziny", "rodzin", "rodzinom", "rodziny", "rodzinami", "rodzinach", "rodziny"],
+    "onlySg": true
+  },
+  {
+    "lemma": "książka",
+    "en": "book",
+    "enPl": "books",
+    "gender": "f",
+    "tags": ["text", "object"],
+    "sg": ["książka", "książki", "książce", "książkę", "książką", "książce", "książko"],
+    "pl": ["książki", "książek", "książkom", "książki", "książkami", "książkach", "książki"]
+  },
+  {
+    "lemma": "gazeta",
+    "en": "newspaper",
+    "enPl": "newspapers",
+    "gender": "f",
+    "tags": ["text", "object"],
+    "sg": ["gazeta", "gazety", "gazecie", "gazetę", "gazetą", "gazecie", "gazeto"],
+    "pl": ["gazety", "gazet", "gazetom", "gazety", "gazetami", "gazetach", "gazety"]
+  },
+  {
+    "lemma": "woda",
+    "en": "water",
+    "enPl": "waters",
+    "gender": "f",
+    "tags": ["drink"],
+    "sg": ["woda", "wody", "wodzie", "wodę", "wodą", "wodzie", "wodo"],
+    "pl": ["wody", "wód", "wodom", "wody", "wodami", "wodach", "wody"],
+    "mass": true
+  },
+  {
+    "lemma": "herbata",
+    "en": "tea",
+    "enPl": "teas",
+    "gender": "f",
+    "tags": ["drink"],
+    "sg": ["herbata", "herbaty", "herbacie", "herbatę", "herbatą", "herbacie", "herbato"],
+    "pl": ["herbaty", "herbat", "herbatom", "herbaty", "herbatami", "herbatach", "herbaty"],
+    "mass": true
+  },
+  {
+    "lemma": "kawa",
+    "en": "coffee",
+    "enPl": "coffees",
+    "gender": "f",
+    "tags": ["drink"],
+    "sg": ["kawa", "kawy", "kawie", "kawę", "kawą", "kawie", "kawo"],
+    "pl": ["kawy", "kaw", "kawom", "kawy", "kawami", "kawach", "kawy"],
+    "mass": true
+  },
+  {
+    "lemma": "zupa",
+    "en": "soup",
+    "enPl": "soups",
+    "gender": "f",
+    "tags": ["food"],
+    "sg": ["zupa", "zupy", "zupie", "zupę", "zupą", "zupie", "zupo"],
+    "pl": ["zupy", "zup", "zupom", "zupy", "zupami", "zupach", "zupy"],
+    "mass": true
+  },
+  {
+    "lemma": "szkoła",
+    "en": "school",
+    "enPl": "schools",
+    "gender": "f",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["szkoła", "szkoły", "szkole", "szkołę", "szkołą", "szkole", "szkoło"],
+    "pl": ["szkoły", "szkół", "szkołom", "szkoły", "szkołami", "szkołach", "szkoły"]
+  },
+  {
+    "lemma": "restauracja",
+    "en": "restaurant",
+    "enPl": "restaurants",
+    "gender": "f",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["restauracja", "restauracji", "restauracji", "restaurację", "restauracją", "restauracji", "restauracjo"],
+    "pl": ["restauracje", "restauracji", "restauracjom", "restauracje", "restauracjami", "restauracjach", "restauracje"]
+  },
+  {
+    "lemma": "kuchnia",
+    "en": "kitchen",
+    "enPl": "kitchens",
+    "gender": "f",
+    "tags": ["placeIn"],
+    "sg": ["kuchnia", "kuchni", "kuchni", "kuchnię", "kuchnią", "kuchni", "kuchnio"],
+    "pl": ["kuchnie", "kuchni", "kuchniom", "kuchnie", "kuchniami", "kuchniach", "kuchnie"]
+  },
+  {
+    "lemma": "praca",
+    "en": "work",
+    "enPl": "jobs",
+    "gender": "f",
+    "tags": ["abstract"],
+    "sg": ["praca", "pracy", "pracy", "pracę", "pracą", "pracy", "praco"],
+    "pl": ["prace", "prac", "pracom", "prace", "pracami", "pracach", "prace"],
+    "mass": true
+  },
+  {
+    "lemma": "ulica",
+    "en": "street",
+    "enPl": "streets",
+    "gender": "f",
+    "tags": [],
+    "sg": ["ulica", "ulicy", "ulicy", "ulicę", "ulicą", "ulicy", "ulico"],
+    "pl": ["ulice", "ulic", "ulicom", "ulice", "ulicami", "ulicach", "ulice"]
+  },
+  {
+    "lemma": "noc",
+    "en": "night",
+    "enPl": "nights",
+    "gender": "f",
+    "tags": ["time"],
+    "sg": ["noc", "nocy", "nocy", "noc", "nocą", "nocy", "nocy"],
+    "pl": ["noce", "nocy", "nocom", "noce", "nocami", "nocach", "noce"]
+  },
+  {
+    "lemma": "rzecz",
+    "en": "thing",
+    "enPl": "things",
+    "gender": "f",
+    "tags": [],
+    "sg": ["rzecz", "rzeczy", "rzeczy", "rzecz", "rzeczą", "rzeczy", "rzeczy"],
+    "pl": ["rzeczy", "rzeczy", "rzeczom", "rzeczy", "rzeczami", "rzeczach", "rzeczy"]
+  },
+  {
+    "lemma": "miłość",
+    "en": "love",
+    "enPl": "loves",
+    "gender": "f",
+    "tags": ["abstract"],
+    "sg": ["miłość", "miłości", "miłości", "miłość", "miłością", "miłości", "miłości"],
+    "pl": ["miłości", "miłości", "miłościom", "miłości", "miłościami", "miłościach", "miłości"],
+    "mass": true
+  },
+  {
+    "lemma": "muzyka",
+    "en": "music",
+    "enPl": "musics",
+    "gender": "f",
+    "tags": ["abstract", "topic"],
+    "sg": ["muzyka", "muzyki", "muzyce", "muzykę", "muzyką", "muzyce", "muzyko"],
+    "mass": true,
+    "noPlural": true
+  },
+  {
+    "lemma": "ręka",
+    "en": "hand",
+    "enPl": "hands",
+    "gender": "f",
+    "tags": ["body"],
+    "sg": ["ręka", "ręki", "ręce", "rękę", "ręką", "ręce", "ręko"],
+    "pl": ["ręce", "rąk", "rękom", "ręce", "rękami", "rękach", "ręce"],
+    "alt": { "pl.ins": ["rękoma"] }
+  },
+  {
+    "lemma": "wieś",
+    "en": "village",
+    "enPl": "villages",
+    "gender": "f",
+    "tags": [],
+    "sg": ["wieś", "wsi", "wsi", "wieś", "wsią", "wsi", "wsi"],
+    "pl": ["wsie", "wsi", "wsiom", "wsie", "wsiami", "wsiach", "wsie"]
+  },
+  {
+    "lemma": "okno",
+    "en": "window",
+    "enPl": "windows",
+    "gender": "n",
+    "tags": [],
+    "sg": ["okno", "okna", "oknu", "okno", "oknem", "oknie", "okno"],
+    "pl": ["okna", "okien", "oknom", "okna", "oknami", "oknach", "okna"]
+  },
+  {
+    "lemma": "biurko",
+    "en": "desk",
+    "enPl": "desks",
+    "gender": "n",
+    "tags": ["object", "surface"],
+    "sg": ["biurko", "biurka", "biurku", "biurko", "biurkiem", "biurku", "biurko"],
+    "pl": ["biurka", "biurek", "biurkom", "biurka", "biurkami", "biurkach", "biurka"]
+  },
+  {
+    "lemma": "dziecko",
+    "en": "child",
+    "enPl": "children",
+    "gender": "n",
+    "tags": ["person", "family"],
+    "sg": ["dziecko", "dziecka", "dziecku", "dziecko", "dzieckiem", "dziecku", "dziecko"],
+    "pl": ["dzieci", "dzieci", "dzieciom", "dzieci", "dziećmi", "dzieciach", "dzieci"]
+  },
+  {
+    "lemma": "miasto",
+    "en": "city",
+    "enPl": "cities",
+    "gender": "n",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["miasto", "miasta", "miastu", "miasto", "miastem", "mieście", "miasto"],
+    "pl": ["miasta", "miast", "miastom", "miasta", "miastami", "miastach", "miasta"]
+  },
+  {
+    "lemma": "muzeum",
+    "en": "museum",
+    "enPl": "museums",
+    "gender": "n",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["muzeum", "muzeum", "muzeum", "muzeum", "muzeum", "muzeum", "muzeum"],
+    "pl": ["muzea", "muzeów", "muzeom", "muzea", "muzeami", "muzeach", "muzea"]
+  },
+  {
+    "lemma": "mieszkanie",
+    "en": "flat",
+    "enPl": "flats",
+    "gender": "n",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["mieszkanie", "mieszkania", "mieszkaniu", "mieszkanie", "mieszkaniem", "mieszkaniu", "mieszkanie"],
+    "pl": ["mieszkania", "mieszkań", "mieszkaniom", "mieszkania", "mieszkaniami", "mieszkaniach", "mieszkania"]
+  },
+  {
+    "lemma": "jabłko",
+    "en": "apple",
+    "enPl": "apples",
+    "gender": "n",
+    "tags": ["food"],
+    "sg": ["jabłko", "jabłka", "jabłku", "jabłko", "jabłkiem", "jabłku", "jabłko"],
+    "pl": ["jabłka", "jabłek", "jabłkom", "jabłka", "jabłkami", "jabłkach", "jabłka"]
+  },
+  {
+    "lemma": "mleko",
+    "en": "milk",
+    "enPl": "milks",
+    "gender": "n",
+    "tags": ["drink"],
+    "sg": ["mleko", "mleka", "mleku", "mleko", "mlekiem", "mleku", "mleko"],
+    "mass": true,
+    "noPlural": true
+  },
+  {
+    "lemma": "piwo",
+    "en": "beer",
+    "enPl": "beers",
+    "gender": "n",
+    "tags": ["drink"],
+    "sg": ["piwo", "piwa", "piwu", "piwo", "piwem", "piwie", "piwo"],
+    "pl": ["piwa", "piw", "piwom", "piwa", "piwami", "piwach", "piwa"],
+    "mass": true
+  },
+  {
+    "lemma": "morze",
+    "en": "sea",
+    "enPl": "seas",
+    "gender": "n",
+    "tags": ["water"],
+    "sg": ["morze", "morza", "morzu", "morze", "morzem", "morzu", "morze"],
+    "pl": ["morza", "mórz", "morzom", "morza", "morzami", "morzach", "morza"]
+  },
+  {
+    "lemma": "jezioro",
+    "en": "lake",
+    "enPl": "lakes",
+    "gender": "n",
+    "tags": ["water"],
+    "sg": ["jezioro", "jeziora", "jezioru", "jezioro", "jeziorem", "jeziorze", "jezioro"],
+    "pl": ["jeziora", "jezior", "jeziorom", "jeziora", "jeziorami", "jeziorach", "jeziora"]
+  },
+  {
+    "lemma": "pole",
+    "en": "field",
+    "enPl": "fields",
+    "gender": "n",
+    "tags": [],
+    "sg": ["pole", "pola", "polu", "pole", "polem", "polu", "pole"],
+    "pl": ["pola", "pól", "polom", "pola", "polami", "polach", "pola"]
+  },
+  {
+    "lemma": "drzewo",
+    "en": "tree",
+    "enPl": "trees",
+    "gender": "n",
+    "tags": ["plant"],
+    "sg": ["drzewo", "drzewa", "drzewu", "drzewo", "drzewem", "drzewie", "drzewo"],
+    "pl": ["drzewa", "drzew", "drzewom", "drzewa", "drzewami", "drzewach", "drzewa"]
+  },
+  {
+    "lemma": "serce",
+    "en": "heart",
+    "enPl": "hearts",
+    "gender": "n",
+    "tags": ["body"],
+    "sg": ["serce", "serca", "sercu", "serce", "sercem", "sercu", "serce"],
+    "pl": ["serca", "serc", "sercom", "serca", "sercami", "sercach", "serca"]
+  },
+  {
+    "lemma": "imię",
+    "en": "name",
+    "enPl": "names",
+    "gender": "n",
+    "tags": [],
+    "sg": ["imię", "imienia", "imieniu", "imię", "imieniem", "imieniu", "imię"],
+    "pl": ["imiona", "imion", "imionom", "imiona", "imionami", "imionach", "imiona"]
+  },
+  {
+    "lemma": "zwierzę",
+    "en": "animal",
+    "enPl": "animals",
+    "gender": "n",
+    "tags": ["animal"],
+    "sg": ["zwierzę", "zwierzęcia", "zwierzęciu", "zwierzę", "zwierzęciem", "zwierzęciu", "zwierzę"],
+    "pl": ["zwierzęta", "zwierząt", "zwierzętom", "zwierzęta", "zwierzętami", "zwierzętach", "zwierzęta"]
+  },
+  {
+    "lemma": "oko",
+    "en": "eye",
+    "enPl": "eyes",
+    "gender": "n",
+    "tags": ["body"],
+    "sg": ["oko", "oka", "oku", "oko", "okiem", "oku", "oko"],
+    "pl": ["oczy", "oczu", "oczom", "oczy", "oczami", "oczach", "oczy"],
+    "alt": { "pl.ins": ["oczyma"] }
+  },
+  {
+    "lemma": "tata",
+    "en": "dad",
+    "enPl": "dads",
+    "gender": "mPers",
+    "tags": ["person", "family"],
+    "sg": ["tata", "taty", "tacie", "tatę", "tatą", "tacie", "tato"],
+    "pl": ["tatowie", "tatów", "tatom", "tatów", "tatami", "tatach", "tatowie"],
+    "onlySg": true
+  },
+  {
+    "lemma": "szef",
+    "en": "boss",
+    "enPl": "bosses",
+    "gender": "mPers",
+    "tags": ["person", "profession"],
+    "sg": ["szef", "szefa", "szefowi", "szefa", "szefem", "szefie", "szefie"],
+    "pl": ["szefowie", "szefów", "szefom", "szefów", "szefami", "szefach", "szefowie"]
+  },
+  {
+    "lemma": "pająk",
+    "en": "spider",
+    "enPl": "spiders",
+    "gender": "mAnim",
+    "tags": [],
+    "sg": ["pająk", "pająka", "pająkowi", "pająka", "pająkiem", "pająku", "pająku"],
+    "pl": ["pająki", "pająków", "pająkom", "pająki", "pająkami", "pająkach", "pająki"]
+  },
+  {
+    "lemma": "klucz",
+    "en": "key",
+    "enPl": "keys",
+    "gender": "mInanim",
+    "tags": ["object"],
+    "sg": ["klucz", "klucza", "kluczowi", "klucz", "kluczem", "kluczu", "kluczu"],
+    "pl": ["klucze", "kluczy", "kluczom", "klucze", "kluczami", "kluczach", "klucze"]
+  },
+  {
+    "lemma": "portfel",
+    "en": "wallet",
+    "enPl": "wallets",
+    "gender": "mInanim",
+    "tags": ["object"],
+    "sg": ["portfel", "portfela", "portfelowi", "portfel", "portfelem", "portfelu", "portfelu"],
+    "pl": ["portfele", "portfeli", "portfelom", "portfele", "portfelami", "portfelach", "portfele"],
+    "alt": { "pl.gen": ["portfelów"] }
+  },
+  {
+    "lemma": "bilet",
+    "en": "ticket",
+    "enPl": "tickets",
+    "gender": "mInanim",
+    "tags": ["object"],
+    "sg": ["bilet", "biletu", "biletowi", "bilet", "biletem", "bilecie", "bilecie"],
+    "pl": ["bilety", "biletów", "biletom", "bilety", "biletami", "biletach", "bilety"]
+  },
+  {
+    "lemma": "prezent",
+    "en": "present",
+    "enPl": "presents",
+    "gender": "mInanim",
+    "tags": ["object"],
+    "sg": ["prezent", "prezentu", "prezentowi", "prezent", "prezentem", "prezencie", "prezencie"],
+    "pl": ["prezenty", "prezentów", "prezentom", "prezenty", "prezentami", "prezentach", "prezenty"]
+  },
+  {
+    "lemma": "obiad",
+    "en": "dinner",
+    "enPl": "dinners",
+    "gender": "mInanim",
+    "tags": ["food"],
+    "sg": ["obiad", "obiadu", "obiadowi", "obiad", "obiadem", "obiedzie", "obiedzie"],
+    "pl": ["obiady", "obiadów", "obiadom", "obiady", "obiadami", "obiadach", "obiady"],
+    "mass": true
+  },
+  {
+    "lemma": "sport",
+    "en": "sport",
+    "enPl": "sports",
+    "gender": "mInanim",
+    "tags": ["topic"],
+    "sg": ["sport", "sportu", "sportowi", "sport", "sportem", "sporcie", "sporcie"],
+    "mass": true,
+    "noPlural": true
+  },
+  {
+    "lemma": "film",
+    "en": "film",
+    "enPl": "films",
+    "gender": "mInanim",
+    "tags": ["show"],
+    "sg": ["film", "filmu", "filmowi", "film", "filmem", "filmie", "filmie"],
+    "pl": ["filmy", "filmów", "filmom", "filmy", "filmami", "filmach", "filmy"]
+  },
+  {
+    "lemma": "mecz",
+    "en": "match",
+    "enPl": "matches",
+    "gender": "mInanim",
+    "tags": ["show"],
+    "sg": ["mecz", "meczu", "meczowi", "mecz", "meczem", "meczu", "meczu"],
+    "pl": ["mecze", "meczów", "meczom", "mecze", "meczami", "meczach", "mecze"]
+  },
+  {
+    "lemma": "serial",
+    "en": "TV series",
+    "enPl": "TV series",
+    "gender": "mInanim",
+    "tags": ["show"],
+    "sg": ["serial", "serialu", "serialowi", "serial", "serialem", "serialu", "serialu"],
+    "pl": ["seriale", "seriali", "serialom", "seriale", "serialami", "serialach", "seriale"],
+    "alt": { "pl.gen": ["serialów"] }
+  },
+  {
+    "lemma": "koncert",
+    "en": "concert",
+    "enPl": "concerts",
+    "gender": "mInanim",
+    "tags": ["show"],
+    "sg": ["koncert", "koncertu", "koncertowi", "koncert", "koncertem", "koncercie", "koncercie"],
+    "pl": ["koncerty", "koncertów", "koncertom", "koncerty", "koncertami", "koncertach", "koncerty"]
+  },
+  {
+    "lemma": "bank",
+    "en": "bank",
+    "enPl": "banks",
+    "gender": "mInanim",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["bank", "banku", "bankowi", "bank", "bankiem", "banku", "banku"],
+    "pl": ["banki", "banków", "bankom", "banki", "bankami", "bankach", "banki"]
+  },
+  {
+    "lemma": "projekt",
+    "en": "project",
+    "enPl": "projects",
+    "gender": "mInanim",
+    "tags": [],
+    "sg": ["projekt", "projektu", "projektowi", "projekt", "projektem", "projekcie", "projekcie"],
+    "pl": ["projekty", "projektów", "projektom", "projekty", "projektami", "projektach", "projekty"]
+  },
+  {
+    "lemma": "ząb",
+    "en": "tooth",
+    "enPl": "teeth",
+    "gender": "mInanim",
+    "tags": ["body"],
+    "sg": ["ząb", "zęba", "zębowi", "ząb", "zębem", "zębie", "zębie"],
+    "pl": ["zęby", "zębów", "zębom", "zęby", "zębami", "zębach", "zęby"]
+  },
+  {
+    "lemma": "czas",
+    "en": "time",
+    "enPl": "times",
+    "gender": "mInanim",
+    "tags": [],
+    "sg": ["czas", "czasu", "czasowi", "czas", "czasem", "czasie", "czasie"],
+    "mass": true,
+    "noPlural": true
+  },
+  {
+    "lemma": "cukier",
+    "en": "sugar",
+    "enPl": "sugars",
+    "gender": "mInanim",
+    "tags": [],
+    "sg": ["cukier", "cukru", "cukrowi", "cukier", "cukrem", "cukrze", "cukrze"],
+    "mass": true,
+    "noPlural": true
+  },
+  {
+    "lemma": "mama",
+    "en": "mum",
+    "enPl": "mums",
+    "gender": "f",
+    "tags": ["person", "family"],
+    "sg": ["mama", "mamy", "mamie", "mamę", "mamą", "mamie", "mamo"],
+    "pl": ["mamy", "mam", "mamom", "mamy", "mamami", "mamach", "mamy"],
+    "onlySg": true
+  },
+  {
+    "lemma": "historia",
+    "en": "history",
+    "enPl": "histories",
+    "gender": "f",
+    "tags": ["topic"],
+    "sg": ["historia", "historii", "historii", "historię", "historią", "historii", "historio"],
+    "mass": true,
+    "noPlural": true
+  },
+  {
+    "lemma": "polityka",
+    "en": "politics",
+    "enPl": "politics",
+    "gender": "f",
+    "tags": ["topic"],
+    "sg": ["polityka", "polityki", "polityce", "politykę", "polityką", "polityce", "polityko"],
+    "mass": true,
+    "noPlural": true
+  },
+  {
+    "lemma": "sztuka",
+    "en": "art",
+    "enPl": "arts",
+    "gender": "f",
+    "tags": ["topic"],
+    "sg": ["sztuka", "sztuki", "sztuce", "sztukę", "sztuką", "sztuce", "sztuko"],
+    "mass": true,
+    "noPlural": true
+  },
+  {
+    "lemma": "pogoda",
+    "en": "weather",
+    "enPl": "weathers",
+    "gender": "f",
+    "tags": [],
+    "sg": ["pogoda", "pogody", "pogodzie", "pogodę", "pogodą", "pogodzie", "pogodo"],
+    "mass": true,
+    "noPlural": true
+  },
+  {
+    "lemma": "pomoc",
+    "en": "help",
+    "enPl": "help",
+    "gender": "f",
+    "tags": [],
+    "sg": ["pomoc", "pomocy", "pomocy", "pomoc", "pomocą", "pomocy", "pomocy"],
+    "mass": true,
+    "noPlural": true
+  },
+  {
+    "lemma": "apteka",
+    "en": "pharmacy",
+    "enPl": "pharmacies",
+    "gender": "f",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["apteka", "apteki", "aptece", "aptekę", "apteką", "aptece", "apteko"],
+    "pl": ["apteki", "aptek", "aptekom", "apteki", "aptekami", "aptekach", "apteki"]
+  },
+  {
+    "lemma": "kawiarnia",
+    "en": "café",
+    "enPl": "cafés",
+    "gender": "f",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["kawiarnia", "kawiarni", "kawiarni", "kawiarnię", "kawiarnią", "kawiarni", "kawiarnio"],
+    "pl": ["kawiarnie", "kawiarni", "kawiarniom", "kawiarnie", "kawiarniami", "kawiarniach", "kawiarnie"],
+    "alt": { "pl.gen": ["kawiarń"] }
+  },
+  {
+    "lemma": "poczta",
+    "en": "post office",
+    "enPl": "post offices",
+    "gender": "f",
+    "tags": [],
+    "sg": ["poczta", "poczty", "poczcie", "pocztę", "pocztą", "poczcie", "poczto"],
+    "pl": ["poczty", "poczt", "pocztom", "poczty", "pocztami", "pocztach", "poczty"]
+  },
+  {
+    "lemma": "cytryna",
+    "en": "lemon",
+    "enPl": "lemons",
+    "gender": "f",
+    "tags": [],
+    "sg": ["cytryna", "cytryny", "cytrynie", "cytrynę", "cytryną", "cytrynie", "cytryno"],
+    "pl": ["cytryny", "cytryn", "cytrynom", "cytryny", "cytrynami", "cytrynach", "cytryny"]
+  },
+  {
+    "lemma": "rzeka",
+    "en": "river",
+    "enPl": "rivers",
+    "gender": "f",
+    "tags": ["water"],
+    "sg": ["rzeka", "rzeki", "rzece", "rzekę", "rzeką", "rzece", "rzeko"],
+    "pl": ["rzeki", "rzek", "rzekom", "rzeki", "rzekami", "rzekach", "rzeki"]
+  },
+  {
+    "lemma": "głowa",
+    "en": "head",
+    "enPl": "heads",
+    "gender": "f",
+    "tags": ["body"],
+    "sg": ["głowa", "głowy", "głowie", "głowę", "głową", "głowie", "głowo"],
+    "pl": ["głowy", "głów", "głowom", "głowy", "głowami", "głowach", "głowy"]
+  },
+  {
+    "lemma": "noga",
+    "en": "leg",
+    "enPl": "legs",
+    "gender": "f",
+    "tags": ["body"],
+    "sg": ["noga", "nogi", "nodze", "nogę", "nogą", "nodze", "nogo"],
+    "pl": ["nogi", "nóg", "nogom", "nogi", "nogami", "nogach", "nogi"]
+  },
+  {
+    "lemma": "kino",
+    "en": "cinema",
+    "enPl": "cinemas",
+    "gender": "n",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["kino", "kina", "kinu", "kino", "kinem", "kinie", "kino"],
+    "pl": ["kina", "kin", "kinom", "kina", "kinami", "kinach", "kina"]
+  },
+  {
+    "lemma": "biuro",
+    "en": "office",
+    "enPl": "offices",
+    "gender": "n",
+    "tags": ["placeIn", "placeTo"],
+    "sg": ["biuro", "biura", "biuru", "biuro", "biurem", "biurze", "biuro"],
+    "pl": ["biura", "biur", "biurom", "biura", "biurami", "biurach", "biura"]
+  },
+  {
+    "lemma": "radio",
+    "en": "radio",
+    "enPl": "radios",
+    "gender": "n",
+    "tags": ["object"],
+    "sg": ["radio", "radia", "radiu", "radio", "radiem", "radiu", "radio"],
+    "pl": ["radia", "radiów", "radiom", "radia", "radiami", "radiach", "radia"]
+  },
+  {
+    "lemma": "ciasto",
+    "en": "cake",
+    "enPl": "cakes",
+    "gender": "n",
+    "tags": ["food"],
+    "sg": ["ciasto", "ciasta", "ciastu", "ciasto", "ciastem", "cieście", "ciasto"],
+    "pl": ["ciasta", "ciast", "ciastom", "ciasta", "ciastami", "ciastach", "ciasta"],
+    "mass": true
+  },
+  {
+    "lemma": "wino",
+    "en": "wine",
+    "enPl": "wines",
+    "gender": "n",
+    "tags": ["drink"],
+    "sg": ["wino", "wina", "winu", "wino", "winem", "winie", "wino"],
+    "pl": ["wina", "win", "winom", "wina", "winami", "winach", "wina"],
+    "mass": true
+  }
+]
