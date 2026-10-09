@@ -52,7 +52,11 @@ const isConsonant = (ch: string) => !!ch && !VOWELS.includes(ch);
 export function resolvePrep(prep: "z" | "w", next: string): string {
   const word = next.toLowerCase();
   const [a, b] = [word[0] ?? "", word[1] ?? ""];
-  if (prep === "z") return "szżśź".includes(a) && isConsonant(b) ? "ze" : "z";
+  // "sz" is one sound: z szefem, but ze szkołą
+  if (prep === "z") {
+    const next = word.startsWith("sz") ? (word[2] ?? "") : b;
+    return "szżśź".includes(a) && isConsonant(next) ? "ze" : "z";
+  }
   return "wf".includes(a) && isConsonant(b) ? "we" : "w";
 }
 
@@ -111,8 +115,12 @@ export function nounsFor(
   );
 }
 
+/** English goes by sound: an hour, an old man; a young man, a university, a European city. */
 export function article(phrase: string): string {
-  return VOWELS.includes(phrase[0]) ? "an" : "a";
+  const word = phrase.toLowerCase();
+  if (/^(hour|honest|honou?r|heir)/.test(word)) return "an";
+  if (/^(uni|use|usu|eu|one|once)/.test(word)) return "a";
+  return "aeiou".includes(word[0] ?? "") ? "an" : "a";
 }
 
 export function capitalise(s: string): string {
