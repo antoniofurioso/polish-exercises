@@ -92,6 +92,43 @@ motion verbs. Verbs whose objects have no sensible sentence wait for 1.6.
   deploying it (Azure key as a secret, the R2 bucket). **Not deployed by the
   agent**: deploying needs the user's Azure and Cloudflare accounts.
 
+### 1.5b Pre-rendered audio ☐ (with wave 2)
+
+The set of sentences is finite. Sampling 400,000 questions per drill gives
+about **62,000 distinct spoken strings** (the gapped sentence plus the full
+solution), averaging 28 characters, so about 1.7M characters in total.
+
+| Drill | Distinct | Saturated? |
+| --- | --- | --- |
+| cases | ~10,200 | yes |
+| pronouns | ~1,300 | yes |
+| possessives | ~4,900 | yes |
+| verbs | ~11,000 | yes |
+| numbers (to 9,999) | ~35,000 | still growing slowly |
+
+That is small enough to render every sentence ahead of time, so there is no
+per-request TTS cost and no rate limit:
+
+- `npm run audio:manifest` enumerates every spoken string (saturating sampling
+  per drill, published content only) into `audio/manifest.jsonl` with the same
+  key the Worker uses: sha256(voice + "\n" + normalised text).
+- `npm run audio:render -- --engine <piper|azure|cmd>` renders only the keys that
+  are missing locally. `cmd` pipes the text to any local tool (an open-source
+  model or a desktop TTS app), so the engine is a plug-in.
+- `npm run audio:upload` syncs the new files to the R2 bucket.
+- The Worker serves R2 hits as it does today. Azure becomes optional: with no
+  key set, a miss returns 404 and the app falls back to the browser voice.
+- Re-run after each approved content batch; only new sentences get rendered.
+
+At around 12 kB per clip the whole set is under 1 GB of R2 storage.
+
+**Engine licence matters, since the app is commercial.** Piper is MIT, but each
+voice model has its own licence: check the Polish voice's model card before
+using it. XTTS-v2 (Coqui Public Model License) and Meta MMS-TTS (CC BY-NC) are
+non-commercial, so they are out. Another option is a one-off batch through
+Azure: at about 1.7M characters it is a single small cost, or it can be spread
+over the monthly free tier.
+
 ### 1.6 Templates and collocations: 142 → 300 ☐ (wave 3)
 
 `data/templates.json`, `data/groups.json`, `data/collocations.json`. Cover every
