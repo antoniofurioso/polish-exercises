@@ -46,10 +46,12 @@ Everything is generated locally and deterministically — no API calls.
 
 | File | Role |
 | --- | --- |
-| `lib/nouns.ts` | ~85 nouns with their full 14-form paradigms (declension is too irregular to derive) |
-| `lib/adjectives.ts` | ~32 adjectives as stem + hardness; only the masculine-personal nominative plural is stored |
+| `data/*.json` | The lexicon: nouns, adjectives, collocations, sentence templates and verbs (schemas in [`data/README.md`](data/README.md)) |
+| `lib/load.ts` | Validates the JSON and turns it into typed entries; throws on a malformed entry, naming it |
+| `lib/nouns.ts` | ~125 nouns with their full 14-form paradigms (declension is too irregular to derive) |
+| `lib/adjectives.ts` | ~74 adjectives as stem + hardness, and which ones go with which noun; only the masculine-personal nominative plural is stored |
 | `lib/declineAdjective.ts` | The regular adjective endings |
-| `lib/templates.ts` | ~80 sentence frames, one per case/trigger, with an English gloss and the rule that applies |
+| `lib/templates.ts` | ~140 sentence frames, one per case/trigger, with an English gloss and the rule that applies |
 | `lib/generate.ts` | Picks a template, a noun that semantically fits it and an adjective, then builds the exercise |
 | `lib/agreement.ts` | Sentence frames, English gloss and distractors shared by the two agreement drills |
 | `lib/pronouns.ts` | The `ten` / `tamten` paradigm — builds the demonstrative-pronoun exercise |

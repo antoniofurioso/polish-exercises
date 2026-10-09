@@ -1,0 +1,527 @@
+[
+  {
+    "lemma": "dobry",
+    "en": "good",
+    "stem": "dobr",
+    "type": "hard",
+    "virilePl": "dobrzy"
+  },
+  {
+    "lemma": "nowy",
+    "en": "new",
+    "stem": "now",
+    "type": "hard",
+    "virilePl": "nowi"
+  },
+  {
+    "lemma": "stary",
+    "en": "old",
+    "stem": "star",
+    "type": "hard",
+    "virilePl": "starzy"
+  },
+  {
+    "lemma": "mały",
+    "en": "small",
+    "stem": "mał",
+    "type": "hard",
+    "virilePl": "mali"
+  },
+  {
+    "lemma": "duży",
+    "en": "big",
+    "stem": "duż",
+    "type": "hard",
+    "virilePl": "duzi"
+  },
+  {
+    "lemma": "ładny",
+    "en": "pretty",
+    "stem": "ładn",
+    "type": "hard",
+    "virilePl": "ładni"
+  },
+  {
+    "lemma": "piękny",
+    "en": "beautiful",
+    "stem": "piękn",
+    "type": "hard",
+    "virilePl": "piękni"
+  },
+  {
+    "lemma": "ciekawy",
+    "en": "interesting",
+    "stem": "ciekaw",
+    "type": "hard",
+    "virilePl": "ciekawi"
+  },
+  {
+    "lemma": "ważny",
+    "en": "important",
+    "stem": "ważn",
+    "type": "hard",
+    "virilePl": "ważni"
+  },
+  {
+    "lemma": "znany",
+    "en": "well-known",
+    "stem": "znan",
+    "type": "hard",
+    "virilePl": "znani"
+  },
+  {
+    "lemma": "czarny",
+    "en": "black",
+    "stem": "czarn",
+    "type": "hard",
+    "virilePl": "czarni"
+  },
+  {
+    "lemma": "biały",
+    "en": "white",
+    "stem": "biał",
+    "type": "hard",
+    "virilePl": "biali"
+  },
+  {
+    "lemma": "zielony",
+    "en": "green",
+    "stem": "zielon",
+    "type": "hard",
+    "virilePl": "zieloni"
+  },
+  {
+    "lemma": "czerwony",
+    "en": "red",
+    "stem": "czerwon",
+    "type": "hard",
+    "virilePl": "czerwoni"
+  },
+  {
+    "lemma": "niebieski",
+    "en": "blue",
+    "stem": "niebiesk",
+    "type": "velar",
+    "virilePl": "niebiescy"
+  },
+  {
+    "lemma": "żółty",
+    "en": "yellow",
+    "stem": "żółt",
+    "type": "hard",
+    "virilePl": "żółci"
+  },
+  {
+    "lemma": "szary",
+    "en": "grey",
+    "stem": "szar",
+    "type": "hard",
+    "virilePl": "szarzy"
+  },
+  {
+    "lemma": "kolorowy",
+    "en": "colourful",
+    "stem": "kolorow",
+    "type": "hard",
+    "virilePl": "kolorowi"
+  },
+  {
+    "lemma": "polski",
+    "en": "Polish",
+    "stem": "polsk",
+    "type": "velar",
+    "virilePl": "polscy"
+  },
+  {
+    "lemma": "włoski",
+    "en": "Italian",
+    "stem": "włosk",
+    "type": "velar",
+    "virilePl": "włoscy"
+  },
+  {
+    "lemma": "wysoki",
+    "en": "tall",
+    "stem": "wysok",
+    "type": "velar",
+    "virilePl": "wysocy",
+    "state": true
+  },
+  {
+    "lemma": "drogi",
+    "en": "expensive",
+    "stem": "drog",
+    "type": "velar",
+    "virilePl": "drodzy"
+  },
+  {
+    "lemma": "tani",
+    "en": "cheap",
+    "stem": "tan",
+    "type": "soft",
+    "virilePl": "tani"
+  },
+  {
+    "lemma": "głupi",
+    "en": "silly",
+    "stem": "głup",
+    "type": "soft",
+    "virilePl": "głupi"
+  },
+  {
+    "lemma": "młody",
+    "en": "young",
+    "stem": "młod",
+    "type": "hard",
+    "virilePl": "młodzi"
+  },
+  {
+    "lemma": "mądry",
+    "en": "wise",
+    "stem": "mądr",
+    "type": "hard",
+    "virilePl": "mądrzy"
+  },
+  {
+    "lemma": "miły",
+    "en": "nice",
+    "stem": "mił",
+    "type": "hard",
+    "virilePl": "mili"
+  },
+  {
+    "lemma": "wesoły",
+    "en": "cheerful",
+    "stem": "wesoł",
+    "type": "hard",
+    "virilePl": "weseli"
+  },
+  {
+    "lemma": "przystojny",
+    "en": "handsome",
+    "stem": "przystojn",
+    "type": "hard",
+    "virilePl": "przystojni",
+    "state": true
+  },
+  {
+    "lemma": "kochany",
+    "en": "dear",
+    "stem": "kochan",
+    "type": "hard",
+    "virilePl": "kochani",
+    "address": true
+  },
+  {
+    "lemma": "starszy",
+    "en": "older",
+    "stem": "starsz",
+    "type": "hard",
+    "virilePl": "starsi"
+  },
+  {
+    "lemma": "młodszy",
+    "en": "younger",
+    "stem": "młodsz",
+    "type": "hard",
+    "virilePl": "młodsi"
+  },
+  {
+    "lemma": "dorosły",
+    "en": "grown-up",
+    "stem": "dorosł",
+    "type": "hard",
+    "virilePl": "dorośli"
+  },
+  {
+    "lemma": "najlepszy",
+    "en": "best",
+    "stem": "najlepsz",
+    "type": "hard",
+    "virilePl": "najlepsi"
+  },
+  {
+    "lemma": "prawdziwy",
+    "en": "true",
+    "stem": "prawdziw",
+    "type": "hard",
+    "virilePl": "prawdziwi"
+  },
+  {
+    "lemma": "głośny",
+    "en": "loud",
+    "stem": "głośn",
+    "type": "hard",
+    "virilePl": "głośni"
+  },
+  {
+    "lemma": "cichy",
+    "en": "quiet",
+    "stem": "cich",
+    "type": "hard",
+    "virilePl": "cisi"
+  },
+  {
+    "lemma": "leniwy",
+    "en": "lazy",
+    "stem": "leniw",
+    "type": "hard",
+    "virilePl": "leniwi"
+  },
+  {
+    "lemma": "dziki",
+    "en": "wild",
+    "stem": "dzik",
+    "type": "velar",
+    "virilePl": "dzicy"
+  },
+  {
+    "lemma": "smutny",
+    "en": "sad",
+    "stem": "smutn",
+    "type": "hard",
+    "virilePl": "smutni",
+    "state": true
+  },
+  {
+    "lemma": "chory",
+    "en": "ill",
+    "stem": "chor",
+    "type": "hard",
+    "virilePl": "chorzy",
+    "state": true
+  },
+  {
+    "lemma": "głodny",
+    "en": "hungry",
+    "stem": "głodn",
+    "type": "hard",
+    "virilePl": "głodni",
+    "state": true
+  },
+  {
+    "lemma": "były",
+    "en": "former",
+    "stem": "był",
+    "type": "hard",
+    "virilePl": "byli",
+    "state": true
+  },
+  {
+    "lemma": "smaczny",
+    "en": "tasty",
+    "stem": "smaczn",
+    "type": "hard",
+    "virilePl": "smaczni"
+  },
+  {
+    "lemma": "słodki",
+    "en": "sweet",
+    "stem": "słodk",
+    "type": "velar",
+    "virilePl": "słodcy"
+  },
+  {
+    "lemma": "świeży",
+    "en": "fresh",
+    "stem": "śwież",
+    "type": "hard",
+    "virilePl": "świeży"
+  },
+  {
+    "lemma": "pomidorowy",
+    "en": "tomato",
+    "stem": "pomidorow",
+    "type": "hard",
+    "virilePl": "pomidorowi"
+  },
+  {
+    "lemma": "pomarańczowy",
+    "en": "orange",
+    "stem": "pomarańczow",
+    "type": "hard",
+    "virilePl": "pomarańczowi"
+  },
+  {
+    "lemma": "mineralny",
+    "en": "mineral",
+    "stem": "mineraln",
+    "type": "hard",
+    "virilePl": "mineralni"
+  },
+  {
+    "lemma": "mocny",
+    "en": "strong",
+    "stem": "mocn",
+    "type": "hard",
+    "virilePl": "mocni"
+  },
+  {
+    "lemma": "zimny",
+    "en": "cold",
+    "stem": "zimn",
+    "type": "hard",
+    "virilePl": "zimni"
+  },
+  {
+    "lemma": "ciepły",
+    "en": "warm",
+    "stem": "ciepł",
+    "type": "hard",
+    "virilePl": "ciepli"
+  },
+  {
+    "lemma": "gorący",
+    "en": "hot",
+    "stem": "gorąc",
+    "type": "hard",
+    "virilePl": "gorący"
+  },
+  {
+    "lemma": "szybki",
+    "en": "fast",
+    "stem": "szybk",
+    "type": "velar",
+    "virilePl": "szybcy"
+  },
+  {
+    "lemma": "wygodny",
+    "en": "comfortable",
+    "stem": "wygodn",
+    "type": "hard",
+    "virilePl": "wygodni"
+  },
+  {
+    "lemma": "drewniany",
+    "en": "wooden",
+    "stem": "drewnian",
+    "type": "hard",
+    "virilePl": "drewniani"
+  },
+  {
+    "lemma": "ostry",
+    "en": "sharp",
+    "stem": "ostr",
+    "type": "hard",
+    "virilePl": "ostrzy"
+  },
+  {
+    "lemma": "czysty",
+    "en": "clean",
+    "stem": "czyst",
+    "type": "hard",
+    "virilePl": "czyści"
+  },
+  {
+    "lemma": "brudny",
+    "en": "dirty",
+    "stem": "brudn",
+    "type": "hard",
+    "virilePl": "brudni"
+  },
+  {
+    "lemma": "wolny",
+    "en": "free",
+    "stem": "woln",
+    "type": "hard",
+    "virilePl": "wolni"
+  },
+  {
+    "lemma": "gruby",
+    "en": "thick",
+    "stem": "grub",
+    "type": "hard",
+    "virilePl": "grubi"
+  },
+  {
+    "lemma": "długi",
+    "en": "long",
+    "stem": "dług",
+    "type": "velar",
+    "virilePl": "dłudzy"
+  },
+  {
+    "lemma": "krótki",
+    "en": "short",
+    "stem": "krótk",
+    "type": "velar",
+    "virilePl": "krótcy"
+  },
+  {
+    "lemma": "trudny",
+    "en": "difficult",
+    "stem": "trudn",
+    "type": "hard",
+    "virilePl": "trudni"
+  },
+  {
+    "lemma": "ciężki",
+    "en": "hard",
+    "stem": "ciężk",
+    "type": "velar",
+    "virilePl": "ciężcy"
+  },
+  {
+    "lemma": "pierwszy",
+    "en": "first",
+    "stem": "pierwsz",
+    "type": "hard",
+    "virilePl": "pierwsi"
+  },
+  {
+    "lemma": "ostatni",
+    "en": "last",
+    "stem": "ostatn",
+    "type": "soft",
+    "virilePl": "ostatni"
+  },
+  {
+    "lemma": "przyszły",
+    "en": "next",
+    "stem": "przyszł",
+    "type": "hard",
+    "virilePl": "przyszli"
+  },
+  {
+    "lemma": "zeszły",
+    "en": "last",
+    "stem": "zeszł",
+    "type": "hard",
+    "virilePl": "zeszli"
+  },
+  {
+    "lemma": "główny",
+    "en": "main",
+    "stem": "główn",
+    "type": "hard",
+    "virilePl": "główni"
+  },
+  {
+    "lemma": "wielki",
+    "en": "great",
+    "stem": "wielk",
+    "type": "velar",
+    "virilePl": "wielcy"
+  },
+  {
+    "lemma": "klasyczny",
+    "en": "classical",
+    "stem": "klasyczn",
+    "type": "hard",
+    "virilePl": "klasyczni"
+  },
+  {
+    "lemma": "lewy",
+    "en": "left",
+    "stem": "lew",
+    "type": "hard",
+    "virilePl": "lewi"
+  },
+  {
+    "lemma": "prawy",
+    "en": "right",
+    "stem": "praw",
+    "type": "hard",
+    "virilePl": "prawi"
+  }
+]

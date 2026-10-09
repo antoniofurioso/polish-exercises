@@ -53,7 +53,8 @@ export type SpellRange = (typeof SPELL_RANGES)[number];
 export type GramNumber = "sg" | "pl";
 
 /** Polish genders, split by the distinctions that actually change endings. */
-export type Gender = "mPers" | "mAnim" | "mInanim" | "f" | "n";
+export const GENDERS = ["mPers", "mAnim", "mInanim", "f", "n"] as const;
+export type Gender = (typeof GENDERS)[number];
 
 /** The three buckets a learner picks from on the configurator. */
 export const GENDER_GROUPS = ["m", "f", "n"] as const;
@@ -64,27 +65,29 @@ export function genderGroup(gender: Gender): GenderGroup {
   return gender === "f" ? "f" : gender === "n" ? "n" : "m";
 }
 
-export type Tag =
-  | "person"
-  | "profession"
-  | "animal"
-  | "food"
-  | "drink"
-  | "placeIn" // takes "w" + locative
-  | "placeTo" // sensible with "do" + genitive
-  | "surface" // takes "na" / "pod" / "nad" + case
-  | "vehicle"
-  | "object" // portable things you can buy, own or hold
-  | "text"
-  | "abstract"
-  | "family" // relatives: English glosses them as "my ..."
-  | "friend"
-  | "topic" // fields of interest: muzyka, historia, sport...
-  | "show" // things you watch: film, mecz, serial
-  | "time"
-  | "body"
-  | "plant"
-  | "water"; // morze, jezioro, rzeka — "nad" rather than "do"
+export const TAGS = [
+  "person",
+  "profession",
+  "animal",
+  "food",
+  "drink",
+  "placeIn", // takes "w" + locative
+  "placeTo", // sensible with "do" + genitive
+  "surface", // takes "na" / "pod" / "nad" + case
+  "vehicle",
+  "object", // portable things you can buy, own or hold
+  "text",
+  "abstract",
+  "family", // relatives: English glosses them as "my ..."
+  "friend",
+  "topic", // fields of interest: muzyka, historia, sport...
+  "show", // things you watch: film, mecz, serial
+  "time",
+  "body",
+  "plant",
+  "water", // morze, jezioro, rzeka — "nad" rather than "do"
+] as const;
+export type Tag = (typeof TAGS)[number];
 
 export type Forms = Record<Case, string>;
 
@@ -108,7 +111,8 @@ export type Noun = {
   alt?: Record<string, string[]>;
 };
 
-export type AdjType = "hard" | "soft" | "velar";
+export const ADJ_TYPES = ["hard", "soft", "velar"] as const;
+export type AdjType = (typeof ADJ_TYPES)[number];
 
 export type Adjective = {
   lemma: string;
