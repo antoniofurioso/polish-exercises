@@ -78,7 +78,7 @@ adjectives, and check `virilePl` alternations (-szy, -cy, -dzy, -rzy).
 2sg / 3pl, and imperatives. Include about 25% reflexive verbs and the common
 motion verbs. Verbs whose objects have no sensible sentence wait for 1.6.
 
-### 1.5 Natural audio ☐ (wave 1, independent)
+### 1.5 Natural audio ☑ (wave 1, independent)
 
 - `workers/tts/`: a Cloudflare Worker. `GET /tts?text=…` → SHA-256 of
   voice + text → R2 hit, or call Azure Neural TTS (pl-PL, e.g. `pl-PL-ZofiaNeural`)

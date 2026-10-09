@@ -21,6 +21,13 @@ synthesis — 🔈 on the card replays it, and the full correct sentence is read
 once the answer is revealed. The 🔊 toggle in the header mutes both and is
 remembered.
 
+Natural voices (optional): build with `NEXT_PUBLIC_TTS_URL` pointing at the TTS
+Worker in `workers/tts/` and sentences are read by an Azure Neural pl-PL voice,
+cached in R2 so each sentence is paid for once. Any failure, or being offline,
+falls back to the browser's speech synthesis. Without the variable nothing
+changes. Deploying the Worker and setting the variable on Cloudflare Pages:
+[`workers/tts/README.md`](workers/tts/README.md).
+
 ```bash
 npm install
 npm run dev     # http://localhost:3000
@@ -62,7 +69,8 @@ Everything is generated locally and deterministically — no API calls.
 | `lib/session.ts` | Encodes a session in the query string and reads it back (`type=pronouns` / `type=possessives` / `type=numbers` / `type=verbs` select the other drills) |
 | `lib/grade.ts` | Normalises the answer; a diacritics-only miss is reported separately |
 | `lib/sound.ts` | Synthesised right / near-miss / wrong cues |
-| `lib/speak.ts` | pl-PL speech synthesis for reading sentences aloud |
+| `lib/speak.ts` | pl-PL speech synthesis for reading sentences aloud (TTS Worker audio when configured, else the browser) |
+| `lib/speaker.ts` | Worker-vs-browser selection and fallback, testable without a browser |
 
 Semantic tags on each noun (`food`, `vehicle`, `placeIn`, …) keep sentences sensible —
 `Jem …` only ever takes food, `Jadę …` only vehicles.

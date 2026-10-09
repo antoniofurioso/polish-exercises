@@ -1,0 +1,24 @@
+# Polish TTS Worker: GET /tts?text=…&voice=… → audio/mpeg, cached in R2.
+# Deploy steps live in README.md. Nothing here is secret: the Azure key is set
+# with `wrangler secret put AZURE_TTS_KEY`.
+name = "polish-exercises-tts"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+
+[vars]
+# Region of the Azure Speech resource, e.g. westeurope or polandcentral.
+AZURE_TTS_REGION = "westeurope"
+# Origins allowed to fetch audio: comma-separated, exact match, no trailing slash.
+ALLOWED_ORIGINS = "https://polish-exercises.pages.dev,http://localhost:3000"
+
+[[r2_buckets]]
+binding = "AUDIO"
+bucket_name = "polish-exercises-tts"
+
+# Per-IP limit on cache misses only (each miss is a paid Azure call; hits are
+# free and never counted). namespace_id is any positive integer that is unique
+# within the Cloudflare account. period must be 10 or 60 seconds.
+[[ratelimits]]
+name = "MISS_LIMITER"
+namespace_id = "1501"
+simple = { limit = 30, period = 60 }
