@@ -1,48 +1,6 @@
 import Link from "next/link";
-
-const EXERCISES: { href: string; title: string; pl: string; blurb: string }[] = [
-  {
-    href: "/cases",
-    title: "Cases",
-    pl: "Przypadki",
-    blurb:
-      "Decline nouns and adjectives across all seven cases, one sentence at a time.",
-  },
-  {
-    href: "/pronouns",
-    title: "Demonstrative pronouns",
-    pl: "Zaimki wskazujące",
-    blurb:
-      "Make ten / tamten agree with the noun in gender, number and case.",
-  },
-  {
-    href: "/possessives",
-    title: "Possessive pronouns",
-    pl: "Zaimki dzierżawcze",
-    blurb:
-      "Decline mój, twój, nasz, wasz — and learn where jego, jej and ich stay put.",
-  },
-  {
-    href: "/numbers",
-    title: "Numbers",
-    pl: "Liczebniki",
-    blurb:
-      "Why it's dwa koty but pięć kotów — plus writing figures out, dates and the time.",
-  },
-  {
-    href: "/verbs",
-    title: "Verbs",
-    pl: "Czasowniki",
-    blurb:
-      "Past, simple future, compound future (będę robić) and the imperative — with aspect.",
-  },
-  {
-    href: "/shuffle",
-    title: "Shuffle",
-    pl: "Mieszanka",
-    blurb: "Every exercise mixed into one session — cases, pronouns, numbers and verbs at random.",
-  },
-];
+import { DRILLS } from "@/lib/drills";
+import { EXERCISE_KINDS } from "@/lib/types";
 
 export default function HomePage() {
   return (
@@ -54,15 +12,15 @@ export default function HomePage() {
       </header>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {EXERCISES.map((ex) => (
+        {EXERCISE_KINDS.map((kind) => DRILLS[kind]).map((drill) => (
           <Link
-            key={ex.href}
-            href={ex.href}
+            key={drill.route}
+            href={drill.route}
             className="rounded-xl border border-line bg-surface px-5 py-5 transition-colors hover:border-accent/50"
           >
-            <span className="block text-xs uppercase tracking-[0.2em] text-accent">{ex.pl}</span>
-            <span className="mt-1 block text-lg font-medium">{ex.title}</span>
-            <span className="mt-2 block text-sm text-muted">{ex.blurb}</span>
+            <span className="block text-xs uppercase tracking-[0.2em] text-accent">{drill.pl}</span>
+            <span className="mt-1 block text-lg font-medium">{drill.title}</span>
+            <span className="mt-2 block text-sm text-muted">{drill.blurb}</span>
           </Link>
         ))}
       </div>

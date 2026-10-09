@@ -5,12 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ExerciseCard } from "@/components/ExerciseCard";
 import { ResultsSummary, type Result } from "@/components/ResultsSummary";
-import { buildSession } from "@/lib/generate";
-import { buildNumberSession } from "@/lib/numbers";
-import { buildPossessiveSession } from "@/lib/possessives";
-import { buildPronounSession } from "@/lib/pronouns";
-import { buildShuffleSession } from "@/lib/shuffle";
-import { buildVerbSession } from "@/lib/verbs";
+import { DRILLS } from "@/lib/drills";
 import { grade, type Verdict } from "@/lib/grade";
 import { playFinish, playVerdict } from "@/lib/sound";
 import { stopSpeaking } from "@/lib/speak";
@@ -44,15 +39,8 @@ export function PracticePage() {
 function Runner({ config, seed }: { config: Config; seed: number }) {
   const router = useRouter();
   const kind = config.kind ?? "cases";
-  const home = kind === "cases" ? "/cases" : `/${kind}`;
-  const initial = useMemo(() => {
-    if (kind === "pronouns") return buildPronounSession(config, seed);
-    if (kind === "possessives") return buildPossessiveSession(config, seed);
-    if (kind === "numbers") return buildNumberSession(config, seed);
-    if (kind === "verbs") return buildVerbSession(config, seed);
-    if (kind === "shuffle") return buildShuffleSession(config, seed);
-    return buildSession(config, seed);
-  }, [kind, config, seed]);
+  const home = DRILLS[kind].route;
+  const initial = useMemo(() => DRILLS[kind].build(config, seed), [kind, config, seed]);
 
   const [exercises, setExercises] = useState<Exercise[]>(initial);
   const [index, setIndex] = useState(0);
