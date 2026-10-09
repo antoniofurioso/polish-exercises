@@ -8,7 +8,7 @@ Status key: ☐ todo · ◐ in progress · ☑ done
 
 | Phase | Theme | Size | Status |
 | --- | --- | --- | --- |
-| 0 | Groundwork: registry, data files, levels, content gate | ~1 week | ◐ — see [phase-0.md](./phase-0.md) |
+| 0 | Groundwork: registry, data files, levels, content gate | ~1 week | ☑ — see [phase-0.md](./phase-0.md) |
 | 1 | Content ×4 and natural audio | 3–5 weeks | ☐ |
 | 2 | Retention: SRS, "today's practice", streaks | 2–3 weeks | ☐ |
 | 3 | Ship the web app: PWA, brand, landing page, beta | 1–2 weeks | ☐ |
