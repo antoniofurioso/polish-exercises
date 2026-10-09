@@ -7,7 +7,7 @@ offline and come back to, plus the measurement to tell whether they do.
 
 | Question | Decision |
 | --- | --- |
-| Name, colours, logo | **Not chosen yet.** Name research for SEO in [naming.md](./naming.md); the owner picks. Until then everything reads from `lib/brand.ts` (placeholder "Ćwiczenia"), so the rename is a one-file change plus the icons |
+| Name, colours, logo | **Not chosen yet.** Name research for SEO in [naming.md](./naming.md) (recommends **Polski Gym**, runner-up **Odmiana**; domains still to be checked); the owner picks. Until then everything reads from `lib/brand.ts` (placeholder "Ćwiczenia"), so the rename is a one-file change plus the icons |
 | Analytics | **PostHog**, EU cloud, only after consent |
 | Privacy policy | Draft under the owner's name (Antonio Furioso); contact email to be created (`NEXT_PUBLIC_CONTACT_EMAIL`) |
 | Domain | **None yet.** `NEXT_PUBLIC_SITE_URL` is empty until there is one; sitemap / canonical URLs use it when set |
