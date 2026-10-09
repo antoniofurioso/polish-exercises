@@ -4,5 +4,9 @@
   "noVocative": ["matka", "ojciec", "żona", "mąż", "rodzina"],
   "dear": ["kochany"],
   "workplaces": ["sklep", "hotel", "restauracja", "szkoła", "muzeum", "bank", "apteka", "biuro", "kino", "kawiarnia"],
-  "meetingPlaces": ["kino", "restauracja", "kawiarnia", "park", "hotel", "muzeum", "sklep", "szkoła", "kościół", "bank"]
+  "meetingPlaces": ["kino", "restauracja", "kawiarnia", "park", "hotel", "muzeum", "sklep", "szkoła", "kościół", "bank"],
+  "notHere": ["kuchnia", "miasto", "ogród", "woda", "obiad", "zupa", "słoń", "rodzina"],
+  "inView": ["person", "animal", "vehicle", "placeIn", "placeTo", "water", "plant", "food"],
+  "notInView": ["kuchnia", "pokój", "bank", "apteka", "biuro", "morze", "zupa", "obiad", "rodzina"],
+  "notCounted": ["pan", "pani", "rodzina"]
 }

@@ -1,7 +1,6 @@
-import verbData from "../data/verbs.json";
 import { capitalise, makeRng, pick, shuffle } from "./generate";
 import { normalise, stripDiacritics } from "./grade";
-import { loadVerbs } from "./load";
+import { LEXICON } from "./lexicon";
 import { TENSES, withinLevel } from "./types";
 import type {
   AnswerMode,
@@ -10,6 +9,7 @@ import type {
   Freq,
   GramNumber,
   Level,
+  Review,
   Tense,
   VerbType,
 } from "./types";
@@ -78,10 +78,11 @@ export type Verb = {
   motion?: true;
   /** Over in a moment (wracać, budzić się): no "all evening" frames. */
   momentary?: true;
+  review?: Review;
 };
 
 /** The verb lexicon, in data/verbs.json; see data/README.md for the layout. */
-export const VERBS: Verb[] = loadVerbs(verbData);
+export const VERBS: Verb[] = LEXICON.verbs;
 
 // ---------------------------------------------------------------- subjects
 

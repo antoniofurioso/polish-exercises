@@ -4,10 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:drafts": "NEXT_PUBLIC_INCLUDE_DRAFTS=1 next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "review:export": "tsx scripts/review-export.ts",
+    "review:import": "tsx scripts/review-import.ts"
   },
   "dependencies": {
     "next": "16.3.4",
@@ -23,6 +26,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^3.2.7"
   }

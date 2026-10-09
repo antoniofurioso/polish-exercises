@@ -1,5 +1,17 @@
-import { ADJ_TYPES, CASES, FREQS, GENDERS, LEVELS, TAGS } from "./types";
-import type { Adjective, Forms, Freq, Level, Noun, Tag, Template } from "./types";
+import { ADJ_TYPES, CASES, FREQS, GENDERS, LEVELS, REVIEW_STATES, TAGS } from "./types";
+import type {
+  Adjective,
+  Case,
+  CountTemplate,
+  Forms,
+  Freq,
+  Level,
+  Noun,
+  NumeralTemplate,
+  Review,
+  Tag,
+  Template,
+} from "./types";
 import type { Verb } from "./verbs";
 
 /**
@@ -73,6 +85,12 @@ class Entry {
     return value as Freq;
   }
 
+  /** The optional `"review": "draft"` mark; undefined on a published entry. */
+  review(): Review | undefined {
+    if (!this.has("review")) return undefined;
+    return this.oneOf("review", REVIEW_STATES);
+  }
+
   object(key: string, value: unknown = this.o[key]): Obj {
     if (!isObject(value)) this.fail(`needs an object for "${key}"`);
     return value;
@@ -107,7 +125,7 @@ const label = (o: Obj, key: string, i: number) => (typeof o[key] === "string" ? 
 
 // ------------------------------------------------------------------ nouns
 
-const NOUN_FIELDS = ["lemma", "en", "enPl", "level", "freq", "gender", "tags", "sg", "pl", "mass", "noPlural", "onlySg", "alt"];
+const NOUN_FIELDS = ["lemma", "en", "enPl", "level", "freq", "gender", "tags", "sg", "pl", "mass", "noPlural", "onlySg", "alt", "review"];
 
 /** A row of seven forms in CASES order: nom, gen, dat, acc, ins, loc, voc. */
 function forms(e: Entry, key: "sg" | "pl"): Forms {
@@ -146,13 +164,15 @@ export function loadNouns(raw: unknown): Noun[] {
         noun.alt[cell] = e.list(`alt.${cell}`, values);
       }
     }
+    const review = e.review();
+    if (review) noun.review = review;
     return noun;
   });
 }
 
 // ------------------------------------------------------------- adjectives
 
-const ADJECTIVE_FIELDS = ["lemma", "en", "level", "freq", "stem", "type", "virilePl", "state", "address"];
+const ADJECTIVE_FIELDS = ["lemma", "en", "level", "freq", "stem", "type", "virilePl", "state", "address", "review"];
 
 export function loadAdjectives(raw: unknown): Adjective[] {
   return entries("adjectives.json", raw).map((o, i) => {
@@ -170,6 +190,8 @@ export function loadAdjectives(raw: unknown): Adjective[] {
     if (freq) adj.freq = freq;
     if (e.has("state")) adj.state = e.flag("state");
     if (e.has("address")) adj.address = e.flag("address");
+    const review = e.review();
+    if (review) adj.review = review;
     return adj;
   });
 }
@@ -204,6 +226,7 @@ const TEMPLATE_FIELDS = [
   "adjOnly",
   "note",
   "subject",
+  "review",
 ];
 
 /** data/groups.json: each group a list of plain strings (no nested "@" references). */
@@ -219,9 +242,10 @@ export function loadGroups(raw: unknown): Groups {
   );
 }
 
-export function loadTemplates(raw: unknown, groups: Groups): Template[] {
-  return entries("templates.json", raw).map((o, i) => {
-    const e = new Entry("templates.json", label(o, "pl", i), o, TEMPLATE_FIELDS);
+/** data/templates.json, or data/agreement-frames.json (same schema) with `file` set. */
+export function loadTemplates(raw: unknown, groups: Groups, file = "templates.json"): Template[] {
+  return entries(file, raw).map((o, i) => {
+    const e = new Entry(file, label(o, "pl", i), o, TEMPLATE_FIELDS);
     const tpl: Template = {
       case: e.oneOf("case", CASES),
       number: e.oneOf("number", ["sg", "pl", "any"] as const),
@@ -237,13 +261,70 @@ export function loadTemplates(raw: unknown, groups: Groups): Template[] {
     if (e.has("states")) tpl.states = e.flag("states");
     if (e.has("adjOnly")) tpl.adjOnly = e.expand("adjOnly", groups);
     if (e.has("subject")) tpl.subject = e.oneOf("subject", ["1sg"] as const);
+    const review = e.review();
+    if (review) tpl.review = review;
     return tpl;
   });
 }
 
+// ------------------------------------------------- count / numeral frames
+
+type NounFilter = Pick<CountTemplate, "requires" | "lemmas" | "excludeLemmas">;
+
+/** The noun filter every frame shares: requires, and optionally lemmas / excludeLemmas. */
+function nounFilter(e: Entry, groups: Groups): NounFilter {
+  const filter: NounFilter = { requires: e.expand("requires", groups).map((t) => e.oneOf<Tag>("tag", TAGS, t)) };
+  if (e.has("lemmas")) filter.lemmas = e.expand("lemmas", groups);
+  if (e.has("excludeLemmas")) filter.excludeLemmas = e.expand("excludeLemmas", groups);
+  return filter;
+}
+
+/** A frame's Polish text, which must hold every slot in `slots`. */
+function frameText(e: Entry, slots: string[]): string {
+  const pl = e.text("pl");
+  for (const slot of slots) if (!pl.includes(slot)) e.fail(`needs a ${slot} slot in "pl"`);
+  return pl;
+}
+
+const COUNT_FIELDS = ["pl", "en", "case", "requires", "lemmas", "excludeLemmas", "review"];
+
+/** data/count-frames.json: the counting drill's sentences, "Mam {N} {NP}." */
+export function loadCountTemplates(raw: unknown, groups: Groups): CountTemplate[] {
+  return entries("count-frames.json", raw).map((o, i) => {
+    const e = new Entry("count-frames.json", label(o, "pl", i), o, COUNT_FIELDS);
+    const tpl: CountTemplate = {
+      pl: frameText(e, ["{N}", "{NP}"]),
+      en: e.text("en"),
+      case: e.oneOf("case", ["nom", "acc"] as const),
+      ...nounFilter(e, groups),
+    };
+    const review = e.review();
+    if (review) tpl.review = review;
+    return tpl;
+  });
+}
+
+const NUMERAL_FIELDS = ["pl", "en", "requires", "lemmas", "excludeLemmas", "review"];
+
+/** data/numeral-frames.json: the numeral drill's one sentence per case, keyed by case. */
+export function loadNumeralTemplates(raw: unknown, groups: Groups): Partial<Record<Case, NumeralTemplate>> {
+  if (!isObject(raw)) throw new Error("data/numeral-frames.json: expected an object keyed by case");
+  return Object.fromEntries(
+    Object.entries(raw).map(([kase, value]) => {
+      const e = new Entry("numeral-frames.json", kase, isObject(value) ? value : {}, NUMERAL_FIELDS);
+      if (!(CASES as readonly string[]).includes(kase)) e.fail(`is not a case: ${CASES.join(", ")}`);
+      if (!isObject(value)) e.fail("needs an object");
+      const tpl: NumeralTemplate = { pl: frameText(e, ["{NP}"]), en: e.text("en"), ...nounFilter(e, groups) };
+      const review = e.review();
+      if (review) tpl.review = review;
+      return [kase, tpl];
+    }),
+  );
+}
+
 // ------------------------------------------------------------------ verbs
 
-const VERB_FIELDS = ["en", "level", "freq", "impf", "pf", "objects", "reflexive", "motion", "momentary"];
+const VERB_FIELDS = ["en", "level", "freq", "impf", "pf", "objects", "reflexive", "motion", "momentary", "review"];
 
 function aspect(e: Entry, key: "impf" | "pf"): Verb["impf"] {
   const o = e.object(key);
@@ -292,6 +373,118 @@ export function loadVerbs(raw: unknown): Verb[] {
     if (e.has("reflexive")) verb.reflexive = e.flag("reflexive", true) as true;
     if (e.has("motion")) verb.motion = e.flag("motion", true) as true;
     if (e.has("momentary")) verb.momentary = e.flag("momentary", true) as true;
+    const review = e.review();
+    if (review) verb.review = review;
     return verb;
   });
+}
+
+// ------------------------------------------------------- the whole lexicon
+
+/** The raw contents of every file in data/, as imported. */
+export type LexiconData = {
+  nouns: unknown;
+  adjectives: unknown;
+  collocations: unknown;
+  groups: unknown;
+  templates: unknown;
+  verbs: unknown;
+  agreement: unknown;
+  counting: unknown;
+  numerals: unknown;
+};
+
+/** Every word and frame the drills draw from, validated and typed. */
+export type Lexicon = {
+  nouns: Noun[];
+  adjectives: Adjective[];
+  collocations: Record<string, string[]>;
+  templates: Template[];
+  verbs: Verb[];
+  /** data/agreement-frames.json: the demonstrative, possessive and ordinal frames. */
+  agreement: Template[];
+  /** data/count-frames.json */
+  counting: CountTemplate[];
+  /** data/numeral-frames.json */
+  numerals: Partial<Record<Case, NumeralTemplate>>;
+};
+
+/** Loads and checks every file, drafts included. */
+export function loadLexicon(data: LexiconData): Lexicon {
+  const nouns = loadNouns(data.nouns);
+  const adjectives = loadAdjectives(data.adjectives);
+  const groups: Groups = {
+    ...loadGroups(data.groups),
+    /** Relatives need a possessive in English: "This is a husband" is no sentence. */
+    relatives: nouns.filter((n) => n.tags.includes("family")).map((n) => n.lemma),
+  };
+  return {
+    nouns,
+    adjectives,
+    collocations: loadCollocations(data.collocations, adjectives),
+    templates: loadTemplates(data.templates, groups),
+    verbs: loadVerbs(data.verbs),
+    agreement: loadTemplates(data.agreement, groups, "agreement-frames.json"),
+    counting: loadCountTemplates(data.counting, groups),
+    numerals: loadNumeralTemplates(data.numerals, groups),
+  };
+}
+
+// ------------------------------------------------------ published vs draft
+
+export const isDraft = (entry: { review?: Review }): boolean => entry.review === "draft";
+
+type Frame = Pick<Template, "requires" | "lemmas" | "excludeLemmas" | "adjOnly" | "review">;
+
+/**
+ * The lexicon a learner sees: every draft left out, and every reference to a
+ * draft word with it, so nothing published names a word that is not there.
+ * A frame that only named draft nouns (no tags, every `lemmas` entry a draft)
+ * goes too; an `adjOnly` left empty means "no adjective", which still reads.
+ * With no drafts the lexicon comes back entry for entry as it was.
+ */
+export function publish(lexicon: Lexicon): Lexicon {
+  const draftNouns = new Set(lexicon.nouns.filter(isDraft).map((n) => n.lemma));
+  const draftAdjectives = new Set(lexicon.adjectives.filter(isDraft).map((a) => a.lemma));
+  const keepNoun = (lemma: string) => !draftNouns.has(lemma);
+  const keepAdjective = (lemma: string) => !draftAdjectives.has(lemma);
+
+  /** The frame without its draft references, or null when it is a draft or names nothing left. */
+  function narrow<T extends Frame>(frame: T): T | null {
+    if (isDraft(frame)) return null;
+    const lemmas = frame.lemmas?.filter(keepNoun);
+    const excludeLemmas = frame.excludeLemmas?.filter(keepNoun);
+    const adjOnly = frame.adjOnly?.filter(keepAdjective);
+    const unchanged = (a?: string[], b?: string[]) => a?.length === b?.length;
+    if (unchanged(lemmas, frame.lemmas) && unchanged(excludeLemmas, frame.excludeLemmas) && unchanged(adjOnly, frame.adjOnly)) {
+      return frame;
+    }
+    if (frame.requires.length === 0 && frame.lemmas?.length && !lemmas?.length) return null;
+    const out: T = { ...frame };
+    if (lemmas) out.lemmas = lemmas;
+    if (excludeLemmas) out.excludeLemmas = excludeLemmas;
+    if (adjOnly) out.adjOnly = adjOnly;
+    return out;
+  }
+  const frames = <T extends Frame>(list: T[]): T[] => list.map(narrow).filter((t): t is T => t !== null);
+
+  return {
+    nouns: lexicon.nouns.filter((n) => !isDraft(n)),
+    adjectives: lexicon.adjectives.filter((a) => !isDraft(a)),
+    collocations: Object.fromEntries(
+      Object.entries(lexicon.collocations)
+        .filter(([noun]) => keepNoun(noun))
+        .map(([noun, adjectives]) => [noun, adjectives.filter(keepAdjective)]),
+    ),
+    templates: frames(lexicon.templates),
+    verbs: lexicon.verbs.filter((v) => !isDraft(v)),
+    agreement: frames(lexicon.agreement),
+    counting: frames(lexicon.counting),
+    numerals: Object.fromEntries(
+      Object.entries(lexicon.numerals).flatMap(([kase, frame]) => {
+        const kept = frame && narrow(frame);
+        return kept ? [[kase, kept]] : [];
+      }),
+    ),
+  };
 }

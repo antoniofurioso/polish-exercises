@@ -8,6 +8,7 @@ import { CASE_INFO } from "./cases";
 import { buildOptions } from "./choices";
 import { capitalise, fitsTemplate, makeRng, nounForm, pick, resolvePrep, shuffle } from "./generate";
 import { normalise, stripDiacritics } from "./grade";
+import { LEXICON } from "./lexicon";
 import { NOUNS, nounVariants } from "./nouns";
 import {
   MONTHS,
@@ -25,6 +26,7 @@ import type {
   AnswerMode,
   Case,
   Config,
+  CountTemplate,
   Exercise,
   Gender,
   GenderGroup,
@@ -32,6 +34,7 @@ import type {
   Level,
   Noun,
   NumberDrill,
+  NumeralTemplate,
   SpellRange,
   Tag,
   Token,
@@ -74,37 +77,12 @@ const countedEn = (n: number, noun: Noun) =>
 
 // ------------------------------------------------------------ 1 · counting
 
-type CountTemplate = {
-  /** Polish frame with {N} for the numeral and {NP} for the counted noun. */
-  pl: string;
-  en: string;
-  /** The case the frame itself assigns — it only shows with "jeden". */
-  case: "nom" | "acc";
-  /** Which nouns the sentence makes sense with — see Template. */
-  requires: Tag[];
-  lemmas?: string[];
-  excludeLemmas?: string[];
-};
-
-/** Things that could sit "here": "Tu są trzy krzesła", not "Tu są dwa miasta". */
-const HERE: Pick<CountTemplate, "requires" | "excludeLemmas"> = {
-  requires: ["person", "animal", "object", "vehicle", "text", "food", "drink", "surface", "placeIn"],
-  excludeLemmas: ["kuchnia", "miasto", "ogród", "woda", "obiad", "zupa", "słoń", "rodzina"],
-};
-/** Things you'd see out of a window or in a photo. */
-const IN_VIEW: Pick<CountTemplate, "requires" | "excludeLemmas"> = {
-  requires: ["person", "animal", "vehicle", "placeIn", "placeTo", "water", "plant", "food"],
-  excludeLemmas: ["kuchnia", "pokój", "bank", "apteka", "biuro", "morze", "zupa", "obiad", "rodzina"],
-};
-
-const COUNT_TEMPLATES: CountTemplate[] = [
-  { pl: "Mam {N} {NP}.", en: "I have {np}.", case: "acc",
-    requires: ["animal", "object", "vehicle", "text", "food"], lemmas: ["dom", "mieszkanie", "pokój"],
-    excludeLemmas: ["słoń", "zwierzę", "list", "gazeta", "radio", "zupa", "obiad", "samolot", "pociąg", "autobus"] },
-  { pl: "Widzę {N} {NP}.", en: "I can see {np}.", case: "acc", ...IN_VIEW },
-  { pl: "Tu {V} {N} {NP}.", en: "There {is} {np} here.", case: "nom", ...HERE },
-  { pl: "Na zdjęciu {V} {N} {NP}.", en: "There {is} {np} in the photo.", case: "nom", ...IN_VIEW },
-];
+/**
+ * The counting sentences, in data/count-frames.json. "@inView" / "@notInView"
+ * are the things you'd see out of a window or in a photo, "@notHere" what
+ * could not sit "here" ("Tu są trzy krzesła", not "Tu są dwa miasta").
+ */
+const COUNT_TEMPLATES: CountTemplate[] = LEXICON.counting;
 
 /**
  * The numbers the counting drill draws from — deliberately loaded with the
@@ -189,29 +167,12 @@ const NUMERAL_POOL = [
   30, 40, 50, 60, 70, 80, 90, 100,
 ];
 
-type NumeralTemplate = Pick<CountTemplate, "requires" | "lemmas" | "excludeLemmas"> & {
-  pl: string;
-  en: string;
-};
-
-/** People you'd help or talk to in a group: "pięciu studentom", "z trzema kolegami". */
-const PEOPLE: Pick<CountTemplate, "requires" | "excludeLemmas"> = {
-  requires: ["person"],
-  excludeLemmas: ["pan", "pani", "rodzina"],
-};
-
-const NUMERAL_TEMPLATES: Record<Case, NumeralTemplate> = {
-  nom: { pl: "Tu {V} {NP}.", en: "There {is} {np} here.", ...HERE },
-  gen: { pl: "Szukam {NP}.", en: "I'm looking for {np}.",
-    requires: ["animal", "object", "profession"], excludeLemmas: ["słoń", "radio", "stół", "łóżko", "biurko"] },
-  dat: { pl: "Pomagam {NP}.", en: "I'm helping {np}.", ...PEOPLE },
-  acc: { pl: "Widzę {NP}.", en: "I can see {np}.", ...IN_VIEW },
-  ins: { pl: "Rozmawiam {z} {NP}.", en: "I'm talking with {np}.", ...PEOPLE },
-  loc: { pl: "Myślę o {NP}.", en: "I'm thinking about {np}.",
-    requires: ["person", "animal", "placeIn", "placeTo", "vehicle"],
-    excludeLemmas: ["pan", "pani", "rodzina", "kuchnia", "pokój", "bank", "apteka", "biuro"] },
-  voc: { pl: "Widzę {NP}.", en: "I can see {np}.", ...IN_VIEW },
-};
+/**
+ * The numeral drill's one sentence per case, in data/numeral-frames.json.
+ * "@notCounted" keeps out the people you would not talk to in a group of five
+ * (pan, pani, rodzina). A case whose frame is still a draft has none.
+ */
+const NUMERAL_TEMPLATES: Partial<Record<Case, NumeralTemplate>> = LEXICON.numerals;
 
 /** Which cell the counted noun sits in once the numeral is in `kase`. */
 export function countedCell(
@@ -271,6 +232,7 @@ function buildNumeralExercise(
   taken: Set<string>,
 ): Exercise | null {
   const tpl = NUMERAL_TEMPLATES[kase];
+  if (!tpl) return null;
   for (const noun of shuffle(nouns, rng)) {
     if (!fitsTemplate(noun, tpl)) continue;
     const key = `numeral|${n}|${noun.lemma}|${kase}`;

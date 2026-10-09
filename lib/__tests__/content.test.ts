@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import adjectiveData from "../../data/adjectives.json";
+import agreementData from "../../data/agreement-frames.json";
 import collocationData from "../../data/collocations.json";
+import countData from "../../data/count-frames.json";
 import groupData from "../../data/groups.json";
 import nounData from "../../data/nouns.json";
+import numeralData from "../../data/numeral-frames.json";
 import templateData from "../../data/templates.json";
 import verbData from "../../data/verbs.json";
 import { AGREEMENT_TEMPLATES } from "../agreement";
@@ -13,6 +16,7 @@ import {
   loadAdjectives,
   loadCollocations,
   loadGroups,
+  loadLexicon,
   loadNouns,
   loadTemplates,
   loadVerbs,
@@ -43,6 +47,25 @@ describe("data files", () => {
     // "@relatives" is derived from the nouns in lib/templates.ts, not stored
     expect(loadTemplates(fresh(templateData), { ...groups, relatives: [] })).toHaveLength(templateData.length);
     expect(loadVerbs(fresh(verbData))).toHaveLength(verbData.length);
+  });
+
+  it("load as one lexicon, frames included", () => {
+    const lexicon = loadLexicon(
+      fresh({
+        nouns: nounData,
+        adjectives: adjectiveData,
+        collocations: collocationData,
+        groups: groupData,
+        templates: templateData,
+        verbs: verbData,
+        agreement: agreementData,
+        counting: countData,
+        numerals: numeralData,
+      }),
+    );
+    expect(lexicon.agreement).toHaveLength(agreementData.length);
+    expect(lexicon.counting).toHaveLength(countData.length);
+    expect(Object.keys(lexicon.numerals)).toEqual(Object.keys(numeralData));
   });
 
   it("rejects an entry with a missing or unknown level, or a bad freq", () => {
