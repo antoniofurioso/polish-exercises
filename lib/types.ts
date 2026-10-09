@@ -287,7 +287,29 @@ export type Exercise = {
   kind?: DrillKind;
   /** The words behind the blank, kept so a wrong answer can be explained. */
   source?: { noun: Noun; adj?: Adjective };
+  /** The SRS card this question drills, e.g. "cases:kot|gen|pl" (see lib/cards.ts). */
+  card?: string;
+  /** The skill it counts toward in the weak-spots view, e.g. "cases:gen|pl". */
+  skill?: string;
 };
+
+/** Why a wrong answer was wrong, as a category the weak-spots view can count (lib/diagnose.ts). */
+export const MISS_KINDS = [
+  "empty", // nothing typed
+  "case", // a real form of the word, in another case
+  "number", // right case, wrong number
+  "caseNumber", // both wrong
+  "accAnimacy", // masculine accusative: nominative vs genitive mix-up
+  "gender", // adjective agreeing with the wrong gender
+  "ending", // right stem, wrong ending
+  "typo", // one letter away
+  "wordCount", // too many or too few words in the blank
+  "aspect", // verbs: the other aspect's form
+  "person", // verbs: another person or number of the right verb
+  "tense", // verbs: the right verb in another tense
+  "other",
+] as const;
+export type MissKind = (typeof MISS_KINDS)[number];
 
 export type CaseStat = { correct: number; total: number };
 export type Stats = Partial<Record<Case, CaseStat>>;

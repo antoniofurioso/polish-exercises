@@ -37,11 +37,16 @@ const BUILD: Record<string, (config: Config, seed: number) => Exercise[]> = {
   shuffle: buildShuffleSession,
 };
 
-/** Lexicon entries can gain metadata (level, freq) without that counting as a content change. */
-const strip = (e: Exercise) => ({
-  ...e,
-  source: e.source && { noun: e.source.noun.lemma, adj: e.source.adj?.lemma },
-});
+/**
+ * Lexicon entries can gain metadata (level, freq) without that counting as a content change,
+ * and the SRS card / skill ids are bookkeeping, not what the learner sees.
+ */
+function strip(e: Exercise) {
+  const out = { ...e, source: e.source && { noun: e.source.noun.lemma, adj: e.source.adj?.lemma } };
+  delete out.card;
+  delete out.skill;
+  return out;
+}
 
 describe("golden sessions", () => {
   for (const [kind, config] of Object.entries(CONFIGS)) {

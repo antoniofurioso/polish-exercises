@@ -1,3 +1,9 @@
+import type { CardSource } from "./cards";
+import { casesCards } from "./cards/cases";
+import { numbersCards } from "./cards/numbers";
+import { possessivesCards } from "./cards/possessives";
+import { pronounsCards } from "./cards/pronouns";
+import { verbsCards } from "./cards/verbs";
 import { buildSession } from "./generate";
 import { buildNumberSession } from "./numbers";
 import { buildPossessiveSession } from "./possessives";
@@ -36,7 +42,7 @@ export type Drill = {
 /** The broad settings a drill runs with when it is mixed into a shuffle. */
 export type MixConfig = Omit<Config, "count" | "answerMode">;
 
-type Registry = { [K in DrillKind]: Drill & { mix: MixConfig } } & { shuffle: Drill };
+type Registry = { [K in DrillKind]: Drill & { mix: MixConfig; cards: CardSource } } & { shuffle: Drill };
 
 /** The comma-separated values of a param that appear in `allowed`. */
 function list<T extends string>(params: URLSearchParams, name: string, allowed: readonly T[]): T[] {
@@ -59,6 +65,7 @@ export const DRILLS: Registry = {
     build: buildSession,
     cases: CASES,
     mix: { kind: "cases", cases: [...CASES], numbers: ["sg", "pl"], mode: "both" },
+    cards: casesCards,
   },
   pronouns: {
     route: "/pronouns",
@@ -75,6 +82,7 @@ export const DRILLS: Registry = {
       return demo === "ten" || demo === "tamten" ? { demo } : {};
     },
     mix: { kind: "pronouns", cases: [...PRONOUN_CASES], numbers: ["sg", "pl"], mode: "nouns" },
+    cards: pronounsCards,
   },
   possessives: {
     route: "/possessives",
@@ -91,6 +99,7 @@ export const DRILLS: Registry = {
       return isSubset(owners, POSSESSIVES) ? { owners } : {};
     },
     mix: { kind: "possessives", cases: [...POSSESSIVE_CASES], numbers: ["sg", "pl"], mode: "nouns" },
+    cards: possessivesCards,
   },
   numbers: {
     route: "/numbers",
@@ -112,6 +121,7 @@ export const DRILLS: Registry = {
       };
     },
     mix: { kind: "numbers", cases: [...NUMBER_CASES], numbers: ["sg"], mode: "nouns", max: 100 },
+    cards: numbersCards,
   },
   verbs: {
     route: "/verbs",
@@ -136,6 +146,7 @@ export const DRILLS: Registry = {
       };
     },
     mix: { kind: "verbs", tenses: [...TENSES], cases: ["nom"], numbers: ["sg", "pl"], mode: "nouns" },
+    cards: verbsCards,
   },
   shuffle: {
     route: "/shuffle",
