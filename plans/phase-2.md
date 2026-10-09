@@ -28,7 +28,7 @@ with its drill.
 | cases | `cases:<noun lemma>\|<case>\|<sg\|pl>` | `cases:<case>\|<sg\|pl>` |
 | pronouns | `pronouns:<case>\|<gender>\|<sg\|pl>` (gender = mPers / mAnim / mInanim / f / n) | `pronouns:<case>\|<sg\|pl>` |
 | possessives | `possessives:<owner>\|<case>\|<gender>\|<sg\|pl>` (owner from `POSSESSIVES`) | `possessives:<case>\|<sg\|pl>` |
-| numbers | `numbers:<drill>\|<facet…>`: the 1 / 2–4 / 5+ band and case for `count`, the numeral class and case for `numeral`, the magnitude for `spell`, date / time / ordinal and case for `ordinal` (exact facets: `lib/cards/numbers.ts`) | `numbers:<drill>\|<band or class>` |
+| numbers | `numbers:count\|<band>\|<nom\|acc>` (band = 1 / 2-4 / 5+ / teens / compound2-4 / compound / men), `numbers:numeral\|<class>\|<case>` (class = 1 / 2-4 / 5+ / 100 / men), `numbers:spell\|<magnitude>` (units / teens / tens / hundreds / thousand / thousands2-4 / thousands5+), `numbers:ordinal\|date\|gen`, `numbers:ordinal\|time\|<nom\|loc>`, `numbers:ordinal\|plain\|<case>` (ranges and levels: `lib/cards/numbers.ts`) | `numbers:<drill>\|<band, class, magnitude or flavour>` |
 | verbs | `verbs:<infinitive>\|<tense>` (the infinitive as stored, `się` included) | `verbs:<tense>\|<person>` |
 
 - Pronouns and possessives schedule the *paradigm cell*, not the noun: the noun
