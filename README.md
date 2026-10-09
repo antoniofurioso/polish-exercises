@@ -179,7 +179,8 @@ Everything is generated locally and deterministically — no API calls.
 | `lib/pronouns.ts` | The `ten` / `tamten` paradigm — builds the demonstrative-pronoun exercise |
 | `lib/possessives.ts` | The `mój` and `nasz` paradigms (and the indeclinable `jego` / `jej` / `ich`) — builds the possessive exercise |
 | `lib/numerals.ts` | Cardinals to 9999, the oblique `-u` forms, the 1 / 2-4 / 5+ government rule, ordinals and the months |
-| `lib/numbers.ts` | Builds the four numeral drills on top of it |
+| `lib/numbers.ts` | Builds the four numeral drills on top of it; tags every exercise with its SRS card (`numbers:count\|5+\|acc`…) and builds one exercise for a given card |
+| `lib/cards/numbers.ts` | The numbers drill's SRS cards: the id scheme (count band, numeral class, spelling magnitude, ordinal flavour × case), their levels, order and learner-facing skill names |
 | `lib/verbs.ts` | Verbs (139 incl. drafts; aspect pairs plus imperfective-only verbs) stored as principal parts (past stems, non-past, imperative); builds the five tense drills, places `się` and builds the English verb |
 | `lib/session.ts` | Encodes a session in the query string and reads it back (`type=` selects the drill, `lvl=` caps the CEFR level; drill-specific params come from the registry) |
 | `lib/review/`, `scripts/review-*.ts` | The native-speaker review sheet: CSV export and import of draft entries |
