@@ -68,6 +68,13 @@ describe("data file layout", () => {
   });
 });
 
+/** A data file as it would read with every draft approved, which is what filesWithDrafts starts from. */
+function unmarked(file: string): string {
+  const content = JSON.parse(read(file)) as Record<string, Obj>;
+  for (const entry of Object.values(content)) delete entry.review;
+  return formatJson(content);
+}
+
 /**
  * Real files with a few entries marked as drafts, in memory only. Drafts
  * already in data/ are unmarked first, so the expectations below hold
@@ -138,8 +145,8 @@ describe("review import", () => {
 
   it("writes an approved entry back exactly as it was before it was a draft", () => {
     const result = applyVerdicts(filesWithDrafts(), [row("noun", "kot", "ok"), row("template", "acc/any: Widzę {NP}.", "ok")]);
-    expect(formatJson(result.files["nouns.json"])).toBe(read("nouns.json"));
-    expect(formatJson(result.files["templates.json"])).toBe(read("templates.json"));
+    expect(formatJson(result.files["nouns.json"])).toBe(unmarked("nouns.json"));
+    expect(formatJson(result.files["templates.json"])).toBe(unmarked("templates.json"));
   });
 
   it("changes nothing the second time round", () => {
