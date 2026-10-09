@@ -16,6 +16,26 @@ then the app stores. The roadmap and phase status live in `plans/`, and the
 user-facing overview is in `README.md`. Read `plans/ROADMAP.md` before starting
 any phase.
 
+## Keep the docs current: part of every change
+
+Updating the documentation is part of the work, not a follow-up. A change is not
+done until the docs it affects are updated **in the same commit**. Before
+committing, check this table:
+
+| If you changed… | Update |
+| --- | --- |
+| A file's role, a new module or folder, a new script | The codebase map below, and the file table in `README.md` |
+| A rule, a gotcha, a command, how tests are split | "Rules that are easy to break" / "Commands" below |
+| A data field, flag, group or file in `data/` | `data/README.md` (schema and rules), and `lib/review/export.ts` if reviewers should see it |
+| A drill, URL param or user-visible behaviour | `README.md` (routes, features), and "How to add things" below if the process changed |
+| Audio pipeline, Worker or env vars | The `README.md` "Audio" section and `workers/tts/README.md` |
+| Progress on a phase | That phase's `plans/phase-N.md` (☐ ◐ ☑ and what is left) and the status table in `plans/ROADMAP.md` |
+| Lexicon counts, known limits, overall status | "Known limits" / "Current status" below |
+
+Write for the next session, which starts with no memory of this one. State
+facts and current numbers, not history ("306 nouns", not "added 181 nouns").
+Delete anything the change made untrue.
+
 ## Stack and shape
 
 - Next.js 16 App Router, React 19, Tailwind 4, TypeScript, vitest. Node 22 (`.nvmrc`).
