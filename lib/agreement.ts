@@ -1,7 +1,8 @@
-import { capitalise, shuffle } from "./generate";
+import { capitalise, nounFits, shuffle } from "./generate";
 import { normalise, stripDiacritics } from "./grade";
 import { LEXICON } from "./lexicon";
-import { PRONOUN_CASES, withinLevel } from "./types";
+import { NOUNS } from "./nouns";
+import { LEVELS, PRONOUN_CASES, withinLevel } from "./types";
 import type { Case, Gender, GenderGroup, GramNumber, Level, Noun, Template } from "./types";
 
 /**
@@ -79,4 +80,26 @@ export function buildAgreementOptions(
   const distractors = [...shuffle(near, rng), ...shuffle(far, rng)].slice(0, count - 1);
   if (distractors.length < 1) return [];
   return shuffle([correct, ...distractors], rng);
+}
+
+/**
+ * The lowest level at which one paradigm cell can be drilled: the easiest
+ * frame among `templates`, paired with the easiest noun that fits it in this
+ * number and passes `accept` (a gender, no "mój Polak"...). Null when no frame
+ * has such a noun. This is an SRS card's level in the agreement drills.
+ */
+export function cellLevel(
+  templates: Template[],
+  number: GramNumber,
+  accept: (noun: Noun) => boolean,
+): Level | null {
+  let best: number | null = null;
+  for (const tpl of templates) {
+    for (const noun of NOUNS) {
+      if (!accept(noun) || !nounFits(noun, tpl, number)) continue;
+      const level = Math.max(LEVELS.indexOf(tpl.level), LEVELS.indexOf(noun.level));
+      if (best === null || level < best) best = level;
+    }
+  }
+  return best === null ? null : LEVELS[best];
 }

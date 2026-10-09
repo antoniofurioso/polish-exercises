@@ -170,6 +170,8 @@ Everything is generated locally and deterministically — no API calls.
 | `lib/load.ts` | Validates the JSON and turns it into typed entries; throws on a malformed entry, naming it. Leaves drafts out of the published lexicon |
 | `lib/lexicon.ts` | Loads every data file once; drafts only with `NEXT_PUBLIC_INCLUDE_DRAFTS=1` |
 | `lib/drills.ts` | The drill registry: route, menu text, builder, URL params and shuffle mix for each drill |
+| `lib/cards.ts`, `lib/cards/` | SRS card sources, one per drill (`DRILLS[kind].cards`): every card up to a level, one exercise for a given card, learner-facing skill names. Card ids: `plans/phase-2.md` §1 |
+| `lib/diagnose.ts` | Why a wrong answer is wrong: `explainMiss` (the line the learner reads) and `diagnoseMiss` (the miss kind the weak-spots view counts) |
 | `lib/nouns.ts` | The nouns (306 incl. drafts) with their full 14-form paradigms (declension is too irregular to derive) |
 | `lib/adjectives.ts` | The adjectives (150 incl. drafts) as stem + hardness, and which ones go with which noun; only the masculine-personal nominative plural is stored |
 | `lib/declineAdjective.ts` | The regular adjective endings |

@@ -216,7 +216,7 @@ const isFixed = (owner: Possessive) => OWNER_INFO[owner].family === "fixed";
  * "swój" only ever refers back to the subject, so it is drilled in the
  * sentences that have one; the rest are open to every possessor.
  */
-function templatesForOwner(
+export function templatesForOwner(
   owner: Possessive,
   kase: Case,
   number: GramNumber,
@@ -267,6 +267,16 @@ function note(
   return head;
 }
 
+/** The SRS card and skill of a possessive question: owner × paradigm cell (plans/phase-2.md §1). */
+export function possessiveCard(
+  owner: Possessive,
+  kase: Case,
+  gender: Gender,
+  number: GramNumber,
+): { card: string; skill: string } {
+  return { card: `possessives:${owner}|${kase}|${gender}|${number}`, skill: `possessives:${kase}|${number}` };
+}
+
 export function buildPossessiveExercise(
   owner: Possessive,
   kase: Case,
@@ -276,6 +286,8 @@ export function buildPossessiveExercise(
   taken: Set<string> = new Set(),
   genders?: GenderGroup[],
   maxLevel?: Level,
+  /** Only nouns of exactly this gender: how an SRS card asks for its paradigm cell. */
+  gender?: Gender,
 ): Exercise | null {
   for (let attempt = 0; attempt < 40; attempt++) {
     const number = pick(numbers, rng);
@@ -283,7 +295,8 @@ export function buildPossessiveExercise(
     if (templates.length === 0) continue;
 
     for (const tpl of shuffle(templates, rng)) {
-      const nouns = nounsFor(tpl, number, genders, maxLevel);
+      const fitting = nounsFor(tpl, number, genders, maxLevel);
+      const nouns = gender ? fitting.filter((n) => n.gender === gender) : fitting;
       for (const noun of shuffle(nouns, rng)) {
         // "mój Polak", "mój komar": skipped after the shuffle, so no random draw changes
         if (noun.noPossessive) continue;
@@ -317,6 +330,7 @@ export function buildPossessiveExercise(
           }`,
           en: renderAgreementEnglish(tpl, noun, OWNER_INFO[owner].en, number),
           answers,
+          ...possessiveCard(owner, kase, noun.gender, number),
           note: note(owner, noun, number, kase, tpl),
         };
 

@@ -158,6 +158,11 @@ function note(
   return head;
 }
 
+/** The SRS card and skill of a demonstrative question: the paradigm cell, not the noun (plans/phase-2.md §1). */
+export function pronounCard(kase: Case, gender: Gender, number: GramNumber): { card: string; skill: string } {
+  return { card: `pronouns:${kase}|${gender}|${number}`, skill: `pronouns:${kase}|${number}` };
+}
+
 export function buildPronounExercise(
   base: Demonstrative,
   kase: Case,
@@ -167,6 +172,8 @@ export function buildPronounExercise(
   taken: Set<string> = new Set(),
   genders?: GenderGroup[],
   maxLevel?: Level,
+  /** Only nouns of exactly this gender: how an SRS card asks for its paradigm cell. */
+  gender?: Gender,
 ): Exercise | null {
   for (let attempt = 0; attempt < 40; attempt++) {
     const number = pick(numbers, rng);
@@ -174,7 +181,8 @@ export function buildPronounExercise(
     if (templates.length === 0) continue;
 
     for (const tpl of shuffle(templates, rng)) {
-      const nouns = nounsFor(tpl, number, genders, maxLevel);
+      const fitting = nounsFor(tpl, number, genders, maxLevel);
+      const nouns = gender ? fitting.filter((n) => n.gender === gender) : fitting;
       for (const noun of shuffle(nouns, rng)) {
         const key = `${base}|${tpl.pl}|${noun.lemma}|${number}`;
         if (taken.has(key) && attempt < 30) continue;
@@ -203,6 +211,7 @@ export function buildPronounExercise(
           hint: `${noun.lemma} · ${GENDER_WORD[genderGroup(noun.gender)]}`,
           en: renderAgreementEnglish(tpl, noun, DETERMINER[base][number === "pl" ? 1 : 0], number),
           answers,
+          ...pronounCard(kase, noun.gender, number),
           note: note(base, noun, number, kase, tpl.note),
         };
 

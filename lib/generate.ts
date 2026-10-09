@@ -99,20 +99,30 @@ export function templatesFor(kase: Case, number: GramNumber, maxLevel?: Level): 
   );
 }
 
+/** True when this noun can fill this frame in this number (the test behind `nounsFor`). */
+export function nounFits(
+  noun: Noun,
+  tpl: Pick<Template, "requires" | "lemmas" | "excludeLemmas">,
+  number: GramNumber,
+  genders?: GenderGroup[],
+  maxLevel?: Level,
+): boolean {
+  return (
+    fitsTemplate(noun, tpl) &&
+    withinLevel(noun, maxLevel) &&
+    // "ciepłe wody", "mocne herbaty": mass nouns stay singular in a sentence
+    (number === "sg" || (!noun.noPlural && !noun.onlySg && !noun.mass && noun.pl !== undefined)) &&
+    (!genders || genders.length === 0 || genders.includes(genderGroup(noun.gender)))
+  );
+}
+
 export function nounsFor(
   tpl: Template,
   number: GramNumber,
   genders?: GenderGroup[],
   maxLevel?: Level,
 ): Noun[] {
-  return NOUNS.filter(
-    (noun) =>
-      fitsTemplate(noun, tpl) &&
-      withinLevel(noun, maxLevel) &&
-      // "ciepłe wody", "mocne herbaty": mass nouns stay singular in a sentence
-      (number === "sg" || (!noun.noPlural && !noun.onlySg && !noun.mass && noun.pl !== undefined)) &&
-      (!genders || genders.length === 0 || genders.includes(genderGroup(noun.gender))),
-  );
+  return NOUNS.filter((noun) => nounFits(noun, tpl, number, genders, maxLevel));
 }
 
 /** English goes by sound: an hour, an old man; a young man, a university, a European city. */
@@ -276,34 +286,108 @@ export function buildExercise(
     const key = `${tpl.pl}|${noun.lemma}|${adj?.lemma ?? ""}|${number}`;
     if (taken.has(key) && attempt < 30) continue;
     taken.add(key);
-
-    const tokens = buildTokens(noun, adj, number, kase, mode);
-    const [before, after] = tpl.pl.split("{NP}");
-    const resolvedBefore = before
-      .replace(/\{z\}/g, resolvePrep("z", tokens[0].text))
-      .replace(/\{w\}/g, resolvePrep("w", tokens[0].text));
-
-    const hintParts = mode === "nouns"
-      ? [noun.lemma]
-      : mode === "adjectives"
-        ? [adj!.lemma]
-        : [adj!.lemma, noun.lemma];
-
-    return {
-      id: `${key}|${kase}`,
-      case: kase,
-      number,
-      before: resolvedBefore,
-      after,
-      tokens,
-      hint: hintParts.join(" "),
-      en: renderEnglish(tpl, noun, adj, number),
-      answers: buildAnswers(tokens, noun, adj, number, kase, mode),
-      note: tpl.note,
-      source: { noun, adj },
-    };
+    return assembleExercise(tpl, noun, adj, number, kase, mode, key);
   }
   return null;
+}
+
+/** The SRS card and skill of a case-drill question (plans/phase-2.md §1). */
+export function caseCard(lemma: string, kase: Case, number: GramNumber): { card: string; skill: string } {
+  return { card: `cases:${lemma}|${kase}|${number}`, skill: `cases:${kase}|${number}` };
+}
+
+/** Turns a chosen sentence, noun and adjective into the exercise the learner sees. */
+function assembleExercise(
+  tpl: Template,
+  noun: Noun,
+  adj: Adjective | undefined,
+  number: GramNumber,
+  kase: Case,
+  mode: WordMode,
+  key: string,
+): Exercise {
+  const tokens = buildTokens(noun, adj, number, kase, mode);
+  const [before, after] = tpl.pl.split("{NP}");
+  const resolvedBefore = before
+    .replace(/\{z\}/g, resolvePrep("z", tokens[0].text))
+    .replace(/\{w\}/g, resolvePrep("w", tokens[0].text));
+
+  const hintParts = mode === "nouns"
+    ? [noun.lemma]
+    : mode === "adjectives"
+      ? [adj!.lemma]
+      : [adj!.lemma, noun.lemma];
+
+  return {
+    id: `${key}|${kase}`,
+    case: kase,
+    number,
+    before: resolvedBefore,
+    after,
+    tokens,
+    hint: hintParts.join(" "),
+    en: renderEnglish(tpl, noun, adj, number),
+    answers: buildAnswers(tokens, noun, adj, number, kase, mode),
+    note: tpl.note,
+    source: { noun, adj },
+    ...caseCard(noun.lemma, kase, number),
+  };
+}
+
+/**
+ * A sentence that can drill one noun in one cell. `needs` is set when only an
+ * adjective shows the number: the plural noun is spelled like the singular in
+ * a frame open to both ("Szukam piekarni"), which buildSession would read as a
+ * singular, but "Szukam dobrych piekarni" is plainly plural.
+ */
+export type CardFrame = { tpl: Template; needs?: Adjective[] };
+
+/** The sentences that can drill one noun in one cell, with words up to `maxLevel`. */
+export function framesForCard(noun: Noun, kase: Case, number: GramNumber, maxLevel?: Level): CardFrame[] {
+  const frames: CardFrame[] = [];
+  for (const tpl of templatesFor(kase, number, maxLevel)) {
+    if (!nounFits(noun, tpl, number, undefined, maxLevel)) continue;
+    if (number === "sg" || tpl.number === "pl" || !looksSingular(tpl, noun, undefined, kase, "nouns")) {
+      frames.push({ tpl });
+      continue;
+    }
+    const needs = adjectivesFor(noun, tpl, maxLevel).filter((a) => !looksSingular(tpl, noun, a, kase, "both"));
+    if (needs.length > 0) frames.push({ tpl, needs });
+  }
+  return frames;
+}
+
+/**
+ * One exercise drilling exactly this noun in this cell (an SRS card), with
+ * sentences and adjectives up to `maxLevel`. In mode "both" it looks for a
+ * sentence where an adjective fits and falls back to the noun alone; a frame
+ * that `needs` an adjective always gets one. Null when no sentence can drill
+ * the cell. It makes its own RNG draws: buildSession is untouched.
+ */
+export function buildCardExercise(
+  noun: Noun,
+  kase: Case,
+  number: GramNumber,
+  mode: "nouns" | "both",
+  rng: () => number,
+  maxLevel?: Level,
+): Exercise | null {
+  const frames = shuffle(framesForCard(noun, kase, number, maxLevel), rng);
+  if (frames.length === 0) return null;
+  let { tpl } = frames[0];
+  let adj = frames[0].needs ? pick(frames[0].needs, rng) : undefined;
+  if (mode === "both" && !adj) {
+    for (const frame of frames) {
+      const adjectives = frame.needs ?? adjectivesFor(noun, frame.tpl, maxLevel);
+      if (adjectives.length === 0) continue;
+      tpl = frame.tpl;
+      adj = pick(adjectives, rng);
+      break;
+    }
+  }
+  const wordMode: WordMode = adj ? "both" : "nouns";
+  const key = `${tpl.pl}|${noun.lemma}|${adj?.lemma ?? ""}|${number}`;
+  return assembleExercise(tpl, noun, adj, number, kase, wordMode, key);
 }
 
 /** Builds a full session, spreading the selected cases evenly. */
