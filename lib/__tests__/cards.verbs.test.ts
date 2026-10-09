@@ -5,7 +5,21 @@ import { grade } from "../grade";
 import { FULL_LEXICON } from "../lexicon";
 import { LEVELS, TENSES } from "../types";
 import type { Config, Exercise, Level } from "../types";
-import { TENSE_LABEL, VERBS, buildVerbCard, buildVerbSession, canDrill, diagnoseVerbMiss, parseVerbCard } from "../verbs";
+import { DRILLS } from "../drills";
+import {
+  SUBJECTS,
+  TENSE_LABEL,
+  VERBS,
+  buildVerbCard,
+  buildVerbSession,
+  canDrill,
+  diagnoseVerbMiss,
+  futureCompound,
+  parseVerbCard,
+  parseVerbSkill,
+  pastForm,
+  withSie,
+} from "../verbs";
 
 const rank = (l: Level) => LEVELS.indexOf(l);
 const SKILL = /^verbs:(present|past|future|futureCompound|imperative)\|[123](sg|pl)$/;
@@ -163,12 +177,46 @@ describe("diagnoseVerbMiss", () => {
     expect(diagnoseVerbMiss("napisali", e)).toBe("person");
     expect(diagnoseVerbMiss("napiszę", e)).toBe("tense");
     expect(diagnoseVerbMiss("piszę", e)).toBe("tense");
-    // a gender slip, a stranger, the answer itself, a diacritics-only miss
-    expect(diagnoseVerbMiss("napisałam", e)).toBeNull();
+    // a stranger, the answer itself, a diacritics-only miss
     expect(diagnoseVerbMiss("czytałem", e)).toBeNull();
     expect(diagnoseVerbMiss("napisałem", e)).toBeNull();
     expect(diagnoseVerbMiss("napisalem", e)).toBeNull();
     expect(diagnoseVerbMiss("", e)).toBeNull();
+  });
+
+  it("past: a gender slip in the right person and number", () => {
+    const m1 = ex("verbs:pisać|past", "verbs:past|1sg", ["napisałem"]);
+    expect(diagnoseVerbMiss("napisałam", m1)).toBe("pastGender");
+    expect(diagnoseVerbMiss("napisalam", m1)).toBe("pastGender");
+    // the other aspect stays "aspect", whatever its gender
+    expect(diagnoseVerbMiss("pisałem", m1)).toBe("aspect");
+    expect(diagnoseVerbMiss("pisałam", m1)).toBe("aspect");
+    // another person is "person", even with a feminine ending
+    expect(diagnoseVerbMiss("napisała", m1)).toBe("person");
+
+    const f1 = ex("verbs:pisać|past", "verbs:past|1sg", ["pisałam"]);
+    expect(diagnoseVerbMiss("pisałem", f1)).toBe("pastGender");
+    expect(diagnoseVerbMiss("pisała", f1)).toBe("person");
+    expect(diagnoseVerbMiss("napisałam", f1)).toBe("aspect");
+
+    expect(diagnoseVerbMiss("pisała", ex("verbs:pisać|past", "verbs:past|3sg", ["pisał"]))).toBe("pastGender");
+    expect(diagnoseVerbMiss("napisałeś", ex("verbs:pisać|past", "verbs:past|2sg", ["napisałaś"]))).toBe("pastGender");
+    const nonvir = ex("verbs:pisać|past", "verbs:past|3pl", ["pisały"]);
+    expect(diagnoseVerbMiss("pisali", nonvir)).toBe("pastGender");
+    expect(diagnoseVerbMiss("pisałyśmy", nonvir)).toBe("person");
+    expect(diagnoseVerbMiss("pisaliśmy", ex("verbs:pisać|past", "verbs:past|1pl", ["pisałyśmy"]))).toBe("pastGender");
+    expect(diagnoseVerbMiss("uczyłam się", ex("verbs:uczyć się|past", "verbs:past|1sg", ["uczyłem się", "się uczyłem"]))).toBe(
+      "pastGender",
+    );
+  });
+
+  it("compound future: a gender slip on the -ł form", () => {
+    const e = ex("verbs:pisać|futureCompound", "verbs:futureCompound|1sg", ["będę pisać", "będę pisał"]);
+    expect(diagnoseVerbMiss("będę pisała", e)).toBe("pastGender");
+    expect(diagnoseVerbMiss("będzie pisała", e)).toBe("person");
+    const vir = ex("verbs:pisać|futureCompound", "verbs:futureCompound|3pl", ["będą pisać", "będą pisali"]);
+    expect(diagnoseVerbMiss("będą pisały", vir)).toBe("pastGender");
+    expect(diagnoseVerbMiss("pisały", vir)).toBe("tense");
   });
 
   it("present and simple future: the other aspect's non-past", () => {
@@ -214,6 +262,83 @@ describe("diagnoseVerbMiss", () => {
     expect(diagnoseVerbMiss("pisałem", { ...e, card: undefined })).toBeNull();
     expect(diagnoseVerbMiss("pisałem", { ...e, card: "verbs:nieistnieć|past" })).toBeNull();
     expect(diagnoseVerbMiss("pisałem", { ...e, skill: "verbs:present|1sg" })).toBeNull();
+  });
+
+  describe("gender slips on real exercises", () => {
+    const config: Config = {
+      kind: "verbs",
+      tenses: ["past", "futureCompound"],
+      cases: ["nom"],
+      numbers: ["sg", "pl"],
+      mode: "nouns",
+      count: 60,
+    };
+    const fromSessions = [1, 2, 3, 4, 5].flatMap((seed) => buildVerbSession(config, seed));
+    const fromCards = DRILLS.verbs.cards
+      .all()
+      .filter((c) => c.id.endsWith("|past") || c.id.endsWith("|futureCompound"))
+      .flatMap((c) => [7, 8].map((seed) => DRILLS.verbs.cards.build(c.id, seed)!));
+    const exercises = [...fromSessions, ...fromCards];
+
+    /** What the learner would type for subject `s`: the -ł form of the past, or będę + -ł. */
+    const typed = (e: Exercise, s: (typeof SUBJECTS)[number], aspect: "impf" | "pf") => {
+      const verb = VERBS.find((v) => v.impf.inf === parseVerbCard(e.card!)!.inf)!;
+      const forms = aspect === "pf" ? verb.pf! : verb.impf;
+      const form =
+        parseVerbCard(e.card!)!.tense === "past"
+          ? pastForm(forms, s.person, s.gender)
+          : futureCompound(forms, s.person, s.number, s.gender)[1];
+      return withSie(verb, form)[0];
+    };
+
+    it("builds both tenses, from sessions and from cards", () => {
+      expect(fromSessions.some((e) => e.card!.endsWith("|past"))).toBe(true);
+      expect(fromSessions.some((e) => e.card!.endsWith("|futureCompound"))).toBe(true);
+      expect(fromCards.length).toBeGreaterThan(100);
+    });
+
+    it("calls the other gender in the right cell pastGender, another cell person", () => {
+      let checked = 0;
+      for (const e of exercises) {
+        const cell = parseVerbSkill(e.skill!)!;
+        const inCell = SUBJECTS.filter((s) => s.person === cell.person && s.number === cell.number);
+        const aspect = (["impf", "pf"] as const).find((a) => {
+          try {
+            return inCell.some((s) => e.answers.includes(typed(e, s, a)));
+          } catch {
+            return false;
+          }
+        })!;
+        expect(aspect, e.id).toBeDefined();
+        const asked = inCell.find((s) => e.answers.includes(typed(e, s, aspect)))!;
+        const slip = inCell.find((s) => s !== asked)!;
+        expect(diagnoseVerbMiss(typed(e, slip, aspect), e), `${e.id}: ${typed(e, slip, aspect)}`).toBe("pastGender");
+        const other = aspect === "pf" ? "impf" : "pf";
+        const verb = VERBS.find((v) => v.impf.inf === parseVerbCard(e.card!)!.inf)!;
+        if (cell.tense === "past" && verb.pf) {
+          expect(diagnoseVerbMiss(typed(e, asked, other), e), e.id).toBe("aspect");
+        }
+        for (const s of SUBJECTS.filter((x) => !inCell.includes(x))) {
+          expect(diagnoseVerbMiss(typed(e, s, aspect), e), `${e.id}: ${typed(e, s, aspect)}`).toBe("person");
+        }
+        for (const answer of e.answers) expect(diagnoseVerbMiss(answer, e)).toBeNull();
+        checked++;
+      }
+      expect(checked).toBe(exercises.length);
+    });
+
+    it("names the gender distractor of multiple-choice exercises", () => {
+      const kinds = new Set(
+        DRILLS.verbs.cards
+          .all()
+          .filter((c) => c.id.endsWith("|past") || c.id.endsWith("|futureCompound"))
+          .flatMap((c) => {
+            const e = DRILLS.verbs.cards.build(c.id, 3, "choice")!;
+            return e.options!.filter((o) => !e.answers.includes(o)).map((o) => diagnoseVerbMiss(o, e));
+          }),
+      );
+      expect(kinds.has("pastGender")).toBe(true);
+    });
   });
 
   it("explains the aspect distractor of real exercises", () => {

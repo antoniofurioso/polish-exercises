@@ -1200,11 +1200,17 @@ function otherAspectForms(verb: Verb, aspect: Aspect, tense: Tense, s: Subject):
  * form of the same verb (diacritics ignored):
  *
  *   aspect  the right person and tense of the other aspect (pisałem for napisałem)
+ *   pastGender  the right verb, aspect, person and number in the past or the
+ *           będę + -ł future, with another gender's ending (pisałam for
+ *           pisałem, pisała for pisał, pisali for pisały, będę pisała for
+ *           będę pisał)
  *   person  the right verb, aspect and tense, another person or number (piszesz for piszę)
  *   tense   the right verb in another tense, either aspect (pisałem for piszę)
  *
- * Anything else, a gender slip in the past included (pisałam for pisałem), is
- * null. The verb and the cell come from the exercise's `card` and `skill`; an
+ * Checked in that order. Gender is only blamed when person and number match:
+ * pisała for pisałam is "person" (a 3sg form). The other aspect in the right
+ * person and number is "aspect" whatever its gender (pisałam for napisałem).
+ * Anything else is null. The verb and the cell come from the exercise's `card` and `skill`; an
  * exercise without them, or whose verb is no longer in `lexicon`, gives null.
  */
 export function diagnoseVerbMiss(
@@ -1232,6 +1238,14 @@ export function diagnoseVerbMiss(
 
   if (SUBJECTS.filter(inCell).some((s) => otherAspectForms(verb, aspect, tense, s).includes(typed))) {
     return "aspect";
+  }
+  // same aspect, person and number, another gender: only the past and the
+  // będę + -ł future mark it (będę + infinitive is shared, so it is an answer)
+  if (
+    (tense === "past" || tense === "futureCompound") &&
+    SUBJECTS.filter(inCell).some((s) => tenseForms(verb, aspect, tense, s).includes(typed))
+  ) {
+    return "pastGender";
   }
   const elsewhere = SUBJECTS.filter((s) => !inCell(s));
   if (elsewhere.some((s) => tenseForms(verb, aspect, tense, s).includes(typed))) return "person";
