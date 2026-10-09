@@ -41,8 +41,15 @@ with its drill.
   easiest frame × noun pair for the cell; verbs = max(verb, tense level: present A1,
   the rest A2); numbers = max(rule level, easiest noun or frame) (`lib/cards/numbers.ts`).
   `build` draws only words and frames at or below the card's own level.
-- Published card counts (up to B2): cases 819, pronouns 60, possessives 460,
-  numbers 56, verbs 158.
+- Published card counts (up to B2): cases 819 (A1 319, A2 414, B1 86), pronouns 60,
+  possessives 460, numbers 56, verbs 158.
+- A cases plural spelled like its singular ("restauracji", gen sg = gen pl) is
+  built in a plural-only sentence or with an adjective that shows the number
+  ("dobrych restauracji"). Only when no sentence can show it does `build` fall
+  back to the sentences that leave it unshown, the way a configured plural-only
+  session asks it (`framesForCard` in `lib/generate.ts`). So every card a
+  configured cases session stamps, under any numbers / mode / genders / level, is
+  in `all()` and builds (swept in `lib/__tests__/cards.agreement.test.ts`).
 - **Every exercise carries `card` and `skill`**, whichever entry point built it
   (configured sessions too), so every answer anywhere feeds the SRS. The golden
   test strips both fields, like it strips lexicon metadata from `source`.
@@ -195,9 +202,6 @@ weak spots listed, no console errors).
 
 - **Tune with real learners** (Phase 3 beta): `newPerDay`, the 70% review share,
   the top-up past `newPerDay` on a first day, and the level-cap thresholds.
-- **A configured plural-only cases session** can produce an exercise whose card
-  is not in `all()` (a plural spelled like the singular). Its answers are logged,
-  but `build` returns null for that card, so it is never scheduled.
 - **Miss kinds for numbers** are only `empty` / `other`. Verbs get aspect,
   person and tense, and past-tense gender slips are now classified as
   `pastGender` (pisałam for pisałem, pisali for pisały, będę pisała for będę

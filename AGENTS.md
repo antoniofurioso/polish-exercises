@@ -172,9 +172,8 @@ Before committing, run test, lint, build, then tsc. All four must be clean.
   for a native speaker's call.
 - **Draft data ships in the JS bundle**, unused. It's harmless, but unreviewed
   words are visible to anyone who reads the bundle.
-- **SRS.** Numbers misses are not classified beyond empty / other, and a
-  plural-only cases session can log a card `all()` does not list (never
-  scheduled). See "Open after Phase 2" in `plans/phase-2.md`.
+- **SRS.** Numbers misses are not classified beyond empty / other. See "Open
+  after Phase 2" in `plans/phase-2.md`.
 - **Pre-rendered audio covers the spelling drill up to 1000.** Above that the
   app falls back to Azure or the browser voice.
 

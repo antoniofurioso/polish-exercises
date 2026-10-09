@@ -342,9 +342,19 @@ function assembleExercise(
  */
 export type CardFrame = { tpl: Template; needs?: Adjective[] };
 
-/** The sentences that can drill one noun in one cell, with words up to `maxLevel`. */
+/**
+ * The sentences that can drill one noun in one cell, with words up to `maxLevel`.
+ *
+ * A plural spelled like the singular is drilled where something shows the
+ * number (a plural-only sentence, or an adjective that differs). Only when no
+ * sentence can do that does it fall back to the frames that leave the number
+ * unshown, as they are: a configured session with only the plural selected
+ * asks the plural that way ("Szukam piekarni" read as plural), and the card it
+ * stamps must still be one the scheduler can list and build.
+ */
 export function framesForCard(noun: Noun, kase: Case, number: GramNumber, maxLevel?: Level): CardFrame[] {
   const frames: CardFrame[] = [];
+  const unshown: CardFrame[] = [];
   for (const tpl of templatesFor(kase, number, maxLevel)) {
     if (!nounFits(noun, tpl, number, undefined, maxLevel)) continue;
     if (number === "sg" || tpl.number === "pl" || !looksSingular(tpl, noun, undefined, kase, "nouns")) {
@@ -353,8 +363,9 @@ export function framesForCard(noun: Noun, kase: Case, number: GramNumber, maxLev
     }
     const needs = adjectivesFor(noun, tpl, maxLevel).filter((a) => !looksSingular(tpl, noun, a, kase, "both"));
     if (needs.length > 0) frames.push({ tpl, needs });
+    else unshown.push({ tpl });
   }
-  return frames;
+  return frames.length > 0 ? frames : unshown;
 }
 
 /**

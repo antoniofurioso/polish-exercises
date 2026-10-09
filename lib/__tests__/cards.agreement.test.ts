@@ -4,12 +4,13 @@ import { possessivesCards } from "../cards/possessives";
 import { pronounsCards } from "../cards/pronouns";
 import type { CardSource } from "../cards";
 import { DRILLS } from "../drills";
-import { buildSession } from "../generate";
+import { buildCardExercise, buildSession, caseCard, framesForCard, makeRng, nounsFor } from "../generate";
 import { NOUNS } from "../nouns";
 import { buildPossessiveSession } from "../possessives";
 import { buildPronounSession } from "../pronouns";
-import { CASES, LEVELS, POSSESSIVE_CASES, PRONOUN_CASES, withinLevel } from "../types";
-import type { Config } from "../types";
+import { TEMPLATES } from "../templates";
+import { CASES, GENDER_GROUPS, LEVELS, POSSESSIVE_CASES, PRONOUN_CASES, withinLevel } from "../types";
+import type { Config, GenderGroup, GramNumber, Level, WordMode } from "../types";
 
 /** Card sources of the cases, pronoun and possessive drills (plans/phase-2.md §1–2). */
 const SOURCES: Record<string, CardSource> = {
@@ -175,5 +176,69 @@ describe("configured sessions carry card and skill", () => {
         expect(ids.has(ex.card!), ex.card).toBe(true);
       }
     }
+  });
+});
+
+describe("every card a configured cases session stamps is listed and builds", () => {
+  const ids = new Set(casesCards.all().map((c) => c.id));
+
+  it("for every noun in every sentence that can take it, in either number", () => {
+    // the whole space buildExercise picks from: templatesFor × nounsFor, with no caps
+    for (const tpl of TEMPLATES) {
+      for (const number of ["sg", "pl"] as const) {
+        if (tpl.number !== "any" && tpl.number !== number) continue;
+        for (const noun of nounsFor(tpl, number)) {
+          const { card } = caseCard(noun.lemma, tpl.case, number);
+          expect(ids.has(card), card).toBe(true);
+        }
+      }
+    }
+  });
+
+  it("over every number, mode, gender and level choice", () => {
+    const numberSets: GramNumber[][] = [["sg"], ["pl"], ["sg", "pl"]];
+    const modes: WordMode[] = ["nouns", "adjectives", "both"];
+    const genderSets: (GenderGroup[] | undefined)[] = [undefined, ...GENDER_GROUPS.map((g) => [g])];
+    const levels: (Level | undefined)[] = [undefined, ...LEVELS];
+    const stamped = new Map<string, number>();
+    // 300 seeds per number set × mode; gender and level take turns, 15 seeds per pairing
+    for (let seed = 1; seed <= 300; seed++) {
+      const genders = genderSets[seed % genderSets.length];
+      const maxLevel = levels[Math.floor(seed / genderSets.length) % levels.length];
+      for (const numbers of numberSets) {
+        for (const mode of modes) {
+          const config: Config = { cases: [...CASES], numbers, mode, genders, maxLevel, count: 7 };
+          for (const ex of buildSession(config, seed)) {
+            expect(numbers).toContain(ex.number);
+            if (!stamped.has(ex.card!)) stamped.set(ex.card!, seed);
+          }
+        }
+      }
+    }
+    expect([...stamped.keys()].some((c) => c.endsWith("|pl"))).toBe(true);
+    // a card the scheduler cannot list or build would be logged but never scheduled
+    for (const [card, seed] of stamped) {
+      expect(ids.has(card), card).toBe(true);
+      const ex = casesCards.build(card, seed);
+      expect(ex, card).not.toBeNull();
+      expect(ex!.card).toBe(card);
+    }
+  });
+
+  it("fall back to sentences that leave the number unshown when nothing can show it", () => {
+    // restauracja under a lemma with no collocations: "restauracji" is gen sg and gen pl,
+    // and no adjective is left to tell them apart
+    const real = NOUNS.find((n) => n.lemma === "restauracja")!;
+    const bare = { ...real, lemma: "restauracja-bez-przymiotnikow" };
+    const frames = framesForCard(bare, "gen", "pl");
+    expect(frames.length).toBeGreaterThan(0);
+    expect(frames.every((f) => !f.needs)).toBe(true);
+    for (const mode of ["nouns", "both"] as const) {
+      const ex = buildCardExercise(bare, "gen", "pl", mode, makeRng(1))!;
+      expect(ex.card).toBe("cases:restauracja-bez-przymiotnikow|gen|pl");
+      expect(ex.answers[0]).toBe("restauracji");
+    }
+    // a noun with an adjective to show the number keeps only the frames that show it
+    expect(framesForCard(real, "gen", "pl").every((f) => f.tpl.number === "pl" || f.needs)).toBe(true);
   });
 });

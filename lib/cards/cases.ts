@@ -13,7 +13,10 @@ import type { Case, GramNumber, Level } from "../types";
  *
  * A card exists for every case and number a published sentence can drill the
  * noun in (no plural for noPlural / onlySg / mass nouns, and a plural spelled
- * like the singular only where an adjective shows the number). Its level is
+ * like the singular where an adjective shows the number, or, when nothing can
+ * show it, in the sentences a plural-only configured session asks it in: see
+ * framesForCard). So every card a configured session stamps is listed here and
+ * builds. Its level is
  * the higher of the noun's and the easiest such sentence's, and `build` stays
  * at that level: an A1 card is drilled with A1 sentences, on the noun alone;
  * from A2 up an adjective that collocates with the noun rides along ("both"
