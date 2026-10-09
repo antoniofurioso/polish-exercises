@@ -3,6 +3,7 @@
  * browser's speech synthesis. Everything browser-specific comes in through
  * `SpeakerEnv`, so the selection and fallback rules run in plain Node tests.
  */
+import { ttsSrc } from "./ttsUrl";
 
 /** The parts of HTMLAudioElement the speaker drives. */
 export interface AudioLike {
@@ -16,6 +17,11 @@ export interface AudioLike {
 export interface SpeakerEnv {
   /** Base URL of the TTS Worker; undefined/empty means browser speech only. */
   ttsUrl: string | undefined;
+  /**
+   * The voice to ask the Worker for (`NEXT_PUBLIC_TTS_VOICE`): an Azure voice
+   * or the label of a pre-rendered one. Unset means the Worker's default.
+   */
+  ttsVoice?: string;
   /** The browser's speech engine, or null where there is none. */
   synth(): SpeechSynthesis | null;
   /** A fresh audio element, or null where there is no Audio. */
@@ -32,11 +38,7 @@ export interface Speaker {
   available(): boolean;
 }
 
-/** The Worker URL for a sentence (same spacing rules as the Worker's cache key). */
-export function ttsSrc(base: string, text: string): string {
-  const sentence = text.replace(/\s+/g, " ").trim();
-  return `${base.replace(/\/+$/, "")}/tts?text=${encodeURIComponent(sentence)}`;
-}
+export { ttsSrc };
 
 export function createSpeaker(env: SpeakerEnv): Speaker {
   let audio: AudioLike | null = null;
@@ -95,7 +97,7 @@ export function createSpeaker(env: SpeakerEnv): Speaker {
     try {
       // a network error, a 4xx/5xx or an undecodable body all land here
       el.onerror = fallBack;
-      el.src = ttsSrc(env.ttsUrl, text);
+      el.src = ttsSrc(env.ttsUrl, text, env.ttsVoice);
       // rejects on autoplay refusal too; an abort from stop() is ignored above
       el.play().catch(fallBack);
     } catch {

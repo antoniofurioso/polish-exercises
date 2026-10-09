@@ -1,4 +1,11 @@
-/** Polish neural voices the Worker will synthesise with. */
+/**
+ * The rules a sentence goes through before it becomes a clip. This file is the
+ * single source of truth for the Worker and for the pre-render scripts in
+ * scripts/audio/ (which import it), so a pre-rendered clip lands under exactly
+ * the R2 key the Worker looks up.
+ */
+
+/** Polish Azure neural voices the Worker can synthesise with on a miss. */
 export const VOICES = [
   "pl-PL-ZofiaNeural",
   "pl-PL-MarekNeural",
@@ -11,6 +18,19 @@ export const DEFAULT_VOICE: Voice = "pl-PL-ZofiaNeural";
 
 export const MAX_TEXT_LENGTH = 300;
 
+/** What Azure is asked for: 24 kHz, 48 kbit/s mono MP3. Other engines' clips are encoded to match. */
+export const AZURE_OUTPUT_FORMAT = "audio-24khz-48kbitrate-mono-mp3";
+export const MP3_SAMPLE_RATE = 24000;
+export const MP3_BITRATE = "48k";
+
+/** Every clip is immutable: its name is the hash of what it says. */
+export const AUDIO_CACHE_CONTROL = "public, max-age=31536000, immutable";
+
+/** The Azure Neural TTS REST endpoint for a Speech resource's region. */
+export function azureEndpoint(region: string): string {
+  return `https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`;
+}
+
 /**
  * Letters (ASCII, Latin-1 and Latin Extended-A, which covers every Polish
  * diacritic), digits, spaces and basic sentence punctuation. Anything else
@@ -18,13 +38,29 @@ export const MAX_TEXT_LENGTH = 300;
  */
 const ALLOWED_TEXT = /^[A-Za-zÀ-ÖØ-öø-ſ0-9 .,!?;:'"…\-–—„”“()]+$/;
 
+/**
+ * A voice label for clips pre-rendered by another engine (e.g.
+ * `piper-pl-gosia`). It becomes a path segment in R2 and on disk, so only
+ * letters, digits and dashes, at most 64 of them.
+ */
+export const VOICE_LABEL = /^[A-Za-z0-9][A-Za-z0-9-]{0,63}$/;
+
 /** One canonical form per sentence, so equal sentences share one cache entry. */
 export function normaliseText(text: string): string {
   return text.normalize("NFC").replace(/\s+/g, " ").trim();
 }
 
+/** An Azure voice: one the Worker can synthesise with. */
 export function isVoice(voice: string): voice is Voice {
   return (VOICES as readonly string[]).includes(voice);
+}
+
+/** The well-formed labels in a comma-separated list (the Worker's `EXTRA_VOICES`). */
+export function parseVoiceList(list: string | undefined): string[] {
+  return (list ?? "")
+    .split(",")
+    .map((v) => v.trim())
+    .filter((v) => VOICE_LABEL.test(v));
 }
 
 /** Returns why the (normalised) text is refused, or null when it is fine. */
@@ -58,12 +94,19 @@ export function ssml(text: string, voice: Voice): string {
   );
 }
 
-/** Hex SHA-256 of voice + "\n" + text: the R2 object name. */
-export async function audioKey(voice: Voice, text: string): Promise<string> {
+/** Hex SHA-256 of voice + "\n" + (normalised) text. */
+export async function audioHash(voice: string, text: string): Promise<string> {
   const bytes = new TextEncoder().encode(`${voice}\n${text}`);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
-  const hex = [...new Uint8Array(digest)]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-  return `audio/${voice}/${hex}.mp3`;
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** The R2 object name for a clip: `audio/<voice>/<hash>.mp3`. */
+export function audioPath(voice: string, hash: string): string {
+  return `audio/${voice}/${hash}.mp3`;
+}
+
+/** The R2 object name for a (normalised) sentence in a voice. */
+export async function audioKey(voice: string, text: string): Promise<string> {
+  return audioPath(voice, await audioHash(voice, text));
 }

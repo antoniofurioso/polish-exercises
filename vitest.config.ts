@@ -17,7 +17,7 @@ export default defineConfig({
       {
         test: {
           name: "published",
-          include: ["lib/__tests__/**/*.test.ts"],
+          include: ["lib/__tests__/**/*.test.ts", "scripts/**/*.test.ts"],
           env: { NEXT_PUBLIC_INCLUDE_DRAFTS: "" },
         },
       },

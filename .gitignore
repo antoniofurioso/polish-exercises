@@ -45,3 +45,8 @@ next-env.d.ts
 
 # review sheets (npm run review:export) are working files
 /review/*.csv
+
+# pre-rendered audio (npm run audio:render / audio:upload) are working files;
+# audio/manifest.jsonl is committed
+/audio/out/
+/audio/uploaded.txt

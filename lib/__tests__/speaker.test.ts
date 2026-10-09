@@ -49,6 +49,9 @@ describe("ttsSrc", () => {
     expect(ttsSrc("https://tts.example", "Żółw")).toBe(
       "https://tts.example/tts?text=%C5%BB%C3%B3%C5%82w",
     );
+    expect(ttsSrc("https://tts.example", "Kot.", "pl-PL-MarekNeural")).toBe(
+      "https://tts.example/tts?text=Kot.&voice=pl-PL-MarekNeural",
+    );
   });
 });
 
@@ -87,6 +90,19 @@ describe("speaker with a TTS URL", () => {
     expect(audios[0].play).toHaveBeenCalledTimes(2);
     expect(audios[0].pause).toHaveBeenCalled(); // the first clip was stopped
     expect(synthSpeak).not.toHaveBeenCalled();
+  });
+
+  it("asks for NEXT_PUBLIC_TTS_VOICE when one is set", () => {
+    const { speaker, audios } = setup({ ttsVoice: "piper-pl-gosia" });
+    speaker.speak("Mam kota.");
+    expect(audios[0].src).toBe("https://tts.example/tts?text=Mam%20kota.&voice=piper-pl-gosia");
+  });
+
+  it("falls back on a 404 for a sentence that was never pre-rendered", () => {
+    const { speaker, audios, synthSpeak } = setup({ ttsVoice: "piper-pl-gosia" });
+    speaker.speak("Mam kota.");
+    audios[0].fail(); // the element's error event: the Worker answered 404
+    expect(synthSpeak).toHaveBeenCalledTimes(1);
   });
 
   it("is available with audio even without speech synthesis", () => {
