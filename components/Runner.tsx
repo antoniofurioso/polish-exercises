@@ -1,13 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ExerciseCard } from "@/components/ExerciseCard";
 import { ResultsSummary, type Result } from "@/components/ResultsSummary";
+import { track, trackGoal, type Source } from "@/lib/analytics";
 import { grade, type Verdict } from "@/lib/grade";
+import { streak, todayCount } from "@/lib/progress";
 import { playFinish, playVerdict } from "@/lib/sound";
 import { stopSpeaking } from "@/lib/speak";
-import { recordAnswer, setSoundOn, useSoundOn } from "@/lib/storage";
+import { dayKey } from "@/lib/srs";
+import { readProgress, readSettings, recordAnswer, setSoundOn, useSoundOn } from "@/lib/storage";
 import type { Exercise, ExerciseKind } from "@/lib/types";
 
 /**
@@ -24,6 +27,7 @@ export function Runner({
   homeLabel,
   reaskWrong = false,
   summaryExtra,
+  source = "practice",
 }: {
   exercises: Exercise[];
   /** Recorded for exercises that do not name their own drill. */
@@ -37,6 +41,8 @@ export function Runner({
   reaskWrong?: boolean;
   /** Rendered above the results, e.g. the streak and goal after today's practice. */
   summaryExtra?: ReactNode;
+  /** Where the session came from, for analytics only. */
+  source?: Source;
 }) {
   const [exercises, setExercises] = useState<Exercise[]>(initial);
   /** Indexes of exercises that are a re-ask: answered and recorded, but not scored twice. */
@@ -51,6 +57,14 @@ export function Runner({
   const exercise = exercises[index];
   const score = results.filter((r) => r.verdict === "correct").length;
 
+  // analytics (lib/analytics.ts): a no-op without a key and consent
+  const started = useRef(false);
+  useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    track("session_started", { source, drill: kind, size: initial.length });
+  }, [source, kind, initial.length]);
+
   const submit = (answer: string = value) => {
     if (!exercise) return;
     if (verdict === null) {
@@ -64,6 +78,18 @@ export function Runner({
         setExercises((list) => [...list, exercise]);
       }
       recordAnswer(exercise, exercise.kind ?? kind, result, answer);
+      track("answer", { drill: exercise.kind ?? kind, verdict: result });
+      trackGoal(() => {
+        const now = Date.now();
+        const progress = readProgress();
+        const goal = readSettings().goal;
+        return {
+          answered: todayCount(progress, now).answered,
+          goal,
+          streak: streak(progress, goal, now).current,
+          today: dayKey(now),
+        };
+      });
       if (soundOn) playVerdict(result);
       return;
     }
@@ -72,6 +98,7 @@ export function Runner({
     stopSpeaking();
     if (index + 1 >= exercises.length) {
       setDone(true);
+      track("session_finished", { source, size: results.length, correct: score });
       if (soundOn) playFinish();
     } else {
       setIndex(index + 1);
@@ -81,6 +108,7 @@ export function Runner({
   const retryMissed = () => {
     const missed = results.filter((r) => r.verdict !== "correct").map((r) => r.exercise);
     if (missed.length === 0) return;
+    track("session_started", { source, drill: kind, size: missed.length });
     setExercises(missed);
     setReasks(new Set());
     setResults([]);

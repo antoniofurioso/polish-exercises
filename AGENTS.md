@@ -62,7 +62,10 @@ Delete anything the change made untrue.
 | `app/progress/` | Streak, today's goal ring, the last 28 days, weak spots (each linking to a configured `/practice` session) and the goal / new-per-day settings |
 | `app/<drill>/page.tsx` | One configurator per drill (cases, pronouns, possessives, numbers, verbs, shuffle). They write the session URL |
 | `app/practice/` | Reads the URL, builds the session and hands it to `Runner` |
-| `components/` | `Runner` (runs a prebuilt `Exercise[]`, grades, records every answer; shared by `/practice` and `/today`), `ExerciseCard` (one question, speech, keyboard), `ResultsSummary`, `TodayButton`, `today` (`useTodayStatus`, `useNow`, `GoalRing`, `GoalStatus`), `ui` |
+| `app/privacy/` | Privacy policy (draft for the owner), consent toggle (`ConsentChoice`), "Delete my data from this device" (`ClearLocalData`: every `polish.*` key) |
+| `lib/analytics.ts` | Analytics (plans/phase-3.md §4): `track(event, props)` is a no-op unless `NEXT_PUBLIC_POSTHOG_KEY` is set and `polish.consent.v1` is `granted`; `EVENT_SCHEMA` lets only enum values and counts through; `nextConsent` state machine; posthog-js is `import()`ed only after consent (EU host). Imports no runtime code but `lib/types`, since every page loads it |
+| `components/Analytics.tsx`, `components/ConsentBanner.tsx` | Mounted in the layout: start PostHog after an earlier consent, `pwa_installed` (`appinstalled` or the `pwa-installed` window event), the banner (only with a key and no choice yet) |
+| `components/` | `Runner` (runs a prebuilt `Exercise[]`, grades, records every answer and sends the analytics events; shared by `/practice` and `/today`, which passes `source="today"`), `ExerciseCard` (one question, speech, keyboard), `ResultsSummary`, `TodayButton`, `today` (`useTodayStatus`, `useNow`, `GoalRing`, `GoalStatus`), `ui` |
 | `lib/storage.ts` | localStorage: configs, sound, the v2 log / progress / settings hooks (`useProgress`, `useSettings`, `recordAnswer`…), v1 migration, compaction past 20,000 events |
 | `lib/progressView.ts` | Pure helpers for the progress UI: `MISS_LABELS` (miss kind → English), `skillConfig` / `skillHref` (weak skill → configured session), `lastDays`, `dueCount`, `safely` |
 | `lib/missKind.ts` | `missKindOf(input, exercise)`: the `MissKind` logged with a wrong answer (`diagnoseVerbMiss` for verbs, `diagnoseNumberMiss` for numbers, then `diagnoseMiss`) |
@@ -147,6 +150,12 @@ Delete anything the change made untrue.
 10. **Icons are generated.** Don't edit the PNGs or `app/favicon.ico` by hand:
    change `public/brand/icon.svg` (or `BRAND.name` / `--accent` while the
    placeholder monogram is in use) and run `npm run icons`.
+11. **Analytics carry no free text.** A new event or prop goes into
+   `EventProps` and `EVENT_SCHEMA` in `lib/analytics.ts` (enum values or counts
+   only), the event table in `README.md` and, if it changes what is collected,
+   the privacy policy (`app/privacy/page.tsx`, with a new date). Nothing from
+   PostHog may load or be stored before consent; keep `lib/analytics.ts` free
+   of the lexicon and progress imports (it is on every page).
 
 ## Commands
 
