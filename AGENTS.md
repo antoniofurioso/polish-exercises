@@ -223,5 +223,7 @@ See `plans/ROADMAP.md`.
 - **Phase 2 (retention) code is done:** SRS cards for every drill, the v2
   answer log, `/today` and `/progress`. Spec, decisions and open points are in
   `plans/phase-2.md`.
-- **Phase 3 (ship the web app) is in progress:** spec in `plans/phase-3.md`.
-  The product name is not chosen yet; it lives only in `lib/brand.ts`.
+- **Phase 3 (ship the web app): code done** (landing page, topic pages, PWA and
+  offline, PostHog after consent, `/privacy`). Waiting on the owner: the name
+  (research in `plans/naming.md`; it lives only in `lib/brand.ts`), contact
+  email, PostHog key, domain and the beta. See `plans/phase-3.md`.

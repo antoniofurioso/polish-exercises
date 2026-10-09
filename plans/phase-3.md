@@ -1,6 +1,6 @@
 # Phase 3: Ship the web version
 
-Status: ◐ in progress. Goal: a public site that real learners can install, use
+Status: ◐ code done; waiting on the owner (name, email, PostHog key, domain, beta). Goal: a public site that real learners can install, use
 offline and come back to, plus the measurement to tell whether they do.
 
 ## Decisions so far
@@ -96,9 +96,33 @@ name and domain exist.
 
 ## Done when
 
-- [ ] The name is chosen and in `lib/brand.ts`, with icons.
-- [ ] The app installs on Android and iOS and runs a session offline.
-- [ ] `/` explains the app and gets a new visitor into a session in one click.
-- [ ] Analytics run only after consent, and day-7 retention can be read in PostHog.
-- [ ] `/privacy` is complete apart from the contact email.
-- [ ] All gates green; Lighthouse PWA and SEO checks pass on the built site.
+- [ ] The name is chosen and in `lib/brand.ts`, with icons. **Owner:** pick from
+  [naming.md](./naming.md) and check the domains; then edit `lib/brand.ts`, run
+  `npm run icons`, and apply the colours.
+- [x] The app installs and runs a session offline: manifest, icons and the service
+  worker checked in Chromium with the server stopped (pages, a practice answer,
+  `/today`, cached audio). Not yet tried on a real Android or iOS phone.
+- [x] `/` explains the app and gets a new visitor into a session in one click.
+- [x] Analytics run only after consent (checked with every PostHog request
+  intercepted); day-7 retention is a Retention insight on `session_started`
+  (README "Analytics and privacy"). **Owner:** EU project, key, IP discarding,
+  12-month retention, DPA.
+- [x] `/privacy` is complete apart from the contact email (`NEXT_PUBLIC_CONTACT_EMAIL`).
+- [x] All gates green. Lighthouse 12 (which no longer has a PWA category) gives
+  100 for accessibility, best practices and SEO on `/`, `/learn`, a topic page and
+  `/privacy`; performance 74–76 on a local server.
+
+## Left for the owner
+
+1. Choose the name, buy the domain, set `NEXT_PUBLIC_SITE_URL` (turns on the sitemap
+   and canonical URLs).
+2. Create the contact email, set `NEXT_PUBLIC_CONTACT_EMAIL`, review `/privacy`.
+3. PostHog EU project and `NEXT_PUBLIC_POSTHOG_KEY` in the Cloudflare Pages build
+   (build command `npm run build`, output `out`).
+4. Recruit the beta (posts in `plans/beta-posts.md` once name and domain exist).
+
+## Known gaps
+
+- The drill configurator pages are client components and keep the default title.
+- Polish words inside English prose on the landing page and drill blurbs lack
+  `lang="pl"`.

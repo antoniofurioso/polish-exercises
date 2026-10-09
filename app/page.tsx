@@ -132,7 +132,8 @@ export default function LandingPage() {
           </ul>
         </section>
 
-        <section className="mt-14 rounded-2xl bg-accent-soft p-6 sm:p-8">
+        {/* muted grey is too faint on the pink panel (WCAG AA): darken it here */}
+        <section className="mt-14 rounded-2xl bg-accent-soft p-6 sm:p-8 [&_.text-muted]:text-foreground/80">
           <h2 className="text-2xl font-semibold">Ten minutes a day is enough</h2>
           <p className="mt-2 text-muted">Start with today’s practice: it picks the questions for you.</p>
           <StartButton className="mt-5" />
