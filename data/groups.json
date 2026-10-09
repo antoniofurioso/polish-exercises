@@ -13,5 +13,6 @@
   "meals": ["śniadanie", "obiad", "kolacja"],
   "womenAtWork": ["nauczycielka", "lekarka", "pielęgniarka"],
   "kin": ["ciocia", "wujek", "kuzyn", "wnuk", "wnuczka"],
-  "notThis": ["literatura", "matematyka", "chemia", "geografia", "filozofia", "moda", "architektura", "psychologia", "gospodarka", "prawda", "szczęście", "zdrowie", "wolność", "przyjaźń", "nadzieja", "sprawiedliwość", "odpowiedzialność", "społeczeństwo", "środowisko", "brzuch", "gardło", "ucho", "nos", "palec", "kolano", "ramię", "stopa", "kręgosłup", "godzina", "minuta", "lato", "zima", "wiosna", "jesień"]
+  "notThis": ["literatura", "matematyka", "chemia", "geografia", "filozofia", "moda", "architektura", "psychologia", "gospodarka", "prawda", "szczęście", "zdrowie", "wolność", "przyjaźń", "nadzieja", "sprawiedliwość", "odpowiedzialność", "społeczeństwo", "środowisko", "brzuch", "gardło", "ucho", "nos", "palec", "kolano", "ramię", "stopa", "kręgosłup", "godzina", "minuta", "lato", "zima", "wiosna", "jesień"],
+  "collective": ["dziecko"]
 }

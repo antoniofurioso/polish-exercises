@@ -198,8 +198,8 @@ weak spots listed, no console errors).
 - **A configured plural-only cases session** can produce an exercise whose card
   is not in `all()` (a plural spelled like the singular). Its answers are logged,
   but `build` returns null for that card, so it is never scheduled.
-- **Miss kinds for numbers** are only `empty` / `other`; verbs get aspect, person
-  and tense; a past-tense gender slip (pisałam for pisałem) is not classified.
-- **"dwa / cztery dzieci"** in the count drill: Polish wants "dwoje / czworo
-  dzieci". Pre-existing; the numbers cards can show it more often. Needs a
-  native speaker's call or a frame exclusion.
+- **Miss kinds for numbers**: `diagnoseNumberMiss` (`lib/diagnoseNumbers.ts`)
+  classifies them (government, numeralForm, typo, ending, wordCount) but is not
+  yet called from `missKindOf`, so the log still says `empty` / `other`. Verbs
+  get aspect, person and tense; a past-tense gender slip (pisałam for pisałem)
+  is not classified.

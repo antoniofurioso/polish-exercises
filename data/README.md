@@ -277,6 +277,7 @@ refer to another group.
 | `@meals` | `lemmas` | Meals, which take no article in English: "before dinner", "after breakfast". |
 | `@womenAtWork` | `lemmas` | Feminine job titles, tagged `person` rather than `profession`: "Ona jest lekarką". |
 | `@kin` | `excludeLemmas` | Count / numeral frames: relatives nobody has dozens of ("pięćdziesiąt dwie wnuczki", "dziewięćdziesiąt cioć"). |
+| `@collective` | `excludeLemmas` | Every count and numeral frame: nouns counted with a collective numeral ("dwoje / pięcioro dzieci", never "dwa dzieci"), which the app does not generate. The frames cannot exclude by number, so "jedno dziecko" goes too. Only dziecko so far; pluralia tantum (drzwi, spodnie) would belong here if they were ever counted. |
 | `@notThis` | `excludeLemmas` | "To jest ..." / "Czy to są ...": fields and ideas ("To jest prawda" means "that's true"), body parts ("This is a left shoulder"), hours and minutes ("To jest minuta") and the seasons (they have "Już jest ..."). |
 
 Groups work the same way in the three frame files below.
@@ -317,13 +318,14 @@ The sentences of the counting drill ("Mam pięć kotów").
 | `pl` | yes | Polish with `{N}` for the numeral and `{NP}` for the counted noun; `{V}` becomes "jest" or "są". |
 | `en` | yes | English with `{np}` for the counted phrase ("five cats"); `{is}` becomes "is" or "are". |
 | `case` | yes | The case the frame itself assigns, `nom` or `acc`: it only shows with "jeden". |
-| `requires`, `lemmas`, `excludeLemmas` | `requires` only | Which nouns fit, as in `templates.json`. A `mass` noun fits only with `portions` or when `lemmas` names it. |
+| `requires`, `lemmas`, `excludeLemmas` | `requires` only | Which nouns fit, as in `templates.json`. A `mass` noun fits only with `portions` or when `lemmas` names it. Every frame excludes `@collective`. |
 
 ## numeral-frames.json
 
 The numeral drill's one sentence per case, keyed by case: `{ "gen": { ... } }`.
 Each has `pl` (with `{NP}` for numeral + noun, `{V}` for "jest" / "są" and
-`{z}` for the preposition), `en` (`{np}`, `{is}`) and the same noun filter.
+`{z}` for the preposition), `en` (`{np}`, `{is}`) and the same noun filter,
+`@collective` excluded in every case.
 The drill asks for `nom` to `loc`; `voc` is there for completeness and never
 drawn. A case whose frame is a draft has no numeral question until it is
 approved.

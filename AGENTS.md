@@ -72,6 +72,7 @@ Delete anything the change made untrue.
 | `lib/generate.ts` | Case drill: template + fitting noun + adjective → exercise. Also `article()`, `resolvePrep()` (z/ze, w/we), `renderPrompt`, `renderSolution` |
 | `lib/pronouns.ts`, `lib/possessives.ts`, `lib/agreement.ts` | Demonstrative and possessive drills, sharing the agreement frames |
 | `lib/numerals.ts`, `lib/numbers.ts` | Numeral grammar, and the four number drills (count, numeral form, spelling, ordinals/dates/time). `numbers.ts` also tags each exercise with its SRS card and builds one exercise per card (`buildNumberCard`) |
+| `lib/diagnoseNumbers.ts` | `diagnoseNumberMiss(input, exercise)`: the `MissKind` of a wrong numbers answer, from its card: `government` (counted noun in the wrong form), `numeralForm` (numeral or ordinal in the wrong gender / case), `typo`, `ending`, `wordCount`, `empty`; null leaves it to `diagnoseMiss` |
 | `lib/cards/numbers.ts` | The numbers `CardSource` (Phase 2): card id scheme, levels, introduction order, skill labels |
 | `lib/verbs.ts` | Verb conjugation from principal parts, the five tenses, time frames, English verb morphology. Also the verbs card / skill ids stamped on every exercise, `buildVerbCard` (one exercise for one verb × tense) and `diagnoseVerbMiss` (aspect, person, tense) |
 | `lib/cards/verbs.ts` | Verbs `CardSource`: one card per drillable verb × tense, `TENSE_LEVEL` (present A1, the rest A2), `skillLabel` |
@@ -172,9 +173,13 @@ Before committing, run test, lint, build, then tsc. All four must be clean.
   for a native speaker's call.
 - **Draft data ships in the JS bundle**, unused. It's harmless, but unreviewed
   words are visible to anyone who reads the bundle.
-- **SRS.** Numbers misses are not classified beyond empty / other, and a
+- **SRS.** `diagnoseNumberMiss` (`lib/diagnoseNumbers.ts`) is not wired into
+  `missKindOf` yet, so numbers misses are still logged as empty / other; and a
   plural-only cases session can log a card `all()` does not list (never
   scheduled). See "Open after Phase 2" in `plans/phase-2.md`.
+- **No collective numerals** (dwoje, pięcioro). Nouns that need them (the
+  `@collective` group: dziecko) are kept out of the count and numeral drills
+  altogether, "jedno dziecko" included.
 - **Pre-rendered audio covers the spelling drill up to 1000.** Above that the
   app falls back to Azure or the browser voice.
 
