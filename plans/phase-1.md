@@ -3,12 +3,48 @@
 Grow the lexicon 2–4× and replace the device voice with natural audio.
 Baseline after Phase 0: 125 nouns, 74 adjectives, 32 verb pairs, 142 case templates.
 
-| | Today | Target |
-| --- | --- | --- |
-| Nouns | 125 | 300 |
-| Adjectives | 74 | 150 |
-| Verb pairs | 32 | 120 |
-| Case templates | 142 | 300 |
+| | Phase 0 | Target | Now (incl. drafts) |
+| --- | --- | --- | --- |
+| Nouns | 125 | 300 | 306 (181 drafts) |
+| Adjectives | 74 | 150 | 150 (76 drafts) |
+| Verbs | 32 pairs | 120 | 139 (107 drafts) |
+| Case templates | 142 | 300 | 319 (177 drafts) |
+
+## Status
+
+**Code: done.** All tasks below are ☑. Beyond the original plan, this phase also
+delivered:
+
+- **A verb generator fix:** imperfective-only verbs (`pf` optional) and the
+  `indeterminate`, `stative` and `orders` flags; English 3rd-person -s/-es/-ies
+  and "be + adjective" bases. 19 high-frequency verbs were added (chodzić,
+  mieszkać, wiedzieć, lubić…).
+- **A cleanup pass:**
+  - noun fields `noPossessive`, `portions` and `article` ("none" / "the");
+  - frames honoured in the ordinal and count drills; mass nouns are not counted;
+  - English articles chosen by sound ("a young", "an hour");
+  - "z", not "ze", before "sz" + vowel.
+  The golden snapshot changed only for these corrections; every changed line is
+  listed in its commit.
+
+**Waiting on the user, not on code:**
+
+1. **Native review.** `npm run review:export` writes `review/pending.csv` (541
+   rows). The reviewer fills `verdict` and `correction`, then
+   `npm run review:import review/pending.csv` applies the verdicts. In the same
+   commit, update the golden snapshot and run `npm run audio:manifest`.
+   - **Also for the reviewer:** odd verb frames ("codziennie będziemy wynajmować
+     mieszkanie", "Nie dziękuj sąsiadowi!"), "mały" glossed as "small" for
+     relatives, "ze" before w + consonant, and the `noPossessive` / `portions`
+     choices.
+   - **Adjectives with no example sentence:** psi, koci, bezpośredni and wrogi
+     have no noun that collocates with them.
+2. **Audio.**
+   - Choose an engine: Azure, a one-off batch of about 1.4M characters; Piper,
+     after checking the Polish voice's licence for commercial use; or `cmd` for
+     any local tool.
+   - Render, upload to R2, deploy `workers/tts`, and set `NEXT_PUBLIC_TTS_URL`.
+   - Steps are in the README "Audio" section and `workers/tts/README.md`.
 
 ## Ground rules for every content agent
 

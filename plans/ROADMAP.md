@@ -9,14 +9,19 @@ Status key: ☐ todo · ◐ in progress · ☑ done
 | Phase | Theme | Size | Status |
 | --- | --- | --- | --- |
 | 0 | Groundwork: registry, data files, levels, content gate | ~1 week | ☑ — see [phase-0.md](./phase-0.md) |
-| 1 | Content ×2–4 and natural audio | 3–5 weeks | ◐ — see [phase-1.md](./phase-1.md) |
-| 2 | Retention: SRS, "today's practice", streaks | 2–3 weeks | ☐ |
+| 1 | Content ×2–4 and natural audio | 3–5 weeks | ◐ code done; waiting on native review + audio render — see [phase-1.md](./phase-1.md) |
+| 2 | Retention: SRS, "today's practice", streaks | 2–3 weeks | ☐ — brief in [phase-2.md](./phase-2.md) |
 | 3 | Ship the web app: PWA, brand, landing page, beta | 1–2 weeks | ☐ |
 | 4 | Accounts, sync, payments | ~2 weeks | ☐ |
 | 5 | Mobile apps (Capacitor) | ~2 weeks | ☐ |
 
-**Critical path:** the native-speaker review in Phase 1a. It is the slowest step
-and the only one that cannot be automated, so find the reviewer during Phase 0.
+**Critical path:** the native-speaker review of the Phase 1 drafts
+(`npm run review:export` → `review/pending.csv`, about 540 rows). It is the only
+step that cannot be automated. Phase 2 can be built in parallel, because drafts
+never reach the published app.
+
+New to the codebase? Start with `AGENTS.md`, which covers the map, the rules
+and the commands.
 
 ---
 
@@ -33,12 +38,12 @@ Changes that make content cheap to add. Full spec: [phase-0.md](./phase-0.md).
 
 ### 1a. Lexicon at scale
 
-| | Today | Launch target |
-| --- | --- | --- |
-| Nouns | 125 | 300 |
-| Adjectives | 74 | 150 |
-| Verb pairs | ~32 | 120 |
-| Case templates | 142 | 300 |
+| | Phase 0 | Launch target | Now (incl. drafts) |
+| --- | --- | --- | --- |
+| Nouns | 125 | 300 | 306 |
+| Adjectives | 74 | 150 | 150 |
+| Verbs | 32 pairs | 120 | 139 (some imperfective-only) |
+| Case templates | 142 | 300 | 319 |
 
 - Source paradigms from a morphological dictionary (SGJP / Morfeusz), and check
   its licence before shipping. Avoid Wiktionary as the bulk source: it is
@@ -51,9 +56,9 @@ Changes that make content cheap to add. Full spec: [phase-0.md](./phase-0.md).
 
 ### 1b. Audio
 
-- Sentences are combinatorial, so they can't all be pre-recorded. A Cloudflare
-  Worker calls a neural pl-PL TTS voice (Azure or Google) and caches the mp3 in
-  R2, keyed by a hash of the text. Each sentence is paid for once.
+- Built: the sentence set turned out to be finite (~55k strings), so every
+  sentence is pre-rendered (`scripts/audio/`, engines azure / piper / cmd) and
+  served from R2 by `workers/tts/`, with Azure as an optional fallback.
 - `lib/speak.ts` (browser `speechSynthesis`) stays as the offline fallback.
 - First backend piece: standalone, no accounts.
 

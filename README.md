@@ -9,9 +9,10 @@ page (`/`) is a menu of exercises:
 | `/pronouns` | Make the demonstrative `ten` / `tamten` agree with a given noun in gender, number and case. |
 | `/possessives` | Make the possessive (`mój`, `twój`, `nasz`, `wasz`, `swój`) agree with a given noun — and leave `jego` / `jej` / `ich` alone. |
 | `/numbers` | Four numeral drills: the noun after a number (`dwa koty` / `pięć kotów`), the numeral's own form, writing figures out in words, and ordinals with dates and clock times. |
+| `/shuffle` | Every drill mixed into one session. |
 | `/verbs` | Conjugate a verb — plain or reflexive (`uczyć się`) — in the present (`piszę`), past (`napisałam`), simple future (`napiszę`), compound future (`będę pisać` / `będę pisał`) or the imperative (`napisz!` / `nie pisz!` / `napiszmy!`). |
 
-Configure the cases (and word type / demonstrative), then answer one sentence at a
+Each exercise has a configurator (cases, word type, level…), then you answer one sentence at a
 time with its English translation, and get the correct form plus the rule behind it
 after every answer.
 
@@ -30,9 +31,16 @@ back to the browser's speech synthesis. Without the variable nothing changes.
 ```bash
 npm install
 npm run dev     # http://localhost:3000
-npm test        # grammar engine + generator fuzz tests
+npm test        # grammar engine, content gate, fuzz and golden tests (two vitest projects)
+npm run lint
 npm run build   # static site in out/
+npx tsc --noEmit  # after a build (Next generates some types during it)
 ```
+
+Working on the code (or an AI agent working on it)? Read [`AGENTS.md`](AGENTS.md)
+first. It has the codebase map, the rules that are easy to break (golden
+snapshot, data order, drafts) and how to add a word, a template or a drill. The
+product roadmap and phase status are in [`plans/`](plans/ROADMAP.md).
 
 New content goes in as drafts that a native speaker approves before learners
 see them: `npm run dev:drafts` shows them, and `npm run review:export` /
@@ -52,8 +60,8 @@ The same `out/` folder works on any static host.
 
 ## Audio
 
-The drills can only say a finite set of sentences (about 60,000 distinct
-strings, 1.6M characters), so every one is rendered ahead of time and stored in
+The drills can only say a finite set of sentences (about 55,000 distinct
+strings, 1.4M characters), so every one is rendered ahead of time and stored in
 the TTS Worker's R2 bucket. The Worker then serves R2 hits only, with no
 per-request TTS cost and no rate limit; Azure is optional (see
 [`workers/tts/README.md`](workers/tts/README.md) for deploying the Worker).
@@ -83,7 +91,7 @@ Published content only. Each line is `{key, voice, text}` with
 the R2 object is `audio/<voice>/<key>.mp3`. Both sides import the same code
 (`workers/tts/src/text.ts`), and a test drives the Worker with the client's URL
 to check the keys agree. The file is sorted by key so batches diff cleanly, and
-it is committed (about 8.5 MB). It takes about 1.5 minutes and prints per-drill
+it is committed (about 8 MB). It takes about 1.5 minutes and prints per-drill
 counts and the total characters (the cost basis for Azure).
 
 The spelling drill ("write 4729 out in words") is pre-rendered up to **1000**
@@ -161,24 +169,27 @@ Everything is generated locally and deterministically — no API calls.
 | `data/*.json` | The lexicon: nouns, adjectives, collocations, sentence templates, verbs and the agreement / counting / numeral frames (schemas in [`data/README.md`](data/README.md)) |
 | `lib/load.ts` | Validates the JSON and turns it into typed entries; throws on a malformed entry, naming it. Leaves drafts out of the published lexicon |
 | `lib/lexicon.ts` | Loads every data file once; drafts only with `NEXT_PUBLIC_INCLUDE_DRAFTS=1` |
-| `lib/nouns.ts` | ~125 nouns with their full 14-form paradigms (declension is too irregular to derive) |
-| `lib/adjectives.ts` | ~74 adjectives as stem + hardness, and which ones go with which noun; only the masculine-personal nominative plural is stored |
+| `lib/drills.ts` | The drill registry: route, menu text, builder, URL params and shuffle mix for each drill |
+| `lib/nouns.ts` | The nouns (306 incl. drafts) with their full 14-form paradigms (declension is too irregular to derive) |
+| `lib/adjectives.ts` | The adjectives (150 incl. drafts) as stem + hardness, and which ones go with which noun; only the masculine-personal nominative plural is stored |
 | `lib/declineAdjective.ts` | The regular adjective endings |
-| `lib/templates.ts` | ~140 sentence frames, one per case/trigger, with an English gloss and the rule that applies |
+| `lib/templates.ts` | The sentence frames (319 incl. drafts), one per case/trigger, with an English gloss and the rule that applies |
 | `lib/generate.ts` | Picks a template, a noun that semantically fits it and an adjective, then builds the exercise |
 | `lib/agreement.ts` | Sentence frames, English gloss and distractors shared by the two agreement drills |
 | `lib/pronouns.ts` | The `ten` / `tamten` paradigm — builds the demonstrative-pronoun exercise |
 | `lib/possessives.ts` | The `mój` and `nasz` paradigms (and the indeclinable `jego` / `jej` / `ich`) — builds the possessive exercise |
 | `lib/numerals.ts` | Cardinals to 9999, the oblique `-u` forms, the 1 / 2-4 / 5+ government rule, ordinals and the months |
 | `lib/numbers.ts` | Builds the four numeral drills on top of it |
-| `lib/verbs.ts` | ~32 aspect pairs (9 reflexive) stored as principal parts (past stems, non-past, imperative); builds the five tense drills and places `się` |
-| `lib/session.ts` | Encodes a session in the query string and reads it back (`type=pronouns` / `type=possessives` / `type=numbers` / `type=verbs` select the other drills) |
+| `lib/verbs.ts` | Verbs (139 incl. drafts; aspect pairs plus imperfective-only verbs) stored as principal parts (past stems, non-past, imperative); builds the five tense drills, places `się` and builds the English verb |
+| `lib/session.ts` | Encodes a session in the query string and reads it back (`type=` selects the drill, `lvl=` caps the CEFR level; drill-specific params come from the registry) |
+| `lib/review/`, `scripts/review-*.ts` | The native-speaker review sheet: CSV export and import of draft entries |
 | `lib/grade.ts` | Normalises the answer; a diacritics-only miss is reported separately |
 | `lib/sound.ts` | Synthesised right / near-miss / wrong cues |
 | `lib/speak.ts` | pl-PL speech synthesis for reading sentences aloud (TTS Worker audio when configured, else the browser) |
 | `lib/speaker.ts` | Worker-vs-browser selection and fallback, testable without a browser |
 | `lib/ttsUrl.ts` | The Worker URL for a sentence (and voice) |
 | `scripts/audio/` | The pre-rendered audio pipeline: manifest, render engines, R2 upload (see [Audio](#audio)) |
+| `workers/tts/` | The Cloudflare Worker that serves sentence audio from R2 (its own package and README) |
 
 Semantic tags on each noun (`food`, `vehicle`, `placeIn`, …) keep sentences sensible —
 `Jem …` only ever takes food, `Jadę …` only vehicles.
