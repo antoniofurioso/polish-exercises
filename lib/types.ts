@@ -104,6 +104,13 @@ export type Tag = (typeof TAGS)[number];
 
 export type Forms = Record<Case, string>;
 
+/**
+ * Marks an entry a native speaker has not approved yet. Drafts are left out of
+ * the published lexicon unless NEXT_PUBLIC_INCLUDE_DRAFTS=1 (see lib/lexicon.ts).
+ */
+export const REVIEW_STATES = ["draft"] as const;
+export type Review = (typeof REVIEW_STATES)[number];
+
 export type Noun = {
   lemma: string;
   /** English singular, without article. */
@@ -126,6 +133,7 @@ export type Noun = {
   pl?: Forms;
   /** Extra accepted answers, e.g. { "pl.gen": ["pokojów"] }. */
   alt?: Record<string, string[]>;
+  review?: Review;
 };
 
 export const ADJ_TYPES = ["hard", "soft", "velar"] as const;
@@ -145,6 +153,7 @@ export type Adjective = {
   state?: boolean;
   /** Only used to address someone ("kochana babciu"), and only where a sentence asks for it. */
   address?: boolean;
+  review?: Review;
 };
 
 export type Template = {
@@ -172,6 +181,36 @@ export type Template = {
   note: string;
   /** Set when the sentence has a first-person singular subject ("Widzę..."). */
   subject?: "1sg";
+  review?: Review;
+};
+
+/** Shared by every sentence frame: which nouns it makes sense with. */
+type NounFilter = {
+  /** Noun must carry at least one of these tags. */
+  requires: Tag[];
+  /** Nouns that fit even without a matching tag. */
+  lemmas?: string[];
+  /** Nouns that fit the tags but not this sentence. */
+  excludeLemmas?: string[];
+};
+
+/** A frame of the counting drill (data/count-frames.json): "Mam {N} {NP}." */
+export type CountTemplate = NounFilter & {
+  /** Polish frame with {N} for the numeral and {NP} for the counted noun; {V} is "jest" / "są". */
+  pl: string;
+  /** English with {np} for the counted phrase; {is} is "is" / "are". */
+  en: string;
+  /** The case the frame itself assigns — it only shows with "jeden". */
+  case: "nom" | "acc";
+  review?: Review;
+};
+
+/** The frame the numeral drill uses for one case (data/numeral-frames.json). */
+export type NumeralTemplate = NounFilter & {
+  /** Polish frame with {NP} for numeral + noun; {V} is "jest" / "są", {z} the preposition. */
+  pl: string;
+  en: string;
+  review?: Review;
 };
 
 export type WordMode = "nouns" | "adjectives" | "both";

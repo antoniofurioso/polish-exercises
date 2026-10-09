@@ -42,3 +42,6 @@ next-env.d.ts
 
 # agent worktrees
 /.claude/worktrees/
+
+# review sheets (npm run review:export) are working files
+/review/*.csv

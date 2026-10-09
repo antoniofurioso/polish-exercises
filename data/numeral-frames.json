@@ -1,0 +1,44 @@
+{
+  "nom": {
+    "pl": "Tu {V} {NP}.",
+    "en": "There {is} {np} here.",
+    "requires": ["@tangible", "surface", "placeIn"],
+    "excludeLemmas": ["@notHere"]
+  },
+  "gen": {
+    "pl": "Szukam {NP}.",
+    "en": "I'm looking for {np}.",
+    "requires": ["animal", "object", "profession"],
+    "excludeLemmas": ["słoń", "radio", "stół", "łóżko", "biurko"]
+  },
+  "dat": {
+    "pl": "Pomagam {NP}.",
+    "en": "I'm helping {np}.",
+    "requires": ["person"],
+    "excludeLemmas": ["@notCounted"]
+  },
+  "acc": {
+    "pl": "Widzę {NP}.",
+    "en": "I can see {np}.",
+    "requires": ["@inView"],
+    "excludeLemmas": ["@notInView"]
+  },
+  "ins": {
+    "pl": "Rozmawiam {z} {NP}.",
+    "en": "I'm talking with {np}.",
+    "requires": ["person"],
+    "excludeLemmas": ["@notCounted"]
+  },
+  "loc": {
+    "pl": "Myślę o {NP}.",
+    "en": "I'm thinking about {np}.",
+    "requires": ["person", "animal", "placeIn", "placeTo", "vehicle"],
+    "excludeLemmas": ["pan", "pani", "rodzina", "kuchnia", "pokój", "bank", "apteka", "biuro"]
+  },
+  "voc": {
+    "pl": "Widzę {NP}.",
+    "en": "I can see {np}.",
+    "requires": ["@inView"],
+    "excludeLemmas": ["@notInView"]
+  }
+}

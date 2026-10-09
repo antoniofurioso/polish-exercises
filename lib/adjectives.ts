@@ -1,6 +1,4 @@
-import adjectiveData from "../data/adjectives.json";
-import collocationData from "../data/collocations.json";
-import { loadAdjectives, loadCollocations } from "./load";
+import { LEXICON } from "./lexicon";
 import type { Adjective } from "./types";
 
 /**
@@ -10,11 +8,11 @@ import type { Adjective } from "./types";
  * state = a passing condition or looks (chory, wysoki): odd on a person in most sentences.
  * address = only when speaking to someone (kochany).
  */
-export const ADJECTIVES: Adjective[] = loadAdjectives(adjectiveData);
+export const ADJECTIVES: Adjective[] = LEXICON.adjectives;
 
 /**
  * Which adjectives a Polish speaker would actually put in front of each noun,
  * keyed by noun lemma. A noun missing here, or with an empty list, never gets
  * an adjective — better no sentence than "niebieska zupa" or "wysoka kawa".
  */
-export const COLLOCATIONS: Record<string, string[]> = loadCollocations(collocationData, ADJECTIVES);
+export const COLLOCATIONS: Record<string, string[]> = LEXICON.collocations;

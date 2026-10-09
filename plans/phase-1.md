@@ -40,7 +40,7 @@ Wave 3   1.6 templates + collocations (needs the new nouns and adjectives)
 Human    native-speaker review of every draft → approve → golden snapshot updated
 ```
 
-### 1.1 Review flow and the remaining frames ☐ (wave 1)
+### 1.1 Review flow and the remaining frames ☑ (wave 1)
 
 - Optional `review: "draft"` field on every kind of entry, validated by `lib/load.ts`.
 - **Published vs draft.** By default the exported lexicon leaves drafts out. With

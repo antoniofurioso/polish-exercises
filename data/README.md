@@ -4,8 +4,8 @@ Every word and sentence the drills draw from lives here, as plain JSON. The
 grammar (endings, paradigms of pronouns, possessives and numerals, verb time
 frames and conjugation) stays in `lib/`.
 
-The files are imported statically, so the static export and offline use need no
-fetch. On load, `lib/load.ts` checks every entry and throws on the first bad one
+The files are imported statically (all of them in `lib/lexicon.ts`), so the
+static export and offline use need no fetch. On load, `lib/load.ts` checks every entry and throws on the first bad one
 with the file and the entry's lemma in the message, e.g.
 
 ```
@@ -21,6 +21,15 @@ say so. Adding entries changes them too; append new ones at the end of a file.
 
 Optional fields are left out when they do not apply; don't write them as `null`
 or `false`. Unknown fields are rejected, which catches typos like `noplural`.
+Every entry of every file below may also carry `"review": "draft"`: see
+[Drafts and review](#drafts-and-review).
+
+**Layout.** Two-space indent, one entry per object, every entry spread over
+lines; inside an entry a list of plain values (`"sg": [...]`) and an object of
+plain values (`"past": { ... }`) stay on one line. `lib/review/format.ts`
+writes exactly this, and the tests check every file round-trips through it
+byte for byte, so the review scripts never reformat a file. Keep hand edits in
+the same layout.
 
 | File | Loaded by | Exports |
 | --- | --- | --- |
@@ -29,6 +38,12 @@ or `false`. Unknown fields are rejected, which catches typos like `noplural`.
 | `collocations.json` | `lib/adjectives.ts` | `COLLOCATIONS` |
 | `templates.json` + `groups.json` | `lib/templates.ts` | `TEMPLATES` |
 | `verbs.json` | `lib/verbs.ts` | `VERBS` |
+| `agreement-frames.json` | `lib/agreement.ts` | `AGREEMENT_TEMPLATES` (demonstratives, possessives, ordinals) |
+| `count-frames.json` | `lib/numbers.ts` | `COUNT_TEMPLATES` (the counting drill) |
+| `numeral-frames.json` | `lib/numbers.ts` | `NUMERAL_TEMPLATES` (the numeral drill) |
+
+All of them are loaded together by `loadLexicon` (`lib/load.ts`) in
+`lib/lexicon.ts`, which every module above reads from.
 
 ## Levels and frequency
 
@@ -52,6 +67,83 @@ has no sentence there yet.
 **These are provisional judgment calls.** In Phase 1 a native speaker reviews
 the levels and `freq` is replaced with corpus frequency (the NKJP frequency
 lists); until then treat both as a first draft.
+
+## Drafts and review
+
+New content goes in as a **draft**: `"review": "draft"` on the entry, which is
+appended at the end of its file. A draft is in the files and passes the same
+checks as everything else, but a learner never sees it until a native speaker
+approves it.
+
+- **Published** (the default: `npm run dev`, `npm run build`): `lib/lexicon.ts`
+  exports the lexicon with every draft left out (`publish` in `lib/load.ts`),
+  and with every reference to a draft word left out with it: a draft noun
+  loses its collocations, a draft adjective drops out of every collocation
+  list and `adjOnly`, and a draft noun out of `lemmas` / `excludeLemmas`
+  (so also out of any `@group`). A sentence that named only draft nouns (no
+  tags, every `lemmas` entry a draft) goes too; an `adjOnly` left empty means
+  "no adjective", which still reads. Nothing published ever points at a draft.
+- **Drafts in**: `NEXT_PUBLIC_INCLUDE_DRAFTS=1`. `npm run dev:drafts` runs the
+  app that way; `NEXT_PUBLIC_INCLUDE_DRAFTS=1 npm run build` makes a preview
+  build. Next.js inlines the value at build time (`next.config.ts` pins it, so
+  a published build is fixed to "drafts out").
+- **Tests** (`vitest.config.ts`) run twice over. The `published` project runs
+  every test on the published lexicon, so the golden snapshot never moves for
+  a draft. The `drafts` project runs the content gate
+  (`lib/__tests__/content.test.ts`) and `drafts.test.ts` with drafts in, so a
+  malformed or unusable draft fails `npm test` before anyone reviews it.
+  Run one with `npx vitest run --project drafts`.
+
+### The review sheet
+
+```
+npm run review:export                       # writes review/pending.csv
+npm run review:import review/pending.csv    # applies the verdicts
+```
+
+`review:export` writes one row per draft to `review/pending.csv` (or the path
+given after it), UTF-8 with a byte-order mark and standard CSV quoting, so it
+opens in Google Sheets (File → Import) or Excel with the Polish letters
+intact. The columns:
+
+| Column | Holds |
+| --- | --- |
+| `kind` | `noun`, `adjective`, `verb`, `template`, `agreement-frame`, `count-frame` or `numeral-frame` |
+| `id` | How the import finds the entry again: the lemma; `pisać / napisać` for a verb pair; `acc/any: Widzę {NP}.` (case/number: sentence) for a template or agreement frame; the sentence for a count frame; the case for a numeral frame. **Don't edit it.** |
+| `file` | Where the entry lives. |
+| `level`, `freq` | As in the entry. |
+| `en` | The English gloss(es). |
+| `forms` | Every form, one line per row of the paradigm: `sg: nom=kot gen=kota …` for a noun, every gender and number of an adjective, both aspects of a verb with their objects, a frame's fields. |
+| `example1`..`example3` | Sentences the real generator builds with the entry, answer filled in, English after the dash: for a noun or an adjective sentences that use it, for a template or frame sentences from it, for a verb the present, past and future. |
+| `verdict` | Empty for the reviewer: `ok`, `fix` or `reject`. |
+| `correction` | Empty for the reviewer: what is wrong, for `fix`. |
+
+The reviewer fills in `verdict` (and `correction` for a fix), exports the
+sheet back to CSV (comma or semicolon separated, either works) and
+`review:import` applies it:
+
+- `ok` removes the `review` field: the entry is published.
+- `reject` deletes the entry. A rejected noun also loses its line in
+  `collocations.json` and a rejected adjective its place in every list there;
+  any template, frame or group that still names the word is reported, and the
+  import exits with an error until it is fixed by hand. Only drafts can be
+  rejected: a published entry is never deleted this way.
+- `fix` changes nothing: it prints the correction with the entry's file and
+  line (`data/verbs.json:24 verb "pisać / napisać": …`) for a human or an
+  agent to make. The entry stays a draft and comes back in the next export.
+- An empty verdict skips the row.
+
+Running the import again on the same sheet changes nothing more: an approved
+entry is no longer a draft and a rejected one is gone. Files are written back
+in the layout above, so the diff shows only what the verdicts changed.
+
+Approving drafts changes the published lexicon, so the golden snapshot moves:
+check the diff, then update it (`npx vitest run -u`) in the same commit.
+
+The scripts live in `scripts/` and run with `tsx`; the logic they call is in
+`lib/review/` (`csv.ts`, `format.ts`, `entries.ts` for the import,
+`export.ts` for the sheet) and is tested in `lib/__tests__/review.test.ts`.
+`review/*.csv` is git-ignored: the sheets are working files, not history.
 
 ## nouns.json
 
@@ -85,6 +177,7 @@ A list of nouns, one object each.
 | `noPlural` | no | `true` when the plural is not used in practice (mleko, muzyka). Leave out `pl` then. |
 | `onlySg` | no | `true` when there is a plural, but not one a sentence about "my ..." can use (matki, żony). |
 | `alt` | no | Extra accepted answers per cell, keyed `"<sg\|pl>.<case>"`: `{ "pl.gen": ["pokojów"] }`. |
+| `review` | no | `"draft"` until a native speaker approves it (see [Drafts and review](#drafts-and-review)). Same on every kind of entry below. |
 
 ## adjectives.json
 
@@ -172,7 +265,52 @@ refer to another group.
 | `@dear` | `adjOnly` | The only adjective that sits naturally in a greeting: "kochana babciu". |
 | `@workplaces` | `lemmas` | Places you work in: "Pracuję w banku". |
 | `@meetingPlaces` | `lemmas` | Somewhere to meet up. |
-| `@relatives` | `excludeLemmas` | **Derived, not in the file**: every noun tagged `family`, in `nouns.json` order (defined in `lib/templates.ts`). Relatives need a possessive in English: "This is a husband" is no sentence. |
+| `@relatives` | `excludeLemmas` | **Derived, not in the file**: every noun tagged `family`, in `nouns.json` order (defined in `loadLexicon`, `lib/load.ts`). Relatives need a possessive in English: "This is a husband" is no sentence. |
+| `@notHere` | `excludeLemmas` | Count / numeral frames: what could not sit "here" ("Tu są trzy krzesła", not "Tu są dwa miasta"). |
+| `@inView` | `requires` | Count / numeral frames: what you'd see out of a window or in a photo. |
+| `@notInView` | `excludeLemmas` | ...and what you would not. |
+| `@notCounted` | `excludeLemmas` | People you would not help or talk to in a group of five: pan, pani, rodzina. |
+
+Groups work the same way in the three frame files below.
+
+## agreement-frames.json
+
+The frames of the drills where the noun is handed over already declined and
+the blank is a word that agrees with it: demonstratives (ten / tamten),
+possessives and ordinals. One plain trigger per case, so the only thing tested
+is the agreement. Same schema as `templates.json`; each is levelled like the
+case it drills there.
+
+## count-frames.json
+
+The sentences of the counting drill ("Mam pięć kotów").
+
+```json
+{
+  "pl": "Mam {N} {NP}.",
+  "en": "I have {np}.",
+  "case": "acc",
+  "requires": ["animal", "object", "vehicle", "text", "food"],
+  "lemmas": ["dom", "mieszkanie", "pokój"],
+  "excludeLemmas": ["słoń", "zwierzę"]
+}
+```
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `pl` | yes | Polish with `{N}` for the numeral and `{NP}` for the counted noun; `{V}` becomes "jest" or "są". |
+| `en` | yes | English with `{np}` for the counted phrase ("five cats"); `{is}` becomes "is" or "are". |
+| `case` | yes | The case the frame itself assigns, `nom` or `acc`: it only shows with "jeden". |
+| `requires`, `lemmas`, `excludeLemmas` | `requires` only | Which nouns fit, as in `templates.json`. |
+
+## numeral-frames.json
+
+The numeral drill's one sentence per case, keyed by case: `{ "gen": { ... } }`.
+Each has `pl` (with `{NP}` for numeral + noun, `{V}` for "jest" / "są" and
+`{z}` for the preposition), `en` (`{np}`, `{is}`) and the same noun filter.
+The drill asks for `nom` to `loc`; `voc` is there for completeness and never
+drawn. A case whose frame is a draft has no numeral question until it is
+approved.
 
 ## verbs.json
 
@@ -217,7 +355,8 @@ rest. In error messages a verb is named by its imperfective infinitive.
 
 ## Adding an entry
 
-1. Append the object to the end of the right file, following the schema above.
+1. Append the object to the end of the right file, following the schema above,
+   with `"review": "draft"` as its last field.
    For a noun, write all 7 forms of each number in nom, gen, dat, acc, ins, loc,
    voc order, and give it the tags that let the right templates pick it. Give
    every entry a `level`.
@@ -227,6 +366,7 @@ rest. In error messages a verb is named by its imperfective infinitive.
    every tag a template requires is carried by enough nouns, and the content
    gate (`lib/__tests__/content.test.ts`) that every level still fills a
    20-question session in every drill without a broken sentence.
-4. If `golden.test.ts` fails, the new entry changed the sessions generated for
-   the fixed seeds. That is expected when adding content: check the diff, then
-   update the snapshot on purpose.
+4. A draft never changes `golden.test.ts`: it runs on the published lexicon.
+   When drafts are approved (`npm run review:import`) the sessions generated
+   for the fixed seeds change; that is expected: check the diff, then update
+   the snapshot on purpose.

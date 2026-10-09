@@ -1,5 +1,4 @@
-import nounData from "../data/nouns.json";
-import { loadNouns } from "./load";
+import { LEXICON } from "./lexicon";
 import type { Case, GramNumber, Noun, Tag } from "./types";
 
 /**
@@ -13,7 +12,7 @@ export function nounVariants(noun: Noun, number: GramNumber, kase: Case): string
 }
 
 /** The noun lexicon, in data/nouns.json; see data/README.md for the layout. */
-export const NOUNS: Noun[] = loadNouns(nounData);
+export const NOUNS: Noun[] = LEXICON.nouns;
 
 export function nounsWithTag(tags: Tag[]): Noun[] {
   return NOUNS.filter((noun) => noun.tags.some((t) => tags.includes(t)));

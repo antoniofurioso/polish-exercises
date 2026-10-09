@@ -35,6 +35,10 @@ npm test        # grammar engine + generator fuzz tests
 npm run build   # static site in out/
 ```
 
+New content goes in as drafts that a native speaker approves before learners
+see them: `npm run dev:drafts` shows them, and `npm run review:export` /
+`npm run review:import` run the review sheet (see [`data/README.md`](data/README.md#drafts-and-review)).
+
 ## Deploying
 
 The app is a fully static export (`output: "export"`) — no server, no adapter.
@@ -53,8 +57,9 @@ Everything is generated locally and deterministically — no API calls.
 
 | File | Role |
 | --- | --- |
-| `data/*.json` | The lexicon: nouns, adjectives, collocations, sentence templates and verbs (schemas in [`data/README.md`](data/README.md)) |
-| `lib/load.ts` | Validates the JSON and turns it into typed entries; throws on a malformed entry, naming it |
+| `data/*.json` | The lexicon: nouns, adjectives, collocations, sentence templates, verbs and the agreement / counting / numeral frames (schemas in [`data/README.md`](data/README.md)) |
+| `lib/load.ts` | Validates the JSON and turns it into typed entries; throws on a malformed entry, naming it. Leaves drafts out of the published lexicon |
+| `lib/lexicon.ts` | Loads every data file once; drafts only with `NEXT_PUBLIC_INCLUDE_DRAFTS=1` |
 | `lib/nouns.ts` | ~125 nouns with their full 14-form paradigms (declension is too irregular to derive) |
 | `lib/adjectives.ts` | ~74 adjectives as stem + hardness, and which ones go with which noun; only the masculine-personal nominative plural is stored |
 | `lib/declineAdjective.ts` | The regular adjective endings |
