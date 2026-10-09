@@ -307,6 +307,9 @@ export const MISS_KINDS = [
   "aspect", // verbs: the other aspect's form
   "person", // verbs: another person or number of the right verb
   "tense", // verbs: the right verb in another tense
+  "pastGender", // verbs: past tense with the wrong gender ending (pisałam for pisałem)
+  "government", // numbers: the counted noun in the wrong case or number (pięć koty)
+  "numeralForm", // numbers: the numeral itself in the wrong gender or case (dwa for dwie)
   "other",
 ] as const;
 export type MissKind = (typeof MISS_KINDS)[number];

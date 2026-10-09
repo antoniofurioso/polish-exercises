@@ -23,6 +23,9 @@ export const MISS_LABELS: Record<MissKind, string> = {
   aspect: "the other aspect of the verb",
   person: "the wrong person or number of the verb",
   tense: "the right verb in the wrong tense",
+  pastGender: "past tense with the wrong gender ending",
+  government: "the noun's form after a number (pięć kotów, dwa koty)",
+  numeralForm: "the number's own form (dwa / dwie / dwaj, dwóch…)",
   other: "another mistake",
 };
 
