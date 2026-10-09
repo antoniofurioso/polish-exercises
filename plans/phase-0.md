@@ -42,7 +42,7 @@ data files from 0.2, so they run after it merges.
 **Done when.** Adding a drill is: one builder file, one registry entry, one
 configurator page. Golden test unchanged.
 
-### 0.2 Lexicon into data files ☐
+### 0.2 Lexicon into data files ☑
 
 **Problem.** Nouns, adjectives, templates and verbs live in TypeScript, so only
 someone editing code can add content, and no script can generate it.
