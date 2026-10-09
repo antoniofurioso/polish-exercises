@@ -1,6 +1,7 @@
 # Polish TTS Worker: GET /tts?text=…&voice=… → audio/mpeg, cached in R2.
 # Deploy steps live in README.md. Nothing here is secret: the Azure key is set
-# with `wrangler secret put AZURE_TTS_KEY`.
+# with `wrangler secret put AZURE_TTS_KEY`, and is optional: without it the
+# Worker only serves clips pre-rendered into R2 (scripts/audio/).
 name = "polish-exercises-tts"
 main = "src/index.ts"
 compatibility_date = "2026-09-01"
@@ -10,6 +11,10 @@ compatibility_date = "2026-09-01"
 AZURE_TTS_REGION = "westeurope"
 # Origins allowed to fetch audio: comma-separated, exact match, no trailing slash.
 ALLOWED_ORIGINS = "https://polish-exercises.pages.dev,http://localhost:3000"
+# Labels of pre-rendered voices from other engines (npm run audio:render --
+# --engine piper|cmd --voice <label>), comma-separated, e.g. "piper-pl-gosia".
+# They are served from R2 only; a miss is a 404 and the app uses the browser voice.
+EXTRA_VOICES = ""
 
 [[r2_buckets]]
 binding = "AUDIO"

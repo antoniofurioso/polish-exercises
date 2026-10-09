@@ -40,13 +40,14 @@ let azure: ReturnType<typeof vi.fn>;
 let limit: ReturnType<typeof vi.fn>;
 let pending: Promise<unknown>[];
 
-function env(): Env {
+function env(over: Partial<Env> = {}): Env {
   return {
     AUDIO: r2 as unknown as R2Bucket,
     AZURE_TTS_KEY: "test-key",
     AZURE_TTS_REGION: "westeurope",
     ALLOWED_ORIGINS: `${ORIGIN}, http://localhost:3000`,
     MISS_LIMITER: { limit } as unknown as RateLimit,
+    ...over,
   };
 }
 
@@ -57,9 +58,10 @@ async function get(
   query: Record<string, string>,
   headers: Record<string, string> = { Origin: ORIGIN },
   method = "GET",
+  over: Partial<Env> = {},
 ): Promise<Response> {
   const url = `https://tts.example/tts?${new URLSearchParams(query)}`;
-  const res = await handle(new Request(url, { method, headers }), env(), ctx());
+  const res = await handle(new Request(url, { method, headers }), env(over), ctx());
   await Promise.all(pending);
   return res;
 }
@@ -236,6 +238,56 @@ describe("cache hit", () => {
     expect(new Uint8Array(await res.arrayBuffer())).toEqual(MP3);
     expect(r2.get).not.toHaveBeenCalled();
     expect(azure).not.toHaveBeenCalled();
+  });
+});
+
+describe("pre-rendered audio, Azure optional", () => {
+  const NO_AZURE = { AZURE_TTS_KEY: undefined };
+
+  it("answers a miss with 404 and CORS headers when no Azure key is set", async () => {
+    const res = await get({ text: "Kot." }, { Origin: ORIGIN }, "GET", NO_AZURE);
+    expect(res.status).toBe(404);
+    expect(res.headers.get("Access-Control-Allow-Origin")).toBe(ORIGIN);
+    expect(res.headers.get("Cache-Control")).toBe("no-store");
+    expect(azure).not.toHaveBeenCalled();
+    expect(limit).not.toHaveBeenCalled();
+    expect(r2.put).not.toHaveBeenCalled();
+  });
+
+  it("treats a key without a region as no Azure", async () => {
+    const res = await get({ text: "Kot." }, { Origin: ORIGIN }, "GET", { AZURE_TTS_REGION: "" });
+    expect(res.status).toBe(404);
+    expect(azure).not.toHaveBeenCalled();
+  });
+
+  it("still serves R2 hits without an Azure key", async () => {
+    const key = await audioKey("pl-PL-ZofiaNeural", "Kot.");
+    r2.objects.set(key, MP3.slice(0).buffer);
+    const res = await get({ text: "Kot." }, { Origin: ORIGIN }, "GET", NO_AZURE);
+    expect(res.status).toBe(200);
+    expect(new Uint8Array(await res.arrayBuffer())).toEqual(MP3);
+  });
+
+  it("serves a voice listed in EXTRA_VOICES from R2 and never synthesises it", async () => {
+    const extra = { EXTRA_VOICES: " piper-pl-gosia, bad/label ,local-pl" };
+    const key = await audioKey("piper-pl-gosia", "Mam kota.");
+    expect(key).toMatch(/^audio\/piper-pl-gosia\/[0-9a-f]{64}\.mp3$/);
+    r2.objects.set(key, MP3.slice(0).buffer);
+
+    const hit = await get({ text: "Mam kota.", voice: "piper-pl-gosia" }, { Origin: ORIGIN }, "GET", extra);
+    expect(hit.status).toBe(200);
+    expect(new Uint8Array(await hit.arrayBuffer())).toEqual(MP3);
+
+    // Azure is configured, but this is not an Azure voice: a miss is a 404
+    const miss = await get({ text: "Pies.", voice: "local-pl" }, { Origin: ORIGIN }, "GET", extra);
+    expect(miss.status).toBe(404);
+    expect(miss.headers.get("Access-Control-Allow-Origin")).toBe(ORIGIN);
+    expect(azure).not.toHaveBeenCalled();
+
+    const unlisted = await get({ text: "Kot.", voice: "bad/label" }, { Origin: ORIGIN }, "GET", extra);
+    expect(unlisted.status).toBe(400);
+    const off = await get({ text: "Kot.", voice: "piper-pl-gosia" });
+    expect(off.status).toBe(400);
   });
 });
 

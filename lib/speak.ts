@@ -5,8 +5,10 @@ import { createSpeaker } from "./speaker";
 
 /**
  * Reads a sentence aloud. With `NEXT_PUBLIC_TTS_URL` set (inlined at build
- * time) it plays natural Azure audio from the TTS Worker (workers/tts) and
- * falls back to the browser's speech synthesis on any error or when offline;
+ * time) it plays natural audio from the TTS Worker (workers/tts) in the voice
+ * `NEXT_PUBLIC_TTS_VOICE` (default pl-PL-ZofiaNeural) and falls back to the
+ * browser's speech synthesis on any error (a 404 for a sentence that was never
+ * pre-rendered included) or when offline;
  * without it, only the browser's speech synthesis is used.
  */
 function synth(): SpeechSynthesis | null {
@@ -32,6 +34,8 @@ function synthSpeak(engine: SpeechSynthesis, text: string): void {
 
 const speaker = createSpeaker({
   ttsUrl: process.env.NEXT_PUBLIC_TTS_URL,
+  // unset: the Worker's default voice, pl-PL-ZofiaNeural
+  ttsVoice: process.env.NEXT_PUBLIC_TTS_VOICE || undefined,
   synth,
   createAudio: () =>
     typeof window === "undefined" || typeof Audio === "undefined" ? null : new Audio(),

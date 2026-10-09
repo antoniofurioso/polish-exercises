@@ -1,9 +1,13 @@
 import {
+  AUDIO_CACHE_CONTROL,
+  AZURE_OUTPUT_FORMAT,
   DEFAULT_VOICE,
   type Voice,
   audioKey,
+  azureEndpoint,
   isVoice,
   normaliseText,
+  parseVoiceList,
   ssml,
   textProblem,
 } from "./text";
@@ -11,17 +15,24 @@ import {
 export interface Env {
   /** Generated audio, one object per (voice, sentence). */
   AUDIO: R2Bucket;
-  /** Secret: `wrangler secret put AZURE_TTS_KEY`. */
-  AZURE_TTS_KEY: string;
-  AZURE_TTS_REGION: string;
+  /**
+   * Secret: `wrangler secret put AZURE_TTS_KEY`. Optional: without it the
+   * Worker only serves pre-rendered clips (scripts/audio/) and a miss is a 404.
+   */
+  AZURE_TTS_KEY?: string;
+  AZURE_TTS_REGION?: string;
   /** Comma-separated list of exact origins, e.g. "https://a.pages.dev,http://localhost:3000". */
   ALLOWED_ORIGINS: string;
+  /**
+   * Comma-separated labels of pre-rendered voices from other engines (e.g.
+   * "piper-pl-gosia"): served from R2 only, never synthesised.
+   */
+  EXTRA_VOICES?: string;
   /** Workers Rate Limiting binding, keyed by client IP, applied to cache misses only. */
   MISS_LIMITER?: RateLimit;
 }
 
-const OUTPUT_FORMAT = "audio-24khz-48kbitrate-mono-mp3";
-const IMMUTABLE = "public, max-age=31536000, immutable";
+const IMMUTABLE = AUDIO_CACHE_CONTROL;
 
 /** The origin when it is on the allow-list; null otherwise (or when absent). */
 function allowedOrigin(request: Request, env: Env): string | null {
@@ -91,22 +102,28 @@ function audioResponse(
   });
 }
 
+/** Azure is optional: without a key (or a region) the Worker only serves R2. */
+function azureConfigured(env: Env): env is Env & { AZURE_TTS_KEY: string; AZURE_TTS_REGION: string } {
+  return !!env.AZURE_TTS_KEY && !!env.AZURE_TTS_REGION;
+}
+
 /** One paid call to Azure Neural TTS. Null on any failure. */
-async function synthesise(text: string, voice: Voice, env: Env): Promise<ArrayBuffer | null> {
+async function synthesise(
+  text: string,
+  voice: Voice,
+  env: Env & { AZURE_TTS_KEY: string; AZURE_TTS_REGION: string },
+): Promise<ArrayBuffer | null> {
   try {
-    const res = await fetch(
-      `https://${env.AZURE_TTS_REGION}.tts.speech.microsoft.com/cognitiveservices/v1`,
-      {
-        method: "POST",
-        headers: {
-          "Ocp-Apim-Subscription-Key": env.AZURE_TTS_KEY,
-          "Content-Type": "application/ssml+xml",
-          "X-Microsoft-OutputFormat": OUTPUT_FORMAT,
-          "User-Agent": "polish-exercises-tts",
-        },
-        body: ssml(text, voice),
+    const res = await fetch(azureEndpoint(env.AZURE_TTS_REGION), {
+      method: "POST",
+      headers: {
+        "Ocp-Apim-Subscription-Key": env.AZURE_TTS_KEY,
+        "Content-Type": "application/ssml+xml",
+        "X-Microsoft-OutputFormat": AZURE_OUTPUT_FORMAT,
+        "User-Agent": "polish-exercises-tts",
       },
-    );
+      body: ssml(text, voice),
+    });
     if (!res.ok) return null;
     const audio = await res.arrayBuffer();
     return audio.byteLength > 0 ? audio : null;
@@ -137,7 +154,9 @@ export async function handle(request: Request, env: Env, ctx: ExecutionContext):
   if (request.method !== "GET") return plain(405, "method not allowed", { ...cors, Allow: "GET, OPTIONS" });
 
   const voice = url.searchParams.get("voice") || DEFAULT_VOICE;
-  if (!isVoice(voice)) return plain(400, "unknown voice", cors);
+  if (!isVoice(voice) && !parseVoiceList(env.EXTRA_VOICES).includes(voice)) {
+    return plain(400, "unknown voice", cors);
+  }
   const text = normaliseText(url.searchParams.get("text") ?? "");
   const problem = textProblem(text);
   if (problem) return plain(400, problem, cors);
@@ -156,6 +175,9 @@ export async function handle(request: Request, env: Env, ctx: ExecutionContext):
   if (stored) {
     audio = await stored.arrayBuffer();
   } else {
+    // nothing pre-rendered and nothing to synthesise with: the app falls back
+    // to the browser's voice on any error, a 404 included
+    if (!isVoice(voice) || !azureConfigured(env)) return plain(404, "no audio for this sentence", cors);
     // only misses cost money, so only misses count towards the limit
     if (env.MISS_LIMITER) {
       const ip = request.headers.get("CF-Connecting-IP") ?? "unknown";

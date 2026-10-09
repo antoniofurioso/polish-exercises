@@ -22,11 +22,10 @@ once the answer is revealed. The 🔊 toggle in the header mutes both and is
 remembered.
 
 Natural voices (optional): build with `NEXT_PUBLIC_TTS_URL` pointing at the TTS
-Worker in `workers/tts/` and sentences are read by an Azure Neural pl-PL voice,
-cached in R2 so each sentence is paid for once. Any failure, or being offline,
-falls back to the browser's speech synthesis. Without the variable nothing
-changes. Deploying the Worker and setting the variable on Cloudflare Pages:
-[`workers/tts/README.md`](workers/tts/README.md).
+Worker in `workers/tts/` and sentences are read by a natural pl-PL voice from
+R2: every sentence pre-rendered ahead of time (see [Audio](#audio)), with Azure
+Neural TTS optionally filling any gap. Any failure, or being offline, falls
+back to the browser's speech synthesis. Without the variable nothing changes.
 
 ```bash
 npm install
@@ -50,6 +49,108 @@ On Cloudflare Pages, connect the repo and set:
 | Output directory | `out` |
 
 The same `out/` folder works on any static host.
+
+## Audio
+
+The drills can only say a finite set of sentences (about 60,000 distinct
+strings, 1.6M characters), so every one is rendered ahead of time and stored in
+the TTS Worker's R2 bucket. The Worker then serves R2 hits only, with no
+per-request TTS cost and no rate limit; Azure is optional (see
+[`workers/tts/README.md`](workers/tts/README.md) for deploying the Worker).
+
+| Variable (app build) | |
+| --- | --- |
+| `NEXT_PUBLIC_TTS_URL` | The Worker's URL. Unset: browser speech only. |
+| `NEXT_PUBLIC_TTS_VOICE` | The voice to request. Default `pl-PL-ZofiaNeural`; for clips from another engine, the label they were rendered under (e.g. `piper-pl-gosia`), which must also be in the Worker's `EXTRA_VOICES`. |
+
+The pipeline, from the repo root. Re-run all three after each approved content
+batch: only new sentences get rendered and uploaded.
+
+```bash
+npm run audio:manifest                       # 1. audio/manifest.jsonl
+npm run audio:render -- --engine azure       # 2. audio/out/<voice>/<hash>.mp3, missing ones only
+npm run audio:upload                         # 3. audio/out → R2, new ones only
+```
+
+**1. Manifest.** `npm run audio:manifest [-- --voice <voice>] [--spell-max 9999]`
+samples every drill with many seeds under every setting that changes what it
+says (each case, number, word mode, demonstrative, possessor, tense, verb type
+and numbers sub-drill, plus each drill's shuffle mix) until 15 rounds in a row
+add nothing, and collects exactly what the client speaks: the gapped prompt
+(`spokenGap(renderPrompt(…))`) and the full sentence (`renderSolution(…)`).
+Published content only. Each line is `{key, voice, text}` with
+`key = sha256(voice + "\n" + normalised text)`, the hash the Worker computes;
+the R2 object is `audio/<voice>/<key>.mp3`. Both sides import the same code
+(`workers/tts/src/text.ts`), and a test drives the Worker with the client's URL
+to check the keys agree. The file is sorted by key so batches diff cleanly, and
+it is committed (about 8.5 MB). It takes about 1.5 minutes and prints per-drill
+counts and the total characters (the cost basis for Azure).
+
+The spelling drill ("write 4729 out in words") is pre-rendered up to **1000**
+by default: the 20, 100 and 1000 settings are covered in full, while the 9,000
+figures from 1001 to 9999 that only the "to 9999" setting reaches are left out.
+`--spell-max 9999` adds them (about 0.3M more characters). A sentence not in R2
+is synthesised by Azure if the Worker has a key, otherwise it gets a 404 and the
+app reads it with the browser voice. Everything else in the numbers drill is
+covered in full.
+
+**2. Render.** `npm run audio:render -- --engine <azure|piper|cmd> [--voice …] [--concurrency N] [--limit N]`
+renders only the keys missing from `audio/out/<voice>/`; each file is written
+atomically, so it can be stopped and re-run at any time. `--limit 20` is handy
+for listening to a sample first. Every clip is MP3, 24 kHz mono, 48 kbit/s,
+like the Worker's Azure output.
+
+| Engine | Needs | `--voice` |
+| --- | --- | --- |
+| `azure` | `AZURE_TTS_KEY`, `AZURE_TTS_REGION` (an Azure Speech resource). Same SSML as the Worker, 8 requests at a time by default, retries 429/5xx with backoff (honouring `Retry-After`). | An Azure voice; default `NEXT_PUBLIC_TTS_VOICE`, else `pl-PL-ZofiaNeural` |
+| `piper` | `PIPER_MODEL` (path to the `.onnx` voice; its `.onnx.json` next to it), `PIPER_BIN` (default `piper`), optional `PIPER_ARGS` (e.g. `--length_scale 1.1` to read 10% slower, like the Worker), `FFMPEG_BIN` (default `ffmpeg`) | Your own label, e.g. `piper-pl-gosia` |
+| `cmd` | `--cmd "<template>"` with `{text_file}` and `{out}` placeholders, optional `--cmd-ext` (the extension `{out}` gets, default `wav`), `FFMPEG_BIN` | Your own label |
+
+A label is letters, digits and dashes (at most 64) and must not be an Azure
+voice name, so clips from another engine are never served as Azure's.
+
+*Piper* is a fast, local, open-source TTS engine: download a release binary for
+your OS from <https://github.com/rhasspy/piper/releases> (MIT licensed; the
+project has since continued as OHF-Voice/piper1-gpl, installed with
+`pip install piper-tts`, under its own licence, so check which one you use),
+and a Polish voice (`pl_PL-…`, an `.onnx` file plus its `.onnx.json`) from
+<https://huggingface.co/rhasspy/piper-voices/tree/main/pl/pl_PL>. The engine
+runs `$PIPER_BIN --model $PIPER_MODEL $PIPER_ARGS --output_file <wav>` with the
+sentence on stdin; flag spellings can differ between Piper builds (check
+`piper --help`), and any build that differs can be driven through `cmd`
+instead. **Each voice model has its own licence, separate from Piper's: read
+the voice's model card and check it allows commercial use before rendering
+clips for the app.** Then, for example:
+
+```bash
+PIPER_MODEL=~/voices/pl_PL-<voice>-medium.onnx PIPER_ARGS="--length_scale 1.1" \
+  npm run audio:render -- --engine piper --voice piper-pl-<voice>
+```
+
+*cmd* runs any command-line TTS tool (another open-source model, a desktop TTS
+app with a CLI…). The sentence is written to a UTF-8 temporary file and also
+given on stdin; `{text_file}` and `{out}` are replaced by quoted temporary
+paths, and the sentence itself never appears in the shell command. If the tool
+writes anything but MP3, ffmpeg converts it. For example:
+
+```bash
+npm run audio:render -- --engine cmd --voice local-pl-anna \
+  --cmd 'my-tts --voice anna --input {text_file} --output {out}'
+```
+
+**3. Upload.** `npm run audio:upload [-- --concurrency N] [--recheck]` puts
+every clip in `audio/out/` that is not in the bucket yet at
+`audio/<voice>/<hash>.mp3`, with `Content-Type: audio/mpeg` and the Worker's
+`Cache-Control: public, max-age=31536000, immutable`, via R2's S3-compatible API.
+It needs `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` (Cloudflare
+dashboard → R2 → *Manage API tokens*, Object Read & Write on the bucket) and
+`R2_BUCKET` (`polish-exercises-tts` in `workers/tts/wrangler.toml`). Uploaded
+keys go in `audio/uploaded.txt`, so a re-run skips them; anything not listed
+there is checked with HEAD first. `--recheck` forgets the list.
+
+`audio/out/` and `audio/uploaded.txt` are git-ignored. To switch voices, render
+and upload the new one, list it in the Worker's `EXTRA_VOICES` if it is not an
+Azure voice, then rebuild the app with `NEXT_PUBLIC_TTS_VOICE` set to it.
 
 ## How exercises are made
 
@@ -76,6 +177,8 @@ Everything is generated locally and deterministically — no API calls.
 | `lib/sound.ts` | Synthesised right / near-miss / wrong cues |
 | `lib/speak.ts` | pl-PL speech synthesis for reading sentences aloud (TTS Worker audio when configured, else the browser) |
 | `lib/speaker.ts` | Worker-vs-browser selection and fallback, testable without a browser |
+| `lib/ttsUrl.ts` | The Worker URL for a sentence (and voice) |
+| `scripts/audio/` | The pre-rendered audio pipeline: manifest, render engines, R2 upload (see [Audio](#audio)) |
 
 Semantic tags on each noun (`food`, `vehicle`, `placeIn`, …) keep sentences sensible —
 `Jem …` only ever takes food, `Jadę …` only vehicles.

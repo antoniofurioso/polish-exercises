@@ -92,7 +92,7 @@ motion verbs. Verbs whose objects have no sensible sentence wait for 1.6.
   deploying it (Azure key as a secret, the R2 bucket). **Not deployed by the
   agent**: deploying needs the user's Azure and Cloudflare accounts.
 
-### 1.5b Pre-rendered audio ☐ (with wave 2)
+### 1.5b Pre-rendered audio ☑ (with wave 2)
 
 The set of sentences is finite. Sampling 400,000 questions per drill gives
 about **62,000 distinct spoken strings** (the gapped sentence plus the full
@@ -119,6 +119,15 @@ per-request TTS cost and no rate limit:
 - The Worker serves R2 hits as it does today. Azure becomes optional: with no
   key set, a miss returns 404 and the app falls back to the browser voice.
 - Re-run after each approved content batch; only new sentences get rendered.
+
+Done: the first `npm run audio:manifest` (published content, every drill
+saturated: 15 rounds of 1,000 questions in a row with nothing new) gives
+**60,390 clips, 1.56M characters** (cases 16,238, pronouns 1,923, possessives
+5,513, numbers 27,202, verbs 10,995 before merging duplicates across drills),
+an 8.5 MB manifest (committed), in about 1.5 minutes. The spelling drill is
+pre-rendered up to 1000 (`--spell-max 9999` adds the other 9,000 figures);
+beyond the cap the app falls back as for any miss. The rest of the numbers
+drill saturates. Pipeline and engines: root README, "Audio".
 
 At around 12 kB per clip the whole set is under 1 GB of R2 storage.
 

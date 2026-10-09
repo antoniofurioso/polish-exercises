@@ -10,7 +10,10 @@
     "lint": "eslint",
     "test": "vitest run",
     "review:export": "tsx scripts/review-export.ts",
-    "review:import": "tsx scripts/review-import.ts"
+    "review:import": "tsx scripts/review-import.ts",
+    "audio:manifest": "tsx scripts/audio/manifest.ts",
+    "audio:render": "tsx scripts/audio/render.ts",
+    "audio:upload": "tsx scripts/audio/upload.ts"
   },
   "dependencies": {
     "next": "16.3.4",
@@ -23,6 +26,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.1.1",
+    "aws4fetch": "^1.0.20",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "tailwindcss": "^4",
