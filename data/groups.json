@@ -8,5 +8,8 @@
   "notHere": ["kuchnia", "miasto", "ogród", "woda", "obiad", "zupa", "słoń", "rodzina"],
   "inView": ["person", "animal", "vehicle", "placeIn", "placeTo", "water", "plant", "food"],
   "notInView": ["kuchnia", "pokój", "bank", "apteka", "biuro", "morze", "zupa", "obiad", "rodzina"],
-  "notCounted": ["pan", "pani", "rodzina"]
+  "notCounted": ["pan", "pani", "rodzina"],
+  "seasons": ["wiosna", "lato", "jesień", "zima"],
+  "meals": ["śniadanie", "obiad", "kolacja"],
+  "womenAtWork": ["nauczycielka", "lekarka", "pielęgniarka"]
 }

@@ -270,6 +270,9 @@ refer to another group.
 | `@inView` | `requires` | Count / numeral frames: what you'd see out of a window or in a photo. |
 | `@notInView` | `excludeLemmas` | ...and what you would not. |
 | `@notCounted` | `excludeLemmas` | People you would not help or talk to in a group of five: pan, pani, rodzina. |
+| `@seasons` | `lemmas` | The four seasons: "Lubię wiosnę", "Tęsknię za latem". |
+| `@meals` | `lemmas` | Meals, which take no article in English: "before dinner", "after breakfast". |
+| `@womenAtWork` | `lemmas` | Feminine job titles, tagged `person` rather than `profession`: "Ona jest lekarką". |
 
 Groups work the same way in the three frame files below.
 
