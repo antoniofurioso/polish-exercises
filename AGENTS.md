@@ -73,7 +73,7 @@ Delete anything the change made untrue.
 | `lib/pronouns.ts`, `lib/possessives.ts`, `lib/agreement.ts` | Demonstrative and possessive drills, sharing the agreement frames |
 | `lib/numerals.ts`, `lib/numbers.ts` | Numeral grammar, and the four number drills (count, numeral form, spelling, ordinals/dates/time). `numbers.ts` also tags each exercise with its SRS card and builds one exercise per card (`buildNumberCard`) |
 | `lib/cards/numbers.ts` | The numbers `CardSource` (Phase 2): card id scheme, levels, introduction order, skill labels |
-| `lib/verbs.ts` | Verb conjugation from principal parts, the five tenses, time frames, English verb morphology. Also the verbs card / skill ids stamped on every exercise, `buildVerbCard` (one exercise for one verb × tense) and `diagnoseVerbMiss` (aspect, person, tense) |
+| `lib/verbs.ts` | Verb conjugation from principal parts, the five tenses, time frames, English verb morphology. Also the verbs card / skill ids stamped on every exercise, `buildVerbCard` (one exercise for one verb × tense) and `diagnoseVerbMiss` (aspect, pastGender, person, tense; a gender slip only when person and number are right) |
 | `lib/cards/verbs.ts` | Verbs `CardSource`: one card per drillable verb × tense, `TENSE_LEVEL` (present A1, the rest A2), `skillLabel` |
 | `lib/shuffle.ts` | Mixes drills, using the registry's `mix` configs |
 | `lib/srs.ts` | SM-2 scheduler with three grades (`schedule`: 1 → 3 → interval × ease days, due at local midnight; wrong → 10 min), and the local-day helpers (`dayKey`, `startOfDay`, `dayNumber`, `addDays`) |
