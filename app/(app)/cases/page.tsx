@@ -92,7 +92,7 @@ export default function CasesConfiguratorPage() {
 
       <div className="space-y-4">
         <Field label="1 · Cases" hint="Choose one or more.">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {CASES.map((kase) => {
               const info = CASE_INFO[kase];
               const stat = stats[kase];
@@ -130,7 +130,7 @@ export default function CasesConfiguratorPage() {
         </Field>
 
         <Field label="2 · Gender" hint="Which noun genders to drill.">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {GENDER_GROUPS.map((g) => {
               const selected = config.genders?.length ? config.genders.includes(g) : true;
               return (
@@ -144,7 +144,7 @@ export default function CasesConfiguratorPage() {
         </Field>
 
         <Field label="3 · What to decline">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {(Object.keys(MODE_LABELS) as WordMode[]).map((mode) => (
               <Choice key={mode} selected={config.mode === mode} onClick={() => setConfig((c) => ({ ...c, mode }))}>
                 <span className="block font-medium">{MODE_LABELS[mode].title}</span>
@@ -162,7 +162,7 @@ export default function CasesConfiguratorPage() {
         </Field>
 
         <Field label="4 · How to answer">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {ANSWER_MODES.map((answerMode) => (
               <Choice
                 key={answerMode}

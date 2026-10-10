@@ -91,7 +91,7 @@ export function Dashboard() {
         </StatCard>
       </section>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[1.2fr_1fr]">
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr_1fr]">
         <section aria-labelledby="days-title" className="card p-6">
           <div className="flex flex-wrap items-baseline justify-between gap-3">
             <h2 id="days-title" className="text-[1.0625rem] font-semibold">
@@ -131,7 +131,7 @@ export function Dashboard() {
           </h2>
           <p className="text-[0.8125rem] text-muted">Set up your own session</p>
         </div>
-        <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {EXERCISE_KINDS.map((kind) => {
             const drill = DRILLS[kind];
             return (
@@ -140,7 +140,7 @@ export function Dashboard() {
                   <span className="tile tile-sm">
                     <DrillIcon kind={kind} size={20} />
                   </span>
-                  <span className="min-w-0 flex-1">
+                  <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">
                     <span className="block font-semibold">{drill.title}</span>
                     <span lang="pl" className="block truncate text-[0.8125rem] text-muted">
                       {drill.pl}

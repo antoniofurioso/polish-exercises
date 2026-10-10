@@ -133,7 +133,7 @@ export default function NumbersConfiguratorPage() {
 
       <div className="space-y-4">
         <Field label="1 · What to drill" hint="Choose one or more.">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {NUMBER_DRILLS.map((drill) => (
               <Choice
                 key={drill}
@@ -155,7 +155,7 @@ export default function NumbersConfiguratorPage() {
             label="2 · Cases"
             hint="Used by the numeral and ordinal drills; counting picks its own."
           >
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {NUMBER_CASES.map((kase) => {
                 const info = CASE_INFO[kase];
                 const stat = stats[kase];
@@ -214,7 +214,7 @@ export default function NumbersConfiguratorPage() {
         ) : null}
 
         <Field label="4 · Gender" hint="Which noun genders to count.">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {GENDER_GROUPS.map((g) => {
               const selected = config.genders?.length ? config.genders.includes(g) : true;
               return (
@@ -228,7 +228,7 @@ export default function NumbersConfiguratorPage() {
         </Field>
 
         <Field label="5 · How to answer">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {ANSWER_MODES.map((answerMode) => (
               <Choice
                 key={answerMode}

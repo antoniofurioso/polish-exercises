@@ -14,9 +14,9 @@ export function FlagMark({ size = 28 }: { size?: number }) {
 /** The mark and the name, linking home. */
 export function Logo({ href = "/", size = 28 }: { href?: string; size?: number }) {
   return (
-    <Link href={href} className="inline-flex items-center gap-2.5 text-foreground no-underline">
+    <Link href={href} className="inline-flex min-w-0 items-center gap-2.5 text-foreground no-underline">
       <FlagMark size={size} />
-      <span className="text-lg font-bold tracking-tight">{BRAND.name}</span>
+      <span className="truncate text-lg font-bold tracking-tight">{BRAND.name}</span>
     </Link>
   );
 }

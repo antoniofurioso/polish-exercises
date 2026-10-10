@@ -170,7 +170,7 @@ export function ExerciseCard({
       ) : null}
 
       {options ? (
-        <div className="mt-8 grid gap-2.5 sm:grid-cols-2">
+        <div className="mt-8 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {options.map((option, i) => {
             const isAnswer = accepted.includes(stripDiacritics(normalise(option)));
             const chosen = answered && normalise(option) === normalise(value);
@@ -195,7 +195,7 @@ export function ExerciseCard({
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-chip font-sans text-xs font-semibold text-muted tabular-nums">
                   {i + 1}
                 </span>
-                <span className="sentence text-xl">{option}</span>
+                <span className="sentence min-w-0 text-xl [overflow-wrap:anywhere]">{option}</span>
               </button>
             );
           })}

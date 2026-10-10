@@ -66,7 +66,7 @@ export default function LandingPage() {
     <main>
       {/* hero */}
       <section className="pb-20 pt-12 sm:pb-28 sm:pt-20">
-        <div className="container-page grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-18">
+        <div className="container-page grid grid-cols-1 items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-18">
           <div>
             <span className="chip chip-accent">
               <Sparkles size={15} aria-hidden="true" />
@@ -124,7 +124,7 @@ export default function LandingPage() {
             </h2>
             <p className="lead mt-4">Every question is a real Polish sentence with its English meaning.</p>
           </div>
-          <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {EXERCISE_KINDS.map((kind) => {
               const drill = DRILLS[kind];
               return (
@@ -191,7 +191,7 @@ export default function LandingPage() {
               A short session every day, and nothing is forgotten
             </h2>
           </div>
-          <ol className="mt-14 grid gap-5 lg:grid-cols-3">
+          <ol className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-3">
             {STEPS.map((step, i) => (
               <li key={step.title} className="card p-7">
                 <div className="flex items-center justify-between">
@@ -245,7 +245,7 @@ export default function LandingPage() {
             </h2>
             <p className="lead mt-4">Short reference pages with every ending table and an example for each rule.</p>
           </div>
-          <ul className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {TOPIC_PAGES.map((page) => (
               <li key={page.path}>
                 <Link href={page.path} className="card card-link flex h-full flex-col gap-3 p-6">
@@ -272,7 +272,7 @@ export default function LandingPage() {
             </h2>
             <p className="lead mt-4">Every drill and every level is free today. Paid plans come later, with accounts.</p>
           </div>
-          <div className="mx-auto mt-14 grid max-w-3xl gap-5 sm:grid-cols-2">
+          <div className="mx-auto mt-14 grid grid-cols-1 max-w-3xl gap-5 sm:grid-cols-2">
             <div className="card flex flex-col p-8">
               <p className="font-semibold">Beta</p>
               <p className="mt-3 text-[2.75rem] font-bold tracking-tight">€0</p>

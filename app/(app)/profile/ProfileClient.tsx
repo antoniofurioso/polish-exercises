@@ -40,7 +40,7 @@ export function ProfilePage() {
         >
           {initial || <User size={34} />}
         </span>
-        <div className="min-w-56 flex-1">
+        <div className="min-w-0 flex-[1_1_14rem]">
           <h2 className="text-[1.375rem] font-bold">{profile.name || "Your profile"}</h2>
           <p className="mt-1 text-muted">{since ? `Practising since ${since}` : "No practice yet"}</p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -62,7 +62,7 @@ export function ProfilePage() {
         </dl>
       </section>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.3fr_1fr]">
         <section aria-labelledby="about-title" className="card p-6 sm:p-7">
           <h2 id="about-title" className="text-[1.0625rem] font-semibold">
             About you
@@ -96,7 +96,7 @@ export function ProfilePage() {
         <h2 id="miles-title" className="text-xl font-semibold">
           Milestones
         </h2>
-        <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {goals.map((m) => (
             <li key={m.id} className={`card flex items-center gap-3.5 p-5 ${m.reached ? "" : "opacity-60"}`}>
               <span

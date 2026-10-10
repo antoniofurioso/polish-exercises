@@ -14,7 +14,7 @@ export function CaseForms({ forms }: { forms: CaseForm[] }) {
       {forms.map(({ kase, stem, ending }, i) => {
         const info = CASE_INFO[kase];
         return (
-          <li key={kase} className="card flex min-h-52 flex-col gap-2 px-4 py-5">
+          <li key={kase} className="card flex min-h-52 min-w-0 flex-col gap-2 px-4 py-5 [overflow-wrap:anywhere]">
             <span className="text-[0.8125rem] font-semibold text-accent">{String(i + 1).padStart(2, "0")}</span>
             <span className="font-semibold">
               {info.en}
@@ -117,7 +117,7 @@ export function SessionMix() {
           <span key={m.title} className={m.swatch} style={{ flex: m.share }} />
         ))}
       </div>
-      <ul className="mt-6 grid gap-6 sm:grid-cols-3">
+      <ul className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
         {MIX.map((m) => (
           <li key={m.title} className="flex gap-3.5">
             <span aria-hidden="true" className={`mt-1.5 h-3 w-3 shrink-0 rounded ${m.swatch}`} />

@@ -68,7 +68,7 @@ export default function ShuffleConfiguratorPage() {
 
       <div className="space-y-4">
         <Field label="1 · Exercises to mix" hint="Choose one or more.">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {DRILL_KINDS.map((kind) => (
               <Choice key={kind} selected={mix.includes(kind)} onClick={() => toggleDrill(kind)}>
                 <span className="block font-medium">{DRILL_LABELS[kind].title}</span>
@@ -79,7 +79,7 @@ export default function ShuffleConfiguratorPage() {
         </Field>
 
         <Field label="2 · How to answer">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {ANSWER_MODES.map((answerMode) => (
               <Choice
                 key={answerMode}

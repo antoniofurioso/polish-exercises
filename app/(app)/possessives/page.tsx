@@ -116,7 +116,7 @@ export default function PossessiveConfiguratorPage() {
 
       <div className="space-y-4">
         <Field label="1 · Whose" hint="Choose one or more.">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {POSSESSIVES.map((owner) => (
               <Choice
                 key={owner}
@@ -131,7 +131,7 @@ export default function PossessiveConfiguratorPage() {
         </Field>
 
         <Field label="2 · Cases" hint="Choose one or more.">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {POSSESSIVE_CASES.map((kase) => {
               const info = CASE_INFO[kase];
               const stat = stats[kase];
@@ -173,7 +173,7 @@ export default function PossessiveConfiguratorPage() {
         </Field>
 
         <Field label="3 · Gender" hint="Which noun genders to drill.">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {GENDER_GROUPS.map((g) => {
               const selected = config.genders?.length ? config.genders.includes(g) : true;
               return (
@@ -202,7 +202,7 @@ export default function PossessiveConfiguratorPage() {
         </Field>
 
         <Field label="5 · How to answer">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {ANSWER_MODES.map((answerMode) => (
               <Choice
                 key={answerMode}

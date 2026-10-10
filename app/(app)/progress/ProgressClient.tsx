@@ -41,7 +41,7 @@ export function ProgressPage() {
             </p>
           ) : null}
 
-          <section className="grid gap-4 sm:grid-cols-2">
+          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="card flex items-center gap-5 p-6">
               <GoalRing answered={status.answered} goal={status.goal} size={84} />
               <div>

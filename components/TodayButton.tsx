@@ -40,7 +40,7 @@ export function TodayButton() {
         <circle cx="100" cy="100" r="60" fill="none" stroke="#fff" strokeWidth="2" />
       </svg>
       {hydrated ? <GoalRing answered={status.answered} goal={status.goal} size={104} onAccent /> : null}
-      <div className="relative min-w-56 flex-1">
+      <div className="relative min-w-0 flex-[1_1_14rem]">
         <p lang="pl" className="text-xs font-semibold uppercase tracking-[0.14em] text-on-accent-soft">
           {extraOnly ? "Dodatkowa praktyka" : "Dzisiaj"}
         </p>

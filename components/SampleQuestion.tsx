@@ -79,7 +79,7 @@ export function SampleQuestion({ exercises }: { exercises: Exercise[] }) {
               lang="pl"
               disabled={picked !== null}
               onClick={() => setPicked(option)}
-              className={`sentence min-h-13 rounded-xl border px-4 py-3 text-left text-lg transition-colors sm:text-xl ${style} ${
+              className={`sentence min-h-13 min-w-0 rounded-xl border px-4 py-3 text-left text-lg [overflow-wrap:anywhere] transition-colors sm:text-xl ${style} ${
                 picked === null ? "cursor-pointer" : "cursor-default"
               }`}
             >

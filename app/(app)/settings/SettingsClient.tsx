@@ -119,7 +119,7 @@ export function SettingsPage() {
             Your data
           </h2>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-            <div className="min-w-60 flex-1">
+            <div className="min-w-0 flex-[1_1_15rem]">
               <p className="font-semibold">Delete everything from this device</p>
               <p className="text-sm text-muted">Your progress, streak, profile and settings. This can’t be undone.</p>
             </div>
@@ -158,7 +158,7 @@ function Row({
 }) {
   return (
     <div className={`flex flex-wrap gap-x-6 gap-y-3 py-5 ${stacked ? "flex-col" : "items-center justify-between"}`}>
-      <div className="flex min-w-60 flex-1 gap-3.5">
+      <div className="flex min-w-0 flex-[1_1_15rem] gap-3.5">
         {icon ? <span className="mt-0.5 text-accent">{icon}</span> : null}
         <div>
           <p className="font-semibold">{title}</p>

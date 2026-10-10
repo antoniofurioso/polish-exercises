@@ -98,7 +98,7 @@ export default function PronounConfiguratorPage() {
 
       <div className="space-y-4">
         <Field label="1 · Which word">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {(Object.keys(DEMO_LABELS) as DemoChoice[]).map((demo) => (
               <Choice
                 key={demo}
@@ -113,7 +113,7 @@ export default function PronounConfiguratorPage() {
         </Field>
 
         <Field label="2 · Cases" hint="Choose one or more.">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {PRONOUN_CASES.map((kase) => {
               const info = CASE_INFO[kase];
               const stat = stats[kase];
@@ -151,7 +151,7 @@ export default function PronounConfiguratorPage() {
         </Field>
 
         <Field label="3 · Gender" hint="Which noun genders to drill.">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {GENDER_GROUPS.map((g) => {
               const selected = config.genders?.length ? config.genders.includes(g) : true;
               return (
@@ -180,7 +180,7 @@ export default function PronounConfiguratorPage() {
         </Field>
 
         <Field label="5 · How to answer">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {ANSWER_MODES.map((answerMode) => (
               <Choice
                 key={answerMode}

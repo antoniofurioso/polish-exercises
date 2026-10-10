@@ -106,7 +106,7 @@ export default function VerbsConfiguratorPage() {
 
       <div className="space-y-4">
         <Field label="1 · Tenses" hint="Choose one or more.">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {TENSES.map((tense) => (
               <Choice
                 key={tense}
@@ -124,7 +124,7 @@ export default function VerbsConfiguratorPage() {
         </Field>
 
         <Field label="2 · Verbs" hint="Reflexive verbs carry “się”.">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {VERB_TYPES.map((verbType) => (
               <Choice
                 key={verbType}
@@ -139,7 +139,7 @@ export default function VerbsConfiguratorPage() {
         </Field>
 
         <Field label="3 · Person" hint="The imperative only uses ty, my and wy.">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {(["sg", "pl"] as GramNumber[]).map((num) => (
               <Choice
                 key={num}
@@ -154,7 +154,7 @@ export default function VerbsConfiguratorPage() {
         </Field>
 
         <Field label="4 · How to answer">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {ANSWER_MODES.map((answerMode) => (
               <Choice
                 key={answerMode}

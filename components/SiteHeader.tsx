@@ -22,9 +22,9 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-background/90 backdrop-blur">
-      <div className="container-page flex h-16 items-center justify-between gap-4 sm:h-[4.75rem]">
+      <div className="container-page flex h-16 items-center justify-between gap-3 sm:h-[4.75rem]">
         <Logo />
-        <nav aria-label="Main" className="flex items-center gap-2 sm:gap-8">
+        <nav aria-label="Main" className="flex shrink-0 items-center gap-2 sm:gap-8">
           <ul className="hidden items-center gap-8 md:flex">
             {LINKS.map((link) => (
               <li key={link.href}>
@@ -34,8 +34,9 @@ export function SiteHeader() {
               </li>
             ))}
           </ul>
-          <Link href="/today" className="btn btn-primary btn-sm sm:min-h-11 sm:px-[1.125rem] sm:text-[0.9375rem]">
-            Start practising
+          <Link href="/today" className="btn btn-primary btn-sm whitespace-nowrap sm:min-h-11 sm:px-[1.125rem] sm:text-[0.9375rem]">
+            <span className="sm:hidden">Start</span>
+            <span className="hidden sm:inline">Start practising</span>
           </Link>
           <button
             type="button"

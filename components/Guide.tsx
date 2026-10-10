@@ -41,7 +41,7 @@ export function GuideLayout({
       <div className="mt-14 space-y-16">{children}</div>
       <nav aria-label="More grammar guides" className="mt-20 border-t border-line pt-10">
         <h2 className="label-caps">More grammar guides</h2>
-        <ul className="mt-4 grid gap-3 sm:grid-cols-3">
+        <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {others.map((p) => (
             <li key={p.path}>
               <Link href={p.path} className="card card-link h-full px-5 py-4">

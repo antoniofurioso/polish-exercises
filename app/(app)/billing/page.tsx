@@ -27,18 +27,18 @@ export default function Billing() {
         <span className="tile">
           <CreditCard size={24} strokeWidth={1.75} aria-hidden="true" />
         </span>
-        <div className="min-w-48 flex-1">
+        <div className="min-w-0 flex-[1_1_12rem]">
           <p className="text-[0.8125rem] font-medium text-muted">Current plan</p>
           <h2 id="plan-title" className="text-xl font-bold">
             Free <span className="text-sm font-medium text-muted">· beta</span>
           </h2>
         </div>
-        <p className="min-w-60 flex-1 text-sm text-muted">
+        <p className="min-w-0 flex-[1_1_15rem] text-sm text-muted">
           Everything is free while {BRAND.name} is in beta. No card, no account.
         </p>
       </section>
 
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
+      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <section aria-labelledby="beta-title" className="card flex flex-col p-7">
           <h2 id="beta-title" className="font-semibold">
             Beta
