@@ -1,6 +1,6 @@
 # Phase 3: Ship the web version
 
-Status: ◐ code done; waiting on the owner (name, email, PostHog key, domain, beta). Goal: a public site that real learners can install, use
+Status: ◐ live at https://polishup.app; the beta is what is left. Goal: a public site that real learners can install, use
 offline and come back to, plus the measurement to tell whether they do.
 
 ## Decisions so far
@@ -8,8 +8,8 @@ offline and come back to, plus the measurement to tell whether they do.
 | Question | Decision |
 | --- | --- |
 | Name, colours, logo | **PolishUp** (owner's pick after [naming.md](./naming.md)). In `lib/brand.ts` only; the placeholder monogram icon is generated from its first letter. Colours stay the current Polish red; a real logo replaces `public/brand/icon.svg` later |
-| Analytics | **PostHog**, EU cloud, only after consent |
-| Privacy policy | Draft under the owner's name (Antonio Furioso); contact email to be created (`NEXT_PUBLIC_CONTACT_EMAIL`) |
+| Analytics | **PostHog**, EU cloud, only after consent. Live: events arrive in the owner's EU project. `respect_dnt` is off, because "Allow analytics" is the learner's own opt-in (with it on, learners whose browser sends Do Not Track were never counted) |
+| Privacy policy | **Approved by the owner** (Antonio Furioso), live at `/privacy` with the contact email from `NEXT_PUBLIC_CONTACT_EMAIL`. It states IP discarding, 12-month retention and a DPA with PostHog, so those PostHog settings must stay on |
 | Domain | **polishup.app**: `BRAND.url` defaults to `https://polishup.app` (`NEXT_PUBLIC_SITE_URL` overrides it), so canonical links, Open Graph and the sitemap name it on every deployment, previews included |
 
 ## 1. Brand in one place
@@ -113,25 +113,33 @@ name and domain exist.
   `npm run icons`).
 - [x] The app installs and runs a session offline: manifest, icons and the service
   worker checked in Chromium with the server stopped (pages, a practice answer,
-  `/today`, cached audio). Not yet tried on a real Android or iOS phone.
+  `/today`, cached audio). **Owner:** try it on a real Android and iOS phone.
 - [x] `/` explains the app and gets a new visitor into a session in one click.
-- [x] Analytics run only after consent (checked with every PostHog request
-  intercepted); day-7 retention is a Retention insight on `session_started`
-  (README "Analytics and privacy"). **Owner:** EU project, key, IP discarding,
-  12-month retention, DPA.
-- [x] `/privacy` is complete apart from the contact email (`NEXT_PUBLIC_CONTACT_EMAIL`).
+- [x] Analytics run only after consent, and events arrive in the live PostHog EU
+  project. Day-7 retention is a Retention insight on `session_started` (README
+  "Analytics and privacy").
+- [x] `/privacy` is approved and live, with the contact email.
 - [x] All gates green. Lighthouse 12 (which no longer has a PWA category) gives
   100 for accessibility, best practices and SEO on `/`, `/learn`, a topic page and
   `/privacy`; performance 74–76 on a local server.
 
+## Live setup
+
+- Cloudflare Pages, own Cloudflare account, production branch `main`, build
+  command `npm run build`, output `out`; every other branch gets a preview URL.
+- polishup.app is the custom domain. `NEXT_PUBLIC_CONTACT_EMAIL` is set for
+  production and preview; `NEXT_PUBLIC_POSTHOG_KEY` for production only, so
+  previews never show the banner or send events.
+
 ## Left for the owner
 
-1. Point polishup.app at the Cloudflare Pages project (custom domain), then add it
-   to Google Search Console and submit `https://polishup.app/sitemap.xml`.
-2. Create the contact email, set `NEXT_PUBLIC_CONTACT_EMAIL`, review `/privacy`.
-3. PostHog EU project and `NEXT_PUBLIC_POSTHOG_KEY` in the Cloudflare Pages build
-   (build command `npm run build`, output `out`).
-4. Recruit the beta (posts in `plans/beta-posts.md`).
+1. Google Search Console: add the `polishup.app` domain property and submit
+   `https://polishup.app/sitemap.xml`.
+2. PostHog: save the day-7 Retention insight to a dashboard; keep "Discard client
+   IP data", 12-month retention and the signed DPA, as `/privacy` states.
+3. Install the app on a real Android and iOS phone and practise offline.
+4. Recruit the beta: 20–30 learners for 2–3 weeks (posts in `plans/beta-posts.md`),
+   then decide on Phase 4 from day-7 return.
 
 ## Known gaps
 

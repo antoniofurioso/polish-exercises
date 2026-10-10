@@ -28,9 +28,6 @@ export default function Privacy() {
       <p className="eyebrow">{BRAND.name}</p>
       <h1 className="heading mt-3">Privacy policy</h1>
       <p className="mt-2 text-sm text-muted">Last updated: {LAST_UPDATED}</p>
-      <p className="mt-4 rounded-xl border border-warn/40 bg-warn-soft px-4 py-3 text-sm text-warn">
-        Draft for the owner to review before launch. It is not legal advice.
-      </p>
 
       <div className="mt-8 space-y-8 leading-relaxed [&_h2]:text-xl [&_h2]:font-semibold [&_li]:ml-5 [&_li]:list-disc [&_p]:mt-3 [&_ul]:mt-3 [&_ul]:space-y-1">
         <section>

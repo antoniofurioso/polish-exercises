@@ -70,7 +70,7 @@ Delete anything the change made untrue.
 | `app/(app)/progress/` | Streak, today's goal ring, the last 28 days, weak spots (each linking to a configured `/practice` session). The settings are on `/settings` |
 | `app/(app)/<drill>/page.tsx` | One configurator per drill (cases, pronouns, possessives, numbers, verbs, shuffle). They write the session URL |
 | `app/practice/` | Reads the URL, builds the session and hands it to `Runner` |
-| `app/(site)/privacy/`, `components/Privacy.tsx` | Privacy policy (draft for the owner); `ConsentChoice` and `ClearLocalData` (every `polish.*` key), also used on `/settings` |
+| `app/(site)/privacy/`, `components/Privacy.tsx` | Privacy policy (approved by the owner; change its `LAST_UPDATED` with every edit, and keep it true to `lib/analytics.ts` and the PostHog settings); `ConsentChoice` and `ClearLocalData` (every `polish.*` key), also used on `/settings` |
 | `lib/analytics.ts` | Analytics (plans/phase-3.md §4): `track(event, props)` is a no-op unless `NEXT_PUBLIC_POSTHOG_KEY` is set and `polish.consent.v1` is `granted`; `EVENT_SCHEMA` lets only enum values and counts through; `nextConsent` state machine; posthog-js is `import()`ed only after consent (EU host). Imports no runtime code but `lib/types`, since every page loads it |
 | `components/Analytics.tsx`, `components/ConsentBanner.tsx` | Mounted in the layout: start PostHog after an earlier consent, `pwa_installed` (`appinstalled` or the `pwa-installed` window event), the banner (only with a key and no choice yet) |
 | `components/` | `SiteHeader`, `SiteFooter` (public pages), `AppShell` (+ `AppPage`, `ACCOUNT`), `AccountTabs`, `Logo` (`FlagMark`), `DrillIcon` (one Lucide icon per drill), `Dashboard`, `progress` (`ActivityGrid`, `StatCard`, `WeakSpotList`), `Infographics`, `StartButton`, `SampleQuestion`, `Guide`, `Runner` (full-screen session: ✕, progress bar, sound; grades, records every answer and sends the analytics events; shared by `/practice` and `/today`), `ExerciseCard` (one question, Polish-letter keys, speech, keyboard), `ResultsSummary`, `TodayButton` (the red panel), `today` (`useTodayStatus`, `useNow`, `GoalRing`, `GoalStatus`), `ui` (`Choice`, `Field`) |
@@ -236,8 +236,8 @@ See `plans/ROADMAP.md`.
 - **Phase 2 (retention) code is done:** SRS cards for every drill, the v2
   answer log, `/today` and `/progress`. Spec, decisions and open points are in
   `plans/phase-2.md`.
-- **Phase 3 (ship the web app): code done** (landing page, topic pages, PWA and
-  offline, PostHog after consent, `/privacy`). The name is **PolishUp** and the
-  domain **polishup.app** (both only in `lib/brand.ts`). Waiting on the owner:
-  contact email, PostHog key, pointing the domain at Cloudflare Pages, and the
-  beta. See `plans/phase-3.md`.
+- **Phase 3 (ship the web app): live at https://polishup.app** (Cloudflare Pages
+  from `main`; landing page, topic pages, PWA and offline, PostHog EU after
+  consent with events arriving, approved `/privacy`). The name **PolishUp** and
+  the domain live only in `lib/brand.ts`. Left: Search Console, a real-phone
+  check and the beta. See `plans/phase-3.md`.
