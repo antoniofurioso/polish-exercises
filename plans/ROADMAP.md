@@ -109,3 +109,7 @@ audio on every device.
 - **An install popup**: after a learner's first finished session (never on the
   first visit), a dismissible card offering to add the app to the home screen.
   It reuses `lib/install.ts` (the browser prompt, or Safari's steps on iPhone).
+- **Resume today's practice**: leaving `/today` mid-session and coming back starts
+  the session over. Keep the day's session (its card list and position) in
+  localStorage, keyed by the local day, and continue from the next unanswered
+  question; answers already given are in the log anyway.
