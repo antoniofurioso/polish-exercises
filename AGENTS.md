@@ -236,8 +236,10 @@ See `plans/ROADMAP.md`.
 - **Phase 2 (retention) code is done:** SRS cards for every drill, the v2
   answer log, `/today` and `/progress`. Spec, decisions and open points are in
   `plans/phase-2.md`.
-- **Phase 3 (ship the web app): live at https://polishup.app** (Cloudflare Pages
-  from `main`; landing page, topic pages, PWA and offline, PostHog EU after
-  consent with events arriving, approved `/privacy`). The name **PolishUp** and
-  the domain live only in `lib/brand.ts`. Left: Search Console, a real-phone
-  check and the beta. See `plans/phase-3.md`.
+- **Phase 3 (ship the web app) is done: live at https://polishup.app**
+  (Cloudflare Pages from `main`; landing page, topic pages, PWA and offline,
+  PostHog EU after consent, approved `/privacy`, Search Console). The name
+  **PolishUp** and the domain live only in `lib/brand.ts`.
+- **Now: the beta is running.** Its day-7 return (PostHog dashboard) decides when
+  Phase 4 (accounts and payments, `plans/ROADMAP.md`) starts. Small leftovers are
+  in the roadmap's "Later" list.
