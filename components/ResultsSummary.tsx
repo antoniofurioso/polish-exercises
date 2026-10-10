@@ -12,12 +12,16 @@ export function ResultsSummary({
   results,
   onRetryMissed,
   onRestart,
-  home = "/",
+  home = "/learn",
+  restartLabel = "New sentences, same settings",
+  homeLabel = "Change settings",
 }: {
   results: Result[];
   onRetryMissed: () => void;
   onRestart: () => void;
   home?: string;
+  restartLabel?: string;
+  homeLabel?: string;
 }) {
   const correct = results.filter((r) => r.verdict === "correct").length;
   const missed = results.filter((r) => r.verdict !== "correct");
@@ -94,13 +98,13 @@ export function ResultsSummary({
           onClick={onRestart}
           className="flex-1 rounded-xl border border-line bg-surface px-6 py-3 font-medium cursor-pointer hover:border-accent/50"
         >
-          New sentences, same settings
+          {restartLabel}
         </button>
         <Link
           href={home}
           className="flex-1 rounded-xl border border-line bg-surface px-6 py-3 text-center font-medium hover:border-accent/50"
         >
-          Change settings
+          {homeLabel}
         </Link>
       </div>
     </div>

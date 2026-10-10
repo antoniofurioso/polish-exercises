@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ADJECTIVES, COLLOCATIONS } from "../adjectives";
 import { AGREEMENT_TEMPLATES } from "../agreement";
 import { nounsFor } from "../generate";
+import { LEXICON } from "../lexicon";
 import { NOUNS } from "../nouns";
 import { TEMPLATES } from "../templates";
 import { CASES, GENDER_GROUPS } from "../types";
@@ -77,6 +78,11 @@ describe("sense checks", () => {
       }
       for (const adj of tpl.adjOnly ?? []) {
         expect(adjectives.has(adj), `${tpl.pl}: ${adj}`).toBe(true);
+      }
+    }
+    for (const frame of [...LEXICON.counting, ...Object.values(LEXICON.numerals)]) {
+      for (const lemma of [...(frame.lemmas ?? []), ...(frame.excludeLemmas ?? [])]) {
+        expect(lemmas.has(lemma), `${frame.pl}: ${lemma}`).toBe(true);
       }
     }
     for (const [noun, adjs] of Object.entries(COLLOCATIONS)) {

@@ -1,11 +1,16 @@
 import { capitalise, makeRng, pick, shuffle } from "./generate";
 import { normalise, stripDiacritics } from "./grade";
-import { TENSES } from "./types";
+import { LEXICON } from "./lexicon";
+import { TENSES, withinLevel } from "./types";
 import type {
   AnswerMode,
   Config,
   Exercise,
+  Freq,
   GramNumber,
+  Level,
+  MissKind,
+  Review,
   Tense,
   VerbType,
 } from "./types";
@@ -23,6 +28,11 @@ import type {
  * verb stores a handful of principal parts and the rest is built from them.
  * Reflexive verbs carry "się", which the answers accept on either side of the
  * verb wherever Polish allows it.
+ *
+ * Not every verb is drilled in every tense. An imperfective-only verb
+ * (chodzić, mieszkać, wiedzieć) has no simple future and no perfective frame;
+ * a stative one (wiedzieć, lubić) no "all evening" or "every day"; a verb
+ * that fits no frame of a tense is simply not drawn for it.
  */
 
 type PastStems = {
@@ -55,11 +65,21 @@ type Complement = {
   en: string;
 };
 
+/**
+ * English base, simple past and -ing form. A "be + adjective" base (be late,
+ * be afraid of) has neither: "be" is conjugated (am late, was late).
+ */
+export type EnglishGloss = { base: string; past?: string; ing?: string };
+
 export type Verb = {
-  /** English base, simple past and -ing form. */
-  en: { base: string; past: string; ing: string };
+  en: EnglishGloss;
+  /** CEFR level of the aspect pair. */
+  level: Level;
+  /** 1 = most common; see data/README.md. */
+  freq?: Freq;
   impf: AspectForms;
-  pf: AspectForms;
+  /** Left out for an imperfective-only verb: chodzić, mieszkać, wiedzieć. */
+  pf?: AspectForms;
   objects: Complement[];
   /** Takes "się": uczyć się, myć się. */
   reflexive?: true;
@@ -68,666 +88,29 @@ export type Verb = {
    * ("codziennie idę" wants chodzić) and no stretch of time.
    */
   motion?: true;
+  /**
+   * Indeterminate motion (chodzić, jeździć): trips made again and again, so
+   * only habits ("codziennie chodzę do pracy"), never one trip now.
+   */
+  indeterminate?: true;
   /** Over in a moment (wracać, budzić się): no "all evening" frames. */
   momentary?: true;
+  /**
+   * A state, not an action (wiedzieć, lubić, widzieć): English keeps the
+   * simple present ("I understand now", never "I am understanding"), and
+   * there are no "all evening" or "every day" frames.
+   */
+  stative?: true;
+  /**
+   * Only orders of this polarity sound right: "negated" for "Nie martw się!"
+   * (never "Martw się!"), "affirmative" for "Pamiętaj o kluczach!".
+   */
+  orders?: "affirmative" | "negated";
+  review?: Review;
 };
 
-export const VERBS: Verb[] = [
-  {
-    en: { base: "make", past: "made", ing: "making" },
-    impf: {
-      inf: "robić",
-      past: { m: "robił", f: "robiła", vir: "robili" },
-      pres: ["robię", "robisz", "robią"],
-      imp: "rób",
-    },
-    pf: {
-      inf: "zrobić",
-      past: { m: "zrobił", f: "zrobiła", vir: "zrobili" },
-      pres: ["zrobię", "zrobisz", "zrobią"],
-      imp: "zrób",
-    },
-    objects: [
-      { pl: "obiad", neg: "obiadu", en: "dinner" },
-      { pl: "kawę", neg: "kawy", en: "coffee" },
-      { pl: "ciasto", neg: "ciasta", en: "a cake" },
-    ],
-  },
-  {
-    en: { base: "write", past: "wrote", ing: "writing" },
-    impf: {
-      inf: "pisać",
-      past: { m: "pisał", f: "pisała", vir: "pisali" },
-      pres: ["piszę", "piszesz", "piszą"],
-      imp: "pisz",
-    },
-    pf: {
-      inf: "napisać",
-      past: { m: "napisał", f: "napisała", vir: "napisali" },
-      pres: ["napiszę", "napiszesz", "napiszą"],
-      imp: "napisz",
-    },
-    objects: [
-      { pl: "list", neg: "listu", en: "a letter" },
-      { pl: "e-mail", neg: "e-maila", en: "an email" },
-      { pl: "raport", neg: "raportu", en: "the report" },
-    ],
-  },
-  {
-    en: { base: "read", past: "read", ing: "reading" },
-    impf: {
-      inf: "czytać",
-      past: { m: "czytał", f: "czytała", vir: "czytali" },
-      pres: ["czytam", "czytasz", "czytają"],
-      imp: "czytaj",
-    },
-    pf: {
-      inf: "przeczytać",
-      past: { m: "przeczytał", f: "przeczytała", vir: "przeczytali" },
-      pres: ["przeczytam", "przeczytasz", "przeczytają"],
-      imp: "przeczytaj",
-    },
-    objects: [
-      { pl: "książkę", neg: "książki", en: "a book" },
-      { pl: "gazetę", neg: "gazety", en: "the newspaper" },
-      { pl: "artykuł", neg: "artykułu", en: "the article" },
-    ],
-  },
-  {
-    en: { base: "drink", past: "drank", ing: "drinking" },
-    impf: {
-      inf: "pić",
-      past: { m: "pił", f: "piła", vir: "pili" },
-      pres: ["piję", "pijesz", "piją"],
-      imp: "pij",
-    },
-    pf: {
-      inf: "wypić",
-      past: { m: "wypił", f: "wypiła", vir: "wypili" },
-      pres: ["wypiję", "wypijesz", "wypiją"],
-      imp: "wypij",
-    },
-    objects: [
-      { pl: "kawę", neg: "kawy", en: "the coffee" },
-      { pl: "herbatę", neg: "herbaty", en: "the tea" },
-      { pl: "wodę", neg: "wody", en: "the water" },
-    ],
-  },
-  {
-    en: { base: "eat", past: "ate", ing: "eating" },
-    impf: {
-      inf: "jeść",
-      past: { m: "jadł", f: "jadła", vir: "jedli" },
-      pres: ["jem", "jesz", "jedzą"],
-      imp: "jedz",
-    },
-    pf: {
-      inf: "zjeść",
-      past: { m: "zjadł", f: "zjadła", vir: "zjedli" },
-      pres: ["zjem", "zjesz", "zjedzą"],
-      imp: "zjedz",
-    },
-    objects: [
-      { pl: "śniadanie", neg: "śniadania", en: "breakfast" },
-      { pl: "zupę", neg: "zupy", en: "the soup" },
-      { pl: "jabłko", neg: "jabłka", en: "an apple" },
-    ],
-  },
-  {
-    en: { base: "buy", past: "bought", ing: "buying" },
-    impf: {
-      inf: "kupować",
-      past: { m: "kupował", f: "kupowała", vir: "kupowali" },
-      pres: ["kupuję", "kupujesz", "kupują"],
-      imp: "kupuj",
-    },
-    pf: {
-      inf: "kupić",
-      past: { m: "kupił", f: "kupiła", vir: "kupili" },
-      pres: ["kupię", "kupisz", "kupią"],
-      imp: "kup",
-    },
-    objects: [
-      { pl: "chleb", neg: "chleba", en: "bread" },
-      { pl: "bilety", neg: "biletów", en: "the tickets" },
-      { pl: "prezent", neg: "prezentu", en: "a present" },
-    ],
-  },
-  {
-    en: { base: "watch", past: "watched", ing: "watching" },
-    impf: {
-      inf: "oglądać",
-      past: { m: "oglądał", f: "oglądała", vir: "oglądali" },
-      pres: ["oglądam", "oglądasz", "oglądają"],
-      imp: "oglądaj",
-    },
-    pf: {
-      inf: "obejrzeć",
-      past: { m: "obejrzał", f: "obejrzała", vir: "obejrzeli" },
-      pres: ["obejrzę", "obejrzysz", "obejrzą"],
-      imp: "obejrzyj",
-    },
-    objects: [
-      { pl: "film", neg: "filmu", en: "a film" },
-      { pl: "mecz", neg: "meczu", en: "the match" },
-      { pl: "serial", neg: "serialu", en: "the series" },
-    ],
-  },
-  {
-    en: { base: "take", past: "took", ing: "taking" },
-    impf: {
-      inf: "brać",
-      past: { m: "brał", f: "brała", vir: "brali" },
-      pres: ["biorę", "bierzesz", "biorą"],
-      imp: "bierz",
-    },
-    pf: {
-      inf: "wziąć",
-      past: { m: "wziął", f: "wzięła", vir: "wzięli" },
-      pres: ["wezmę", "weźmiesz", "wezmą"],
-      imp: "weź",
-    },
-    objects: [
-      { pl: "parasol", neg: "parasola", en: "an umbrella" },
-      { pl: "taksówkę", neg: "taksówki", en: "a taxi" },
-      { pl: "klucze", neg: "kluczy", en: "the keys" },
-    ],
-  },
-  {
-    en: { base: "go", past: "went", ing: "going" },
-    // "pójdź" is archaic — the affirmative imperative falls back to "idź"
-    motion: true,
-    impf: {
-      inf: "iść",
-      past: { m: "szedł", f: "szła", vir: "szli" },
-      pres: ["idę", "idziesz", "idą"],
-      imp: "idź",
-    },
-    pf: {
-      inf: "pójść",
-      past: { m: "poszedł", f: "poszła", vir: "poszli" },
-      pres: ["pójdę", "pójdziesz", "pójdą"],
-    },
-    objects: [
-      { pl: "do domu", en: "home" },
-      { pl: "do pracy", en: "to work" },
-      { pl: "na spacer", en: "for a walk" },
-    ],
-  },
-  {
-    en: { base: "go", past: "went", ing: "going" },
-    motion: true,
-    impf: {
-      inf: "jechać",
-      past: { m: "jechał", f: "jechała", vir: "jechali" },
-      pres: ["jadę", "jedziesz", "jadą"],
-      imp: "jedź",
-    },
-    pf: {
-      inf: "pojechać",
-      past: { m: "pojechał", f: "pojechała", vir: "pojechali" },
-      pres: ["pojadę", "pojedziesz", "pojadą"],
-      imp: "pojedź",
-    },
-    objects: [
-      { pl: "do Krakowa", en: "to Kraków" },
-      { pl: "nad morze", en: "to the seaside" },
-      { pl: "w góry", en: "to the mountains" },
-    ],
-  },
-  {
-    en: { base: "clean", past: "cleaned", ing: "cleaning" },
-    impf: {
-      inf: "sprzątać",
-      past: { m: "sprzątał", f: "sprzątała", vir: "sprzątali" },
-      pres: ["sprzątam", "sprzątasz", "sprzątają"],
-      imp: "sprzątaj",
-    },
-    pf: {
-      inf: "posprzątać",
-      past: { m: "posprzątał", f: "posprzątała", vir: "posprzątali" },
-      pres: ["posprzątam", "posprzątasz", "posprzątają"],
-      imp: "posprzątaj",
-    },
-    objects: [
-      { pl: "mieszkanie", neg: "mieszkania", en: "the flat" },
-      { pl: "kuchnię", neg: "kuchni", en: "the kitchen" },
-      { pl: "pokój", neg: "pokoju", en: "the room" },
-    ],
-  },
-  {
-    en: { base: "cook", past: "cooked", ing: "cooking" },
-    impf: {
-      inf: "gotować",
-      past: { m: "gotował", f: "gotowała", vir: "gotowali" },
-      pres: ["gotuję", "gotujesz", "gotują"],
-      imp: "gotuj",
-    },
-    pf: {
-      inf: "ugotować",
-      past: { m: "ugotował", f: "ugotowała", vir: "ugotowali" },
-      pres: ["ugotuję", "ugotujesz", "ugotują"],
-      imp: "ugotuj",
-    },
-    objects: [
-      { pl: "zupę", neg: "zupy", en: "soup" },
-      { pl: "makaron", neg: "makaronu", en: "pasta" },
-      { pl: "ryż", neg: "ryżu", en: "rice" },
-    ],
-  },
-  {
-    en: { base: "pay", past: "paid", ing: "paying" },
-    impf: {
-      inf: "płacić",
-      past: { m: "płacił", f: "płaciła", vir: "płacili" },
-      pres: ["płacę", "płacisz", "płacą"],
-      imp: "płać",
-    },
-    pf: {
-      inf: "zapłacić",
-      past: { m: "zapłacił", f: "zapłaciła", vir: "zapłacili" },
-      pres: ["zapłacę", "zapłacisz", "zapłacą"],
-      imp: "zapłać",
-    },
-    objects: [
-      { pl: "rachunek", neg: "rachunku", en: "the bill" },
-      { pl: "za kawę", en: "for the coffee" },
-      { pl: "czynsz", neg: "czynszu", en: "the rent" },
-    ],
-  },
-  {
-    en: { base: "call", past: "called", ing: "calling" },
-    impf: {
-      inf: "dzwonić",
-      past: { m: "dzwonił", f: "dzwoniła", vir: "dzwonili" },
-      pres: ["dzwonię", "dzwonisz", "dzwonią"],
-      imp: "dzwoń",
-    },
-    pf: {
-      inf: "zadzwonić",
-      past: { m: "zadzwonił", f: "zadzwoniła", vir: "zadzwonili" },
-      pres: ["zadzwonię", "zadzwonisz", "zadzwonią"],
-      imp: "zadzwoń",
-    },
-    objects: [
-      { pl: "do mamy", en: "Mum" },
-      { pl: "do szefa", en: "the boss" },
-      { pl: "do lekarza", en: "the doctor" },
-    ],
-  },
-  {
-    en: { base: "open", past: "opened", ing: "opening" },
-    impf: {
-      inf: "otwierać",
-      past: { m: "otwierał", f: "otwierała", vir: "otwierali" },
-      pres: ["otwieram", "otwierasz", "otwierają"],
-      imp: "otwieraj",
-    },
-    pf: {
-      inf: "otworzyć",
-      past: { m: "otworzył", f: "otworzyła", vir: "otworzyli" },
-      pres: ["otworzę", "otworzysz", "otworzą"],
-      imp: "otwórz",
-    },
-    objects: [
-      { pl: "okno", neg: "okna", en: "the window" },
-      { pl: "drzwi", en: "the door" },
-      { pl: "butelkę", neg: "butelki", en: "the bottle" },
-    ],
-  },
-  {
-    en: { base: "close", past: "closed", ing: "closing" },
-    impf: {
-      inf: "zamykać",
-      past: { m: "zamykał", f: "zamykała", vir: "zamykali" },
-      pres: ["zamykam", "zamykasz", "zamykają"],
-      imp: "zamykaj",
-    },
-    pf: {
-      inf: "zamknąć",
-      past: { m: "zamknął", f: "zamknęła", vir: "zamknęli" },
-      pres: ["zamknę", "zamkniesz", "zamkną"],
-      imp: "zamknij",
-    },
-    objects: [
-      { pl: "okno", neg: "okna", en: "the window" },
-      { pl: "drzwi", en: "the door" },
-      { pl: "sklep", neg: "sklepu", en: "the shop" },
-    ],
-  },
-  {
-    en: { base: "help", past: "helped", ing: "helping" },
-    impf: {
-      inf: "pomagać",
-      past: { m: "pomagał", f: "pomagała", vir: "pomagali" },
-      pres: ["pomagam", "pomagasz", "pomagają"],
-      imp: "pomagaj",
-    },
-    pf: {
-      inf: "pomóc",
-      past: { m: "pomógł", m1: "pomogł", f: "pomogła", vir: "pomogli" },
-      pres: ["pomogę", "pomożesz", "pomogą"],
-      imp: "pomóż",
-    },
-    objects: [
-      { pl: "mamie", en: "Mum" },
-      { pl: "bratu", en: "my brother" },
-      { pl: "sąsiadce", en: "the neighbour" },
-    ],
-  },
-  {
-    en: { base: "come back", past: "came back", ing: "coming back" },
-    momentary: true,
-    impf: {
-      inf: "wracać",
-      past: { m: "wracał", f: "wracała", vir: "wracali" },
-      pres: ["wracam", "wracasz", "wracają"],
-      imp: "wracaj",
-    },
-    pf: {
-      inf: "wrócić",
-      past: { m: "wrócił", f: "wróciła", vir: "wrócili" },
-      pres: ["wrócę", "wrócisz", "wrócą"],
-      imp: "wróć",
-    },
-    objects: [
-      { pl: "do domu", en: "home" },
-      { pl: "z pracy", en: "from work" },
-      { pl: "późno", en: "late" },
-    ],
-  },
-  {
-    en: { base: "finish", past: "finished", ing: "finishing" },
-    impf: {
-      inf: "kończyć",
-      past: { m: "kończył", f: "kończyła", vir: "kończyli" },
-      pres: ["kończę", "kończysz", "kończą"],
-      imp: "kończ",
-    },
-    pf: {
-      inf: "skończyć",
-      past: { m: "skończył", f: "skończyła", vir: "skończyli" },
-      pres: ["skończę", "skończysz", "skończą"],
-      imp: "skończ",
-    },
-    objects: [
-      { pl: "projekt", neg: "projektu", en: "the project" },
-      { pl: "książkę", neg: "książki", en: "the book" },
-      { pl: "pracę", neg: "pracy", en: "work" },
-    ],
-  },
-  {
-    en: { base: "wash", past: "washed", ing: "washing" },
-    impf: {
-      inf: "myć",
-      past: { m: "mył", f: "myła", vir: "myli" },
-      pres: ["myję", "myjesz", "myją"],
-      imp: "myj",
-    },
-    pf: {
-      inf: "umyć",
-      past: { m: "umył", f: "umyła", vir: "umyli" },
-      pres: ["umyję", "umyjesz", "umyją"],
-      imp: "umyj",
-    },
-    objects: [
-      { pl: "naczynia", neg: "naczyń", en: "the dishes" },
-      { pl: "samochód", neg: "samochodu", en: "the car" },
-      { pl: "okna", neg: "okien", en: "the windows" },
-    ],
-  },
-  {
-    en: { base: "rest", past: "rested", ing: "resting" },
-    impf: {
-      inf: "odpoczywać",
-      past: { m: "odpoczywał", f: "odpoczywała", vir: "odpoczywali" },
-      pres: ["odpoczywam", "odpoczywasz", "odpoczywają"],
-      imp: "odpoczywaj",
-    },
-    pf: {
-      inf: "odpocząć",
-      past: { m: "odpoczął", f: "odpoczęła", vir: "odpoczęli" },
-      pres: ["odpocznę", "odpoczniesz", "odpoczną"],
-      imp: "odpocznij",
-    },
-    objects: [
-      { pl: "w domu", en: "at home" },
-      { pl: "w ogrodzie", en: "in the garden" },
-      { pl: "nad jeziorem", en: "by the lake" },
-    ],
-  },
-  {
-    en: { base: "give", past: "gave", ing: "giving" },
-    impf: {
-      inf: "dawać",
-      past: { m: "dawał", f: "dawała", vir: "dawali" },
-      pres: ["daję", "dajesz", "dają"],
-      imp: "dawaj",
-    },
-    pf: {
-      inf: "dać",
-      past: { m: "dał", f: "dała", vir: "dali" },
-      pres: ["dam", "dasz", "dadzą"],
-      imp: "daj",
-    },
-    objects: [
-      { pl: "mamie kwiaty", neg: "mamie kwiatów", en: "Mum flowers" },
-      { pl: "psu wodę", neg: "psu wody", en: "the dog water" },
-      { pl: "dziecku jabłko", neg: "dziecku jabłka", en: "the child an apple" },
-    ],
-  },
-  {
-    en: { base: "sing", past: "sang", ing: "singing" },
-    impf: {
-      inf: "śpiewać",
-      past: { m: "śpiewał", f: "śpiewała", vir: "śpiewali" },
-      pres: ["śpiewam", "śpiewasz", "śpiewają"],
-      imp: "śpiewaj",
-    },
-    pf: {
-      inf: "zaśpiewać",
-      past: { m: "zaśpiewał", f: "zaśpiewała", vir: "zaśpiewali" },
-      pres: ["zaśpiewam", "zaśpiewasz", "zaśpiewają"],
-      imp: "zaśpiewaj",
-    },
-    objects: [
-      { pl: "piosenkę", neg: "piosenki", en: "a song" },
-      { pl: "kolędę", neg: "kolędy", en: "a carol" },
-      { pl: "hymn", neg: "hymnu", en: "the anthem" },
-    ],
-  },
-  {
-    reflexive: true,
-    en: { base: "learn", past: "learned", ing: "learning" },
-    impf: {
-      inf: "uczyć się",
-      past: { m: "uczył", f: "uczyła", vir: "uczyli" },
-      pres: ["uczę", "uczysz", "uczą"],
-      imp: "ucz",
-    },
-    pf: {
-      inf: "nauczyć się",
-      past: { m: "nauczył", f: "nauczyła", vir: "nauczyli" },
-      pres: ["nauczę", "nauczysz", "nauczą"],
-      imp: "naucz",
-    },
-    objects: [
-      { pl: "polskiego", en: "Polish" },
-      { pl: "nowych słówek", en: "new words" },
-      { pl: "tej piosenki", en: "this song" },
-    ],
-  },
-  {
-    reflexive: true,
-    en: { base: "wash", past: "washed", ing: "washing" },
-    impf: {
-      inf: "myć się",
-      past: { m: "mył", f: "myła", vir: "myli" },
-      pres: ["myję", "myjesz", "myją"],
-      imp: "myj",
-    },
-    pf: {
-      inf: "umyć się",
-      past: { m: "umył", f: "umyła", vir: "umyli" },
-      pres: ["umyję", "umyjesz", "umyją"],
-      imp: "umyj",
-    },
-    objects: [
-      { pl: "w łazience", en: "in the bathroom" },
-      { pl: "zimną wodą", en: "in cold water" },
-      { pl: "przed obiadem", en: "before dinner" },
-    ],
-  },
-  {
-    reflexive: true,
-    en: { base: "get dressed", past: "got dressed", ing: "getting dressed" },
-    impf: {
-      inf: "ubierać się",
-      past: { m: "ubierał", f: "ubierała", vir: "ubierali" },
-      pres: ["ubieram", "ubierasz", "ubierają"],
-      imp: "ubieraj",
-    },
-    pf: {
-      inf: "ubrać się",
-      past: { m: "ubrał", f: "ubrała", vir: "ubrali" },
-      pres: ["ubiorę", "ubierzesz", "ubiorą"],
-      imp: "ubierz",
-    },
-    objects: [
-      { pl: "szybko", en: "quickly" },
-      { pl: "elegancko", en: "smartly" },
-      { pl: "ciepło", en: "warmly" },
-    ],
-  },
-  {
-    reflexive: true,
-    en: { base: "meet up", past: "met up", ing: "meeting up" },
-    impf: {
-      inf: "spotykać się",
-      past: { m: "spotykał", f: "spotykała", vir: "spotykali" },
-      pres: ["spotykam", "spotykasz", "spotykają"],
-      imp: "spotykaj",
-    },
-    pf: {
-      inf: "spotkać się",
-      past: { m: "spotkał", f: "spotkała", vir: "spotkali" },
-      pres: ["spotkam", "spotkasz", "spotkają"],
-      imp: "spotkaj",
-    },
-    objects: [
-      { pl: "z przyjaciółmi", en: "with friends" },
-      { pl: "z Anną", en: "with Anna" },
-      { pl: "w kawiarni", en: "at the café" },
-    ],
-  },
-  {
-    reflexive: true,
-    en: { base: "bathe", past: "bathed", ing: "bathing" },
-    impf: {
-      inf: "kąpać się",
-      past: { m: "kąpał", f: "kąpała", vir: "kąpali" },
-      pres: ["kąpię", "kąpiesz", "kąpią"],
-      imp: "kąp",
-    },
-    pf: {
-      inf: "wykąpać się",
-      past: { m: "wykąpał", f: "wykąpała", vir: "wykąpali" },
-      pres: ["wykąpię", "wykąpiesz", "wykąpią"],
-      imp: "wykąp",
-    },
-    objects: [
-      { pl: "w morzu", en: "in the sea" },
-      { pl: "w jeziorze", en: "in the lake" },
-      { pl: "w rzece", en: "in the river" },
-    ],
-  },
-  {
-    reflexive: true,
-    en: { base: "prepare", past: "prepared", ing: "preparing" },
-    impf: {
-      inf: "przygotowywać się",
-      past: { m: "przygotowywał", f: "przygotowywała", vir: "przygotowywali" },
-      pres: ["przygotowuję", "przygotowujesz", "przygotowują"],
-      imp: "przygotowuj",
-    },
-    pf: {
-      inf: "przygotować się",
-      past: { m: "przygotował", f: "przygotowała", vir: "przygotowali" },
-      pres: ["przygotuję", "przygotujesz", "przygotują"],
-      imp: "przygotuj",
-    },
-    objects: [
-      { pl: "do egzaminu", en: "for the exam" },
-      { pl: "do podróży", en: "for the trip" },
-      { pl: "do rozmowy", en: "for the interview" },
-    ],
-  },
-  {
-    reflexive: true,
-    en: { base: "play", past: "played", ing: "playing" },
-    impf: {
-      inf: "bawić się",
-      past: { m: "bawił", f: "bawiła", vir: "bawili" },
-      pres: ["bawię", "bawisz", "bawią"],
-      imp: "baw",
-    },
-    pf: {
-      inf: "pobawić się",
-      past: { m: "pobawił", f: "pobawiła", vir: "pobawili" },
-      pres: ["pobawię", "pobawisz", "pobawią"],
-      imp: "pobaw",
-    },
-    objects: [
-      { pl: "z dziećmi", en: "with the children" },
-      { pl: "z psem", en: "with the dog" },
-      { pl: "w ogrodzie", en: "in the garden" },
-    ],
-  },
-  {
-    reflexive: true,
-    momentary: true,
-    en: { base: "go to bed", past: "went to bed", ing: "going to bed" },
-    impf: {
-      inf: "kłaść się",
-      past: { m: "kładł", f: "kładła", vir: "kładli" },
-      pres: ["kładę", "kładziesz", "kładą"],
-      imp: "kładź",
-    },
-    pf: {
-      inf: "położyć się",
-      past: { m: "położył", f: "położyła", vir: "położyli" },
-      pres: ["położę", "położysz", "położą"],
-      imp: "połóż",
-    },
-    objects: [
-      { pl: "wcześnie", en: "early" },
-      { pl: "późno", en: "late" },
-      { pl: "przed północą", en: "before midnight" },
-    ],
-  },
-  {
-    reflexive: true,
-    momentary: true,
-    en: { base: "wake up", past: "woke up", ing: "waking up" },
-    impf: {
-      inf: "budzić się",
-      past: { m: "budził", f: "budziła", vir: "budzili" },
-      pres: ["budzę", "budzisz", "budzą"],
-      imp: "budź",
-    },
-    pf: {
-      inf: "obudzić się",
-      past: { m: "obudził", f: "obudziła", vir: "obudzili" },
-      pres: ["obudzę", "obudzisz", "obudzą"],
-      imp: "obudź",
-    },
-    objects: [
-      { pl: "wcześnie", en: "early" },
-      { pl: "o siódmej", en: "at seven" },
-      { pl: "bez budzika", en: "without an alarm" },
-    ],
-  },
-];
+/** The verb lexicon, in data/verbs.json; see data/README.md for the layout. */
+export const VERBS: Verb[] = LEXICON.verbs;
 
 // ---------------------------------------------------------------- subjects
 
@@ -849,9 +232,12 @@ export function nonPast(
 export const presentForm = (verb: Verb, person: Person, number: GramNumber) =>
   nonPast(verb.impf, person, number);
 
-/** Perfective non-past — which is to say, the simple future. */
-export const futureSimple = (verb: Verb, person: Person, number: GramNumber) =>
-  nonPast(verb.pf, person, number);
+/** Perfective non-past — which is to say, the simple future; null without a perfective. */
+export const futureSimple = (
+  verb: Verb,
+  person: Person,
+  number: GramNumber,
+): string | null => (verb.pf ? nonPast(verb.pf, person, number) : null);
 
 const BYC: Record<GramNumber, [string, string, string]> = {
   sg: ["będę", "będziesz", "będzie"],
@@ -872,11 +258,11 @@ export function futureCompound(
 
 /** Imperative for ty / my / wy, or null when the verb has none in use. */
 export function imperative(
-  forms: AspectForms,
+  forms: AspectForms | undefined,
   person: Person,
   number: GramNumber,
 ): string | null {
-  if (!forms.imp) return null;
+  if (!forms?.imp) return null;
   if (number === "sg") return person === 2 ? forms.imp : null;
   if (person === 1) return `${forms.imp}my`;
   if (person === 2) return `${forms.imp}cie`;
@@ -921,6 +307,8 @@ type TimeFrame = {
   durative?: true;
   /** Describes a repeated action. */
   habit?: true;
+  /** Only for verbs with one of these flags; every other verb skips the frame. */
+  only?: ("stative" | "indeterminate")[];
   note?: string;
 };
 
@@ -947,6 +335,14 @@ const PRESENT_FRAMES: TimeFrame[] = [
     enVerb: "pres",
     habit: true,
     note: "A habit — the present of an imperfective verb.",
+  },
+  {
+    pl: "Chyba",
+    en: "I think {s} {v} {o}.",
+    aspect: "impf",
+    enVerb: "pres",
+    only: ["stative"],
+    note: "A state, not an action — the present of an imperfective verb.",
   },
 ];
 
@@ -980,6 +376,14 @@ const PAST_FRAMES: TimeFrame[] = [
     enVerb: "past",
     habit: true,
     note: "A habit, repeated — imperfective past.",
+  },
+  {
+    pl: "Wtedy",
+    en: "At that time {s} {v} {o}.",
+    aspect: "impf",
+    enVerb: "past",
+    only: ["stative", "indeterminate"],
+    note: "A state or habit at the time, not a one-off event — imperfective past.",
   },
 ];
 
@@ -1018,39 +422,143 @@ const COMPOUND_FRAMES: TimeFrame[] = [
   },
 ];
 
-/** The frames a verb fits: motion verbs have no habit, quick ones no duration. */
-function framesFor(frames: TimeFrame[], verb: Verb): TimeFrame[] {
-  return frames.filter(
-    (f) =>
-      !(f.durative && (verb.motion || verb.momentary)) &&
-      !(f.habit && verb.motion),
+/**
+ * Whether a frame suits a verb: a perfective frame needs a perfective; a
+ * frame marked `only` is for stative / indeterminate verbs alone; stative
+ * verbs take no duration or habit, indeterminate ones nothing but habits;
+ * determinate motion has no habit, quick actions no duration.
+ */
+function fits(frame: TimeFrame, verb: Verb): boolean {
+  if (frame.aspect === "pf" && !verb.pf) return false;
+  if (frame.only) return frame.only.some((flag) => verb[flag]);
+  if (verb.stative && (frame.durative || frame.habit)) return false;
+  if (verb.indeterminate && !frame.habit) return false;
+  return (
+    !(frame.durative && (verb.motion || verb.momentary)) &&
+    !(frame.habit && verb.motion)
   );
 }
 
-const third = (s: Subject) => s.person === 3 && s.number === "sg";
+/** The frames a verb fits, in their order. */
+function framesFor(frames: TimeFrame[], verb: Verb): TimeFrame[] {
+  return frames.filter((f) => fits(f, verb));
+}
 
-/** English 3sg: watch → watches, go → goes, come back → comes back. */
-function englishS(base: string): string {
+// ----------------------------------------------------------------- English
+
+/** Who the English verb agrees with: "I", "she", "you all"... */
+export type EnglishSubject = Pick<Subject, "en" | "person" | "number">;
+
+const third = (s: EnglishSubject) => s.person === 3 && s.number === "sg";
+
+/** "be late" → "late"; null when the base is not "be + something". */
+const afterBe = (base: string): string | null =>
+  /^be /.test(base) ? base.slice(3) : null;
+
+/** Present of "be": I am, she is, we are. */
+export const bePresent = (s: EnglishSubject) =>
+  s.en === "I" ? "am" : third(s) ? "is" : "are";
+
+/** Past of "be": I was, she was, we were. */
+export const bePast = (s: EnglishSubject) =>
+  s.en === "I" || third(s) ? "was" : "were";
+
+/** 3sg of one English verb: studies, watches, goes, does, has, plays. */
+function thirdSingular(verb: string): string {
+  if (verb === "be") return "is";
+  if (verb === "have") return "has";
+  if (/[^aeiou]y$/.test(verb)) return `${verb.slice(0, -1)}ies`;
+  if (/(ch|sh|s|x|z|o)$/.test(verb)) return `${verb}es`;
+  return `${verb}s`;
+}
+
+/** English 3sg of a base: watch → watches, come back → comes back, be late → is late. */
+export function englishS(base: string): string {
   const [head, ...rest] = base.split(" ");
-  const inflected = /(ch|sh|s|x|o)$/.test(head) ? `${head}es` : `${head}s`;
-  return [inflected, ...rest].join(" ");
+  return [thirdSingular(head), ...rest].join(" ");
+}
+
+/** Simple present: I study, she studies, he is late. */
+export function englishPresent(en: EnglishGloss, s: EnglishSubject): string {
+  const rest = afterBe(en.base);
+  if (rest !== null) return `${bePresent(s)} ${rest}`;
+  return third(s) ? englishS(en.base) : en.base;
+}
+
+/** Simple past: I wrote, she was late, they were afraid of dogs. */
+export function englishPast(en: EnglishGloss, s: EnglishSubject): string {
+  const rest = afterBe(en.base);
+  if (rest !== null) return `${bePast(s)} ${rest}`;
+  return en.past ?? en.base;
+}
+
+/**
+ * Present continuous: I am writing. A stative verb or a "be" base keeps the
+ * simple present, which is what English says: I understand, I am late.
+ */
+export function englishPresentCont(
+  en: EnglishGloss,
+  s: EnglishSubject,
+  stative = false,
+): string {
+  if (stative || !en.ing) return englishPresent(en, s);
+  return `${bePresent(s)} ${en.ing}`;
+}
+
+/** Past continuous: I was writing; for a state the simple past (I knew, I was late). */
+export function englishPastCont(
+  en: EnglishGloss,
+  s: EnglishSubject,
+  stative = false,
+): string {
+  if (stative || !en.ing) return englishPast(en, s);
+  return `${bePast(s)} ${en.ing}`;
+}
+
+/** Future: will write, will be late. */
+export const englishWill = (en: EnglishGloss) => `will ${en.base}`;
+
+/** Future continuous: will be writing; for a state plain "will" (will know, will be late). */
+export function englishWillBe(en: EnglishGloss, stative = false): string {
+  if (stative || !en.ing) return englishWill(en);
+  return `will be ${en.ing}`;
+}
+
+/**
+ * An order in English: "Write a letter!", "Don't be late for work, all of
+ * you!", "Let's not worry about money!". The 1pl is "let's".
+ */
+export function englishOrder(
+  base: string,
+  person: Person,
+  number: GramNumber,
+  negated: boolean,
+  object: string,
+): string {
+  if (person === 1) {
+    return negated
+      ? `Let's not ${base} ${object}!`
+      : `Let's ${base} ${object}!`;
+  }
+  const all = number === "pl" ? ", all of you" : "";
+  return `${negated ? `Don't ${base}` : capitalise(base)} ${object}${all}!`;
 }
 
 function englishVerb(verb: Verb, frame: TimeFrame, subject: Subject): string {
-  const be = subject.en === "I" ? "am" : third(subject) ? "is" : "are";
+  const stative = !!verb.stative;
   switch (frame.enVerb) {
     case "pres":
-      return third(subject) ? englishS(verb.en.base) : verb.en.base;
+      return englishPresent(verb.en, subject);
     case "presCont":
-      return `${be} ${verb.en.ing}`;
+      return englishPresentCont(verb.en, subject, stative);
     case "past":
-      return verb.en.past;
+      return englishPast(verb.en, subject);
     case "pastCont":
-      return `${subject.en === "I" || third(subject) ? "was" : "were"} ${verb.en.ing}`;
+      return englishPastCont(verb.en, subject, stative);
     case "will":
-      return `will ${verb.en.base}`;
+      return englishWill(verb.en);
     case "willBe":
-      return `will be ${verb.en.ing}`;
+      return englishWillBe(verb.en, stative);
   }
 }
 
@@ -1060,11 +568,38 @@ function englishSentence(
   subject: Subject,
   obj: Complement,
 ): string {
-  const text = frame.en
-    .replace("{s}", subject.en)
-    .replace("{v}", englishVerb(verb, frame, subject))
-    .replace("{o}", obj.en);
-  return capitalise(text);
+  return capitalise(
+    englishClause(
+      frame.en,
+      subject.en,
+      englishVerb(verb, frame, subject),
+      obj.en,
+    ),
+  );
+}
+
+/**
+ * Fills a frame's {s} {v} {o}. A frequency adverb goes after a form of "be"
+ * but before any other verb: "he usually works", "he is usually late".
+ */
+export function englishClause(
+  frame: string,
+  subject: string,
+  verb: string,
+  object: string,
+): string {
+  let text = frame;
+  let v = verb;
+  const be = /^(am|is|are|was|were) (.*)$/.exec(verb);
+  const adverb = / (usually|often|always|never) \{v\}/.exec(text);
+  if (be && adverb) {
+    text = text.replace(adverb[0], " {v}");
+    v = `${be[1]} ${adverb[1]} ${be[2]}`;
+  }
+  return text
+    .replace("{s}", subject)
+    .replace("{v}", v)
+    .replace("{o}", object);
 }
 
 export const TENSE_LABEL: Record<Tense, string> = {
@@ -1118,6 +653,7 @@ function withDistractors(
 type Built = { exercise: Exercise; candidates: (string | null)[] };
 
 function exerciseBase(
+  verb: Verb,
   id: string,
   tense: Tense,
   subject: Subject,
@@ -1140,6 +676,8 @@ function exerciseBase(
     en,
     answers,
     note,
+    card: verbCardId(verb, tense),
+    skill: verbSkillId(tense, subject.person, subject.number),
   };
 }
 
@@ -1157,6 +695,7 @@ function buildPresent(
 
   return {
     exercise: exerciseBase(
+      verb,
       `present|${verb.impf.inf}|${subject.pl}|${obj.pl}|${frame.pl}`,
       "present",
       subject,
@@ -1187,7 +726,8 @@ function buildPast(
   const frames = framesFor(PAST_FRAMES, verb);
   if (frames.length === 0) return null;
   const frame = pick(frames, rng);
-  const forms = verb[frame.aspect];
+  // fits() only lets a perfective frame through when there is a perfective
+  const forms = frame.aspect === "pf" ? verb.pf! : verb.impf;
   const form = pastForm(forms, subject.person, subject.gender);
   const other = frame.aspect === "pf" ? verb.impf : verb.pf;
   const answers = withSie(verb, form);
@@ -1195,6 +735,7 @@ function buildPast(
 
   return {
     exercise: exerciseBase(
+      verb,
       `past|${forms.inf}|${subject.label}|${obj.pl}|${frame.pl}`,
       "past",
       subject,
@@ -1207,7 +748,7 @@ function buildPast(
     ),
     candidates: [
       ...SUBJECTS.map((s) => shown(verb, pastForm(forms, s.person, s.gender))),
-      shown(verb, pastForm(other, subject.person, subject.gender)),
+      shown(verb, other ? pastForm(other, subject.person, subject.gender) : null),
       verb.reflexive ? form : null,
     ],
   };
@@ -1218,21 +759,27 @@ function buildFuture(
   subject: Subject,
   obj: Complement,
   rng: () => number,
-): Built {
-  const frame = pick(FUTURE_FRAMES, rng);
-  const form = futureSimple(verb, subject.person, subject.number);
+): Built | null {
+  // the simple future is the perfective's: an imperfective-only verb has none
+  const pf = verb.pf;
+  if (!pf) return null;
+  const frames = framesFor(FUTURE_FRAMES, verb);
+  if (frames.length === 0) return null;
+  const frame = pick(frames, rng);
+  const form = nonPast(pf, subject.person, subject.number);
   const answers = withSie(verb, form);
-  const note = `A perfective verb has no present: its "present" endings make the future — ${verb.pf.inf} → ${answers[0]}. The action will be completed.${sieNote(verb)}`;
+  const note = `A perfective verb has no present: its "present" endings make the future — ${pf.inf} → ${answers[0]}. The action will be completed.${sieNote(verb)}`;
 
   return {
     exercise: exerciseBase(
-      `future|${verb.pf.inf}|${subject.pl}|${obj.pl}|${frame.pl}`,
+      verb,
+      `future|${pf.inf}|${subject.pl}|${obj.pl}|${frame.pl}`,
       "future",
       subject,
       `${frame.pl} `,
       ` ${obj.pl}.`,
       answers,
-      `${verb.pf.inf} · ${subject.pl}`,
+      `${pf.inf} · ${subject.pl}`,
       englishSentence(verb, frame, subject, obj),
       note,
     ),
@@ -1250,7 +797,7 @@ function buildFuture(
         )[0],
       ),
       shown(verb, presentForm(verb, subject.person, subject.number)),
-      shown(verb, pastForm(verb.pf, subject.person, subject.gender)),
+      shown(verb, pastForm(pf, subject.person, subject.gender)),
       verb.reflexive ? form : null,
     ],
   };
@@ -1287,6 +834,7 @@ function buildCompound(
 
   return {
     exercise: exerciseBase(
+      verb,
       `compound|${verb.impf.inf}|${subject.label}|${obj.pl}|${frame.pl}`,
       "futureCompound",
       subject,
@@ -1310,7 +858,7 @@ function buildCompound(
           OTHER_GENDER[subject.gender],
         )[1],
       ),
-      shown(verb, `${aux} ${verb.pf.inf.replace(/ się$/, "")}`),
+      verb.pf ? shown(verb, `${aux} ${verb.pf.inf.replace(/ się$/, "")}`) : null,
       shown(verb, futureSimple(verb, subject.person, subject.number)),
       verb.reflexive ? withInf : null,
     ],
@@ -1332,19 +880,21 @@ function buildImperative(
 ): Built | null {
   // affirmative orders lean perfective ("zrób!"); a negated one is imperfective ("nie rób!")
   const negated = rng() < 0.4;
-  const aspect: Aspect = negated || !verb.pf.imp ? "impf" : "pf";
-  const forms = verb[aspect];
+  // "Nie martw się!" but never "Martw się!"; "Pamiętaj o kluczach!" but never "Nie pamiętaj"
+  if (verb.orders === (negated ? "affirmative" : "negated")) return null;
+  const aspect: Aspect = negated || !verb.pf?.imp ? "impf" : "pf";
+  const forms = aspect === "pf" ? verb.pf! : verb.impf;
   const form = imperative(forms, subject.person, subject.number);
   if (!form) return null;
 
   const object = negated ? (obj.neg ?? obj.pl) : obj.pl;
-  const base = verb.en.base;
-  const en =
-    subject.person === 1
-      ? negated
-        ? `Let's not ${base} ${obj.en}!`
-        : `Let's ${base} ${obj.en}!`
-      : `${negated ? `Don't ${base}` : capitalise(base)} ${obj.en}${subject.number === "pl" ? ", all of you" : ""}!`;
+  const en = englishOrder(
+    verb.en.base,
+    subject.person,
+    subject.number,
+    negated,
+    obj.en,
+  );
 
   const who =
     subject.number === "sg" ? "ty" : subject.person === 1 ? "my" : "wy";
@@ -1359,14 +909,17 @@ function buildImperative(
   const aspectNote = negated
     ? `A negated order takes the imperfective (${verb.impf.inf}).${obj.neg ? ` The object goes into the genitive after "nie": ${obj.neg}.` : ""}`
     : aspect === "pf"
-      ? `A one-off order usually takes the perfective (${verb.pf.inf}).`
-      : `This verb's perfective has no imperative in everyday use, so the order takes ${verb.impf.inf}.`;
+      ? `A one-off order usually takes the perfective (${forms.inf}).`
+      : verb.pf
+        ? `This verb's perfective has no imperative in everyday use, so the order takes ${verb.impf.inf}.`
+        : `${verb.impf.inf} has no perfective in this sense, so the order is imperfective.`;
   const sie = verb.reflexive
     ? ` "Się" comes right after the verb: ${answer}.`
     : "";
 
   const other = aspect === "pf" ? verb.impf : verb.pf;
   const exercise = exerciseBase(
+    verb,
     `imp|${forms.inf}|${who}|${obj.pl}|${negated ? "neg" : "pos"}`,
     "imperative",
     subject,
@@ -1392,6 +945,17 @@ function buildImperative(
     ],
   };
 }
+
+/** Whether a verb makes a sentence in the tense at all, for some subject and polarity. */
+const CAN_BUILD: Record<Tense, (verb: Verb) => boolean> = {
+  present: (v) => framesFor(PRESENT_FRAMES, v).length > 0,
+  past: (v) => framesFor(PAST_FRAMES, v).length > 0,
+  future: (v) => !!v.pf && framesFor(FUTURE_FRAMES, v).length > 0,
+  futureCompound: (v) => framesFor(COMPOUND_FRAMES, v).length > 0,
+  imperative: (v) =>
+    (v.orders !== "affirmative" && !!v.impf.imp) ||
+    (v.orders !== "negated" && !!(v.pf?.imp ?? v.impf.imp)),
+};
 
 const BUILDERS: Record<
   Tense,
@@ -1420,42 +984,62 @@ function buildOne(
   const pool = (tense === "imperative" ? IMPERATIVE_SUBJECTS : SUBJECTS).filter(
     (s) => numbers.includes(s.number),
   );
-  if (pool.length === 0) return null;
+  if (pool.length === 0 || verbs.length === 0) return null;
 
-  for (let attempt = 0; attempt < 40; attempt++) {
-    const verb = pick(verbs, rng);
-    const built = BUILDERS[tense](
-      verb,
-      pick(pool, rng),
-      pick(verb.objects, rng),
-      rng,
-    );
-    if (!built) continue;
+  const draw = (from: Verb[]): Exercise | null => {
+    for (let attempt = 0; attempt < 40; attempt++) {
+      const verb = pick(from, rng);
+      const built = BUILDERS[tense](
+        verb,
+        pick(pool, rng),
+        pick(verb.objects, rng),
+        rng,
+      );
+      if (!built) continue;
 
-    const { exercise, candidates } = built;
-    if (taken.has(exercise.id) && attempt < 30) continue;
-    taken.add(exercise.id);
+      const { exercise, candidates } = built;
+      if (taken.has(exercise.id) && attempt < 30) continue;
+      taken.add(exercise.id);
 
-    if (answerMode === "choice") {
-      const options = withDistractors(exercise.answers, candidates, rng);
-      if (options.length > 1) exercise.options = options;
+      if (answerMode === "choice") {
+        const options = withDistractors(exercise.answers, candidates, rng);
+        if (options.length > 1) exercise.options = options;
+      }
+      return exercise;
     }
-    return exercise;
-  }
-  return null;
+    return null;
+  };
+  // Draw from every verb first, which keeps the sessions a seed gave before;
+  // should that fail (a pool that is mostly imperfective-only verbs, drilled
+  // in the simple future), draw again from just the verbs that fit the tense.
+  const exercise = draw(verbs);
+  if (exercise) return exercise;
+  const able = verbs.filter(CAN_BUILD[tense]);
+  return able.length > 0 ? draw(able) : null;
 }
 
-/** The verb pool for a session: plain, reflexive or both. */
-export function verbsFor(kind: VerbType | undefined): Verb[] {
-  if (kind === "plain") return VERBS.filter((v) => !v.reflexive);
-  if (kind === "reflexive") return VERBS.filter((v) => v.reflexive);
-  return VERBS;
+/** The verb pool for a session: plain, reflexive or both, up to `maxLevel` when set. */
+export function verbsFor(
+  kind: VerbType | undefined,
+  maxLevel?: Level,
+  lexicon: Verb[] = VERBS,
+): Verb[] {
+  const verbs = maxLevel
+    ? lexicon.filter((v) => withinLevel(v, maxLevel))
+    : lexicon;
+  if (kind === "plain") return verbs.filter((v) => !v.reflexive);
+  if (kind === "reflexive") return verbs.filter((v) => v.reflexive);
+  return verbs;
 }
 
-/** Builds a full verbs session, spreading the selected tenses evenly. */
+/**
+ * Builds a full verbs session, spreading the selected tenses evenly. `lexicon`
+ * replaces the verb list the session draws from (the tests pass their own).
+ */
 export function buildVerbSession(
   config: Config,
   seed = Date.now(),
+  lexicon: Verb[] = VERBS,
 ): Exercise[] {
   const rng = makeRng(seed);
   const tenses = config.tenses?.length ? config.tenses : [...TENSES];
@@ -1464,7 +1048,7 @@ export function buildVerbSession(
     : (["sg", "pl"] as GramNumber[]);
   const answerMode: AnswerMode =
     config.answerMode === "choice" ? "choice" : "typing";
-  const verbs = verbsFor(config.verbType);
+  const verbs = verbsFor(config.verbType, config.maxLevel, lexicon);
 
   const taken = new Set<string>();
   const exercises: Exercise[] = [];
@@ -1476,4 +1060,198 @@ export function buildVerbSession(
     if (exercise) exercises.push(exercise);
   }
   return exercises;
+}
+
+// -------------------------------------------------------------- SRS cards
+
+/**
+ * A verbs card is one verb × one tense: "verbs:pisać|past". The verb is named
+ * by its imperfective infinitive as stored, "się" included ("verbs:uczyć się|present"),
+ * which is unique in data/verbs.json and present on every entry. The skill is
+ * the tense × person cell, "verbs:past|3pl": the person token is the person
+ * digit plus the number, 1sg 2sg 3sg 1pl 2pl 3pl. The imperative only has
+ * 2sg (ty), 1pl (my, "let's") and 2pl (wy).
+ */
+export function verbCardId(verb: Verb, tense: Tense): string {
+  return `verbs:${verb.impf.inf}|${tense}`;
+}
+
+/** The person token of a skill id: 1sg, 3pl… */
+export function personToken(person: Person, number: GramNumber): string {
+  return `${person}${number}`;
+}
+
+export function verbSkillId(tense: Tense, person: Person, number: GramNumber): string {
+  return `verbs:${tense}|${personToken(person, number)}`;
+}
+
+/** Splits "verbs:pisać|past" into the verb's infinitive and the tense; null for anything else. */
+export function parseVerbCard(card: string): { inf: string; tense: Tense } | null {
+  const m = /^verbs:([^|]+)\|([^|]+)$/.exec(card);
+  if (!m || !(TENSES as readonly string[]).includes(m[2])) return null;
+  return { inf: m[1], tense: m[2] as Tense };
+}
+
+/** Splits "verbs:past|3pl" into tense, person and number; null for anything else. */
+export function parseVerbSkill(
+  skill: string,
+): { tense: Tense; person: Person; number: GramNumber } | null {
+  const m = /^verbs:([^|]+)\|([123])(sg|pl)$/.exec(skill);
+  if (!m || !(TENSES as readonly string[]).includes(m[1])) return null;
+  return { tense: m[1] as Tense, person: Number(m[2]) as Person, number: m[3] as GramNumber };
+}
+
+/** Whether the drill can ever build this verb in this tense (some subject, frame and polarity). */
+export function canDrill(verb: Verb, tense: Tense): boolean {
+  return CAN_BUILD[tense](verb);
+}
+
+/**
+ * One exercise for exactly this verb (by imperfective infinitive) in this tense,
+ * deterministic in `seed`: subject, object, frame and polarity are drawn the way
+ * a configured session draws them (the same buildOne), so the verb's flags
+ * (motion, stative, momentary, orders, no perfective…) rule out the same
+ * frames. Null when the verb is not in `lexicon` (removed, or a draft in the
+ * published app) or can't be drilled in the tense.
+ */
+export function buildVerbCard(
+  inf: string,
+  tense: Tense,
+  seed: number,
+  answerMode: AnswerMode = "typing",
+  lexicon: Verb[] = VERBS,
+): Exercise | null {
+  const verb = lexicon.find((v) => v.impf.inf === inf);
+  if (!verb || !canDrill(verb, tense)) return null;
+  // mix the card into the seed, so cards built with one session seed don't all
+  // draw the same person and frame
+  const rng = makeRng((seed ^ hashString(`${inf}|${tense}`)) >>> 0);
+  return buildOne(tense, [verb], ["sg", "pl"], answerMode, rng, new Set());
+}
+
+/** FNV-1a, 32 bits: a stable number from a string. */
+function hashString(text: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+// -------------------------------------------------------------- diagnosis
+
+/** Every way a form may be written, as compared: "się" on either side, no diacritics. */
+function spellings(verb: Verb, form: string | null): string[] {
+  return form ? withSie(verb, form).map((f) => stripDiacritics(normalise(f))) : [];
+}
+
+/** The forms of one aspect of a verb in one tense, for one subject; [] where it has none. */
+function tenseForms(verb: Verb, aspect: Aspect, tense: Tense, s: Subject): string[] {
+  const forms = aspect === "pf" ? verb.pf : verb.impf;
+  if (!forms) return [];
+  switch (tense) {
+    case "present":
+      return aspect === "impf" ? spellings(verb, nonPast(forms, s.person, s.number)) : [];
+    case "future":
+      return aspect === "pf" ? spellings(verb, nonPast(forms, s.person, s.number)) : [];
+    case "past":
+      return spellings(verb, pastForm(forms, s.person, s.gender));
+    case "futureCompound":
+      return aspect === "impf"
+        ? futureCompound(forms, s.person, s.number, s.gender).flatMap((f) => spellings(verb, f))
+        : [];
+    case "imperative":
+      return spellings(verb, imperative(forms, s.person, s.number));
+  }
+}
+
+/**
+ * What an aspect mix-up looks like in each tense, for one subject: the other
+ * aspect's form doing the same job. In the non-past that is the other aspect's
+ * non-past (napiszę for piszę, piszę for napiszę) or a compound future on the
+ * wrong verb (będę pisać for napiszę, będę napisać for będę pisać).
+ */
+function otherAspectForms(verb: Verb, aspect: Aspect, tense: Tense, s: Subject): string[] {
+  const other = aspect === "pf" ? verb.impf : verb.pf;
+  if (!other) return [];
+  switch (tense) {
+    case "present":
+      return spellings(verb, nonPast(other, s.person, s.number));
+    case "future":
+      return [
+        ...spellings(verb, nonPast(other, s.person, s.number)),
+        ...futureCompound(other, s.person, s.number, s.gender).flatMap((f) => spellings(verb, f)),
+      ];
+    case "futureCompound":
+      return [
+        ...spellings(verb, nonPast(other, s.person, s.number)),
+        ...spellings(verb, `${BYC[s.number][s.person - 1]} ${other.inf.replace(/ się$/, "")}`),
+      ];
+    case "past":
+      return spellings(verb, pastForm(other, s.person, s.gender));
+    case "imperative":
+      return spellings(verb, imperative(other, s.person, s.number));
+  }
+}
+
+/**
+ * Why a wrong answer to a verbs exercise was wrong, when it is another real
+ * form of the same verb (diacritics ignored):
+ *
+ *   aspect  the right person and tense of the other aspect (pisałem for napisałem)
+ *   pastGender  the right verb, aspect, person and number in the past or the
+ *           będę + -ł future, with another gender's ending (pisałam for
+ *           pisałem, pisała for pisał, pisali for pisały, będę pisała for
+ *           będę pisał)
+ *   person  the right verb, aspect and tense, another person or number (piszesz for piszę)
+ *   tense   the right verb in another tense, either aspect (pisałem for piszę)
+ *
+ * Checked in that order. Gender is only blamed when person and number match:
+ * pisała for pisałam is "person" (a 3sg form). The other aspect in the right
+ * person and number is "aspect" whatever its gender (pisałam for napisałem).
+ * Anything else is null. The verb and the cell come from the exercise's `card` and `skill`; an
+ * exercise without them, or whose verb is no longer in `lexicon`, gives null.
+ */
+export function diagnoseVerbMiss(
+  input: string,
+  ex: Exercise,
+  lexicon: Verb[] = VERBS,
+): MissKind | null {
+  const card = ex.card ? parseVerbCard(ex.card) : null;
+  const cell = ex.skill ? parseVerbSkill(ex.skill) : null;
+  if (!card || !cell || card.tense !== cell.tense) return null;
+  const verb = lexicon.find((v) => v.impf.inf === card.inf);
+  if (!verb) return null;
+  const typed = stripDiacritics(normalise(input));
+  const answers = ex.answers.map((a) => stripDiacritics(normalise(a)));
+  if (!typed || answers.includes(typed)) return null;
+
+  const { tense } = cell;
+  const inCell = (s: Subject) => s.person === cell.person && s.number === cell.number;
+  const aspects: Aspect[] = verb.pf ? ["impf", "pf"] : ["impf"];
+  // the aspect the exercise asks for: the one whose form for this cell is an answer
+  const aspect = aspects.find((a) =>
+    SUBJECTS.filter(inCell).some((s) => tenseForms(verb, a, tense, s).some((f) => answers.includes(f))),
+  );
+  if (!aspect) return null;
+
+  if (SUBJECTS.filter(inCell).some((s) => otherAspectForms(verb, aspect, tense, s).includes(typed))) {
+    return "aspect";
+  }
+  // same aspect, person and number, another gender: only the past and the
+  // będę + -ł future mark it (będę + infinitive is shared, so it is an answer)
+  if (
+    (tense === "past" || tense === "futureCompound") &&
+    SUBJECTS.filter(inCell).some((s) => tenseForms(verb, aspect, tense, s).includes(typed))
+  ) {
+    return "pastGender";
+  }
+  const elsewhere = SUBJECTS.filter((s) => !inCell(s));
+  if (elsewhere.some((s) => tenseForms(verb, aspect, tense, s).includes(typed))) return "person";
+  const otherTense = TENSES.some(
+    (t) =>
+      t !== tense && aspects.some((a) => SUBJECTS.some((s) => tenseForms(verb, a, t, s).includes(typed))),
+  );
+  return otherTense ? "tense" : null;
 }

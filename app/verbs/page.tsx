@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { BRAND } from "@/lib/brand";
 import { Choice, Field } from "@/components/ui";
 import { randomSeed, sessionParams } from "@/lib/session";
 import { saveConfig, useStoredConfig } from "@/lib/storage";
@@ -97,8 +98,8 @@ export default function VerbsConfiguratorPage() {
   return (
     <main className="mx-auto w-full max-w-3xl px-5 py-10 sm:py-16">
       <header className="mb-10">
-        <Link href="/" className="text-sm uppercase tracking-[0.2em] text-accent">
-          Ćwiczenia
+        <Link href="/learn" className="text-sm uppercase tracking-[0.2em] text-accent">
+          {BRAND.name}
         </Link>
         <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Verbs</h1>
         <p className="mt-3 text-muted">

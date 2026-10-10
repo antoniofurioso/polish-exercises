@@ -4,13 +4,21 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "dev:drafts": "NEXT_PUBLIC_INCLUDE_DRAFTS=1 next dev",
+    "build": "next build && tsx scripts/sw-manifest.ts",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "review:export": "tsx scripts/review-export.ts",
+    "review:import": "tsx scripts/review-import.ts",
+    "audio:manifest": "tsx scripts/audio/manifest.ts",
+    "audio:render": "tsx scripts/audio/render.ts",
+    "audio:upload": "tsx scripts/audio/upload.ts",
+    "icons": "tsx scripts/icons.ts"
   },
   "dependencies": {
     "next": "16.3.4",
+    "posthog-js": "1.433.10",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
@@ -20,9 +28,11 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.1.1",
+    "aws4fetch": "^1.0.20",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^3.2.7"
   }

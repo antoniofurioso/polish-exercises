@@ -8,6 +8,7 @@ import { CASE_INFO } from "./cases";
 import { buildOptions } from "./choices";
 import { capitalise, fitsTemplate, makeRng, nounForm, pick, resolvePrep, shuffle } from "./generate";
 import { normalise, stripDiacritics } from "./grade";
+import { LEXICON } from "./lexicon";
 import { NOUNS, nounVariants } from "./nouns";
 import {
   MONTHS,
@@ -20,19 +21,23 @@ import {
   ordinal,
   ordinalLemma,
 } from "./numerals";
-import { NUMBER_CASES, NUMBER_DRILLS, genderGroup } from "./types";
+import { LEVELS, NUMBER_CASES, NUMBER_DRILLS, genderGroup, withinLevel } from "./types";
 import type {
   AnswerMode,
   Case,
   Config,
+  CountTemplate,
   Exercise,
   Gender,
   GenderGroup,
   GramNumber,
+  Level,
   Noun,
   NumberDrill,
+  NumeralTemplate,
   SpellRange,
   Tag,
+  Template,
   Token,
 } from "./types";
 
@@ -43,6 +48,16 @@ import type {
  *   numeral  the numeral itself, agreeing with the noun and the case
  *   spell    a figure written out in words
  *   ordinal  pierwszy / drugi / trzeci, plus dates and clock times
+ *
+ * Every exercise carries an SRS `card` and `skill` (`numbers:<drill>|<facet…>`).
+ * The facets are a grammar rule × a range of numbers, never a single sentence:
+ * the count band, the numeral class, the spelling magnitude, the ordinal flavour,
+ * each with the case where the case changes the form. The exact scheme, the
+ * levels and the order cards are introduced in are documented in
+ * lib/cards/numbers.ts; the facet functions and `buildNumberCard` (one exercise
+ * for exactly one card) live at the bottom of this file. Tagging an exercise
+ * reads what was already drawn and never touches the RNG, so configured
+ * sessions are unchanged by it.
  */
 
 const withPlural = (noun: Noun) => !noun.noPlural && noun.pl !== undefined;
@@ -53,14 +68,30 @@ const COUNTABLE: Tag[] = [
   "placeIn", "placeTo", "surface", "plant", "water", "show",
 ];
 
-function lexicon(genders?: GenderGroup[]): Noun[] {
+/**
+ * The nouns to count, up to `maxLevel` when set. The level only narrows the
+ * words: the frames here are fixed per sub-drill and stay as they are.
+ */
+function lexicon(genders?: GenderGroup[], maxLevel?: Level): Noun[] {
   const countable = NOUNS.filter(
-    (n) => withPlural(n) && fitsTemplate(n, { requires: COUNTABLE }),
+    (n) => withPlural(n) && fitsTemplate(n, { requires: COUNTABLE }) && withinLevel(n, maxLevel),
   );
   if (!genders || genders.length === 0) return countable;
   const wanted = countable.filter((n) => genders.includes(genderGroup(n.gender)));
   // a filter that leaves nothing to count would strand the noun-based drills
   return wanted.length > 0 ? wanted : countable;
+}
+
+/**
+ * Whether a frame can count (or number) this noun: it has to fit the frame's
+ * requires / lemmas / excludeLemmas, and a mass noun only counts in portions
+ * (dwie kawy, pięć chlebów), never "dziewiętnaście traw", unless the frame
+ * names it. The candidates are checked one by one after the shuffle, so a
+ * skipped noun costs no random draw and the rest of a session stays as it was.
+ */
+export function countsIn(noun: Noun, tpl: Pick<CountTemplate, "requires" | "lemmas" | "excludeLemmas">): boolean {
+  if (!fitsTemplate(noun, tpl)) return false;
+  return !noun.mass || !!noun.portions || !!tpl.lemmas?.includes(noun.lemma);
 }
 
 /** English for a counted phrase: "five cats", "one cat". */
@@ -69,37 +100,12 @@ const countedEn = (n: number, noun: Noun) =>
 
 // ------------------------------------------------------------ 1 · counting
 
-type CountTemplate = {
-  /** Polish frame with {N} for the numeral and {NP} for the counted noun. */
-  pl: string;
-  en: string;
-  /** The case the frame itself assigns — it only shows with "jeden". */
-  case: "nom" | "acc";
-  /** Which nouns the sentence makes sense with — see Template. */
-  requires: Tag[];
-  lemmas?: string[];
-  excludeLemmas?: string[];
-};
-
-/** Things that could sit "here": "Tu są trzy krzesła", not "Tu są dwa miasta". */
-const HERE: Pick<CountTemplate, "requires" | "excludeLemmas"> = {
-  requires: ["person", "animal", "object", "vehicle", "text", "food", "drink", "surface", "placeIn"],
-  excludeLemmas: ["kuchnia", "miasto", "ogród", "woda", "obiad", "zupa", "słoń", "rodzina"],
-};
-/** Things you'd see out of a window or in a photo. */
-const IN_VIEW: Pick<CountTemplate, "requires" | "excludeLemmas"> = {
-  requires: ["person", "animal", "vehicle", "placeIn", "placeTo", "water", "plant", "food"],
-  excludeLemmas: ["kuchnia", "pokój", "bank", "apteka", "biuro", "morze", "zupa", "obiad", "rodzina"],
-};
-
-const COUNT_TEMPLATES: CountTemplate[] = [
-  { pl: "Mam {N} {NP}.", en: "I have {np}.", case: "acc",
-    requires: ["animal", "object", "vehicle", "text", "food"], lemmas: ["dom", "mieszkanie", "pokój"],
-    excludeLemmas: ["słoń", "zwierzę", "list", "gazeta", "radio", "zupa", "obiad", "samolot", "pociąg", "autobus"] },
-  { pl: "Widzę {N} {NP}.", en: "I can see {np}.", case: "acc", ...IN_VIEW },
-  { pl: "Tu {V} {N} {NP}.", en: "There {is} {np} here.", case: "nom", ...HERE },
-  { pl: "Na zdjęciu {V} {N} {NP}.", en: "There {is} {np} in the photo.", case: "nom", ...IN_VIEW },
-];
+/**
+ * The counting sentences, in data/count-frames.json. "@inView" / "@notInView"
+ * are the things you'd see out of a window or in a photo, "@notHere" what
+ * could not sit "here" ("Tu są trzy krzesła", not "Tu są dwa miasta").
+ */
+const COUNT_TEMPLATES: CountTemplate[] = LEXICON.counting;
 
 /**
  * The numbers the counting drill draws from — deliberately loaded with the
@@ -135,10 +141,11 @@ function buildCountExercise(
   nouns: Noun[],
   rng: () => number,
   taken: Set<string>,
+  templates: CountTemplate[] = COUNT_TEMPLATES,
 ): Exercise | null {
-  for (const tpl of shuffle(COUNT_TEMPLATES, rng)) {
+  for (const tpl of shuffle(templates, rng)) {
     for (const noun of shuffle(nouns, rng)) {
-      if (!fitsTemplate(noun, tpl)) continue;
+      if (!countsIn(noun, tpl)) continue;
       const key = `count|${n}|${noun.lemma}|${tpl.pl}`;
       if (taken.has(key)) continue;
       taken.add(key);
@@ -170,6 +177,7 @@ function buildCountExercise(
         answers,
         note: countNote(n, noun),
         source: { noun },
+        ...cardOf("count", countBand(n, noun.gender), tpl.case),
       };
     }
   }
@@ -184,29 +192,12 @@ const NUMERAL_POOL = [
   30, 40, 50, 60, 70, 80, 90, 100,
 ];
 
-type NumeralTemplate = Pick<CountTemplate, "requires" | "lemmas" | "excludeLemmas"> & {
-  pl: string;
-  en: string;
-};
-
-/** People you'd help or talk to in a group: "pięciu studentom", "z trzema kolegami". */
-const PEOPLE: Pick<CountTemplate, "requires" | "excludeLemmas"> = {
-  requires: ["person"],
-  excludeLemmas: ["pan", "pani", "rodzina"],
-};
-
-const NUMERAL_TEMPLATES: Record<Case, NumeralTemplate> = {
-  nom: { pl: "Tu {V} {NP}.", en: "There {is} {np} here.", ...HERE },
-  gen: { pl: "Szukam {NP}.", en: "I'm looking for {np}.",
-    requires: ["animal", "object", "profession"], excludeLemmas: ["słoń", "radio", "stół", "łóżko", "biurko"] },
-  dat: { pl: "Pomagam {NP}.", en: "I'm helping {np}.", ...PEOPLE },
-  acc: { pl: "Widzę {NP}.", en: "I can see {np}.", ...IN_VIEW },
-  ins: { pl: "Rozmawiam {z} {NP}.", en: "I'm talking with {np}.", ...PEOPLE },
-  loc: { pl: "Myślę o {NP}.", en: "I'm thinking about {np}.",
-    requires: ["person", "animal", "placeIn", "placeTo", "vehicle"],
-    excludeLemmas: ["pan", "pani", "rodzina", "kuchnia", "pokój", "bank", "apteka", "biuro"] },
-  voc: { pl: "Widzę {NP}.", en: "I can see {np}.", ...IN_VIEW },
-};
+/**
+ * The numeral drill's one sentence per case, in data/numeral-frames.json.
+ * "@notCounted" keeps out the people you would not talk to in a group of five
+ * (pan, pani, rodzina). A case whose frame is still a draft has none.
+ */
+const NUMERAL_TEMPLATES: Partial<Record<Case, NumeralTemplate>> = LEXICON.numerals;
 
 /** Which cell the counted noun sits in once the numeral is in `kase`. */
 export function countedCell(
@@ -266,8 +257,9 @@ function buildNumeralExercise(
   taken: Set<string>,
 ): Exercise | null {
   const tpl = NUMERAL_TEMPLATES[kase];
+  if (!tpl) return null;
   for (const noun of shuffle(nouns, rng)) {
-    if (!fitsTemplate(noun, tpl)) continue;
+    if (!countsIn(noun, tpl)) continue;
     const key = `numeral|${n}|${noun.lemma}|${kase}`;
     if (taken.has(key)) continue;
     taken.add(key);
@@ -299,6 +291,7 @@ function buildNumeralExercise(
       ),
       answers,
       note: numeralNote(n, noun, kase),
+      ...cardOf("numeral", numeralClass(n, noun.gender, kase), kase),
     };
 
     if (answerMode === "choice") {
@@ -344,31 +337,36 @@ function buildSpellExercise(
     const key = `spell|${n}`;
     if (taken.has(key) && attempt < 30) continue;
     taken.add(key);
-
-    const word = cardinal(n);
-    const exercise: Exercise = {
-      id: key,
-      case: "nom",
-      number: "sg",
-      label: "Liczba",
-      before: "",
-      after: "",
-      tokens: [{ text: word, blank: true }],
-      hint: String(n),
-      en: capitalise(englishNumber(n)),
-      answers: [word],
-      note:
-        n >= 100 && n % 100 !== 0
-          ? `Polish stacks the parts with no "and": ${word}.`
-          : `${n} = ${word}.`,
-    };
-    if (answerMode === "choice") {
-      const options = spellDistractors(n, max, rng);
-      if (options.length > 0) exercise.options = shuffle([word, ...options], rng);
-    }
-    return exercise;
+    return spellExercise(n, max, answerMode, rng);
   }
   return null;
+}
+
+/** The figure `n` to write out; choice mode draws its near misses from 0..max. */
+function spellExercise(n: number, max: number, answerMode: AnswerMode, rng: () => number): Exercise {
+  const word = cardinal(n);
+  const exercise: Exercise = {
+    id: `spell|${n}`,
+    case: "nom",
+    number: "sg",
+    label: "Liczba",
+    before: "",
+    after: "",
+    tokens: [{ text: word, blank: true }],
+    hint: String(n),
+    en: capitalise(englishNumber(n)),
+    answers: [word],
+    note:
+      n >= 100 && n % 100 !== 0
+        ? `Polish stacks the parts with no "and": ${word}.`
+        : `${n} = ${word}.`,
+    ...cardOf("spell", spellMagnitude(n)),
+  };
+  if (answerMode === "choice") {
+    const options = spellDistractors(n, max, rng);
+    if (options.length > 0) exercise.options = shuffle([word, ...options], rng);
+  }
+  return exercise;
 }
 
 // ----------------------------------------------------------- 4 · ordinals
@@ -452,6 +450,7 @@ function buildDateExercise(
       note: `A date is an ordinal in the genitive — "${ordinalLemma(
         day,
       )}" becomes "${form}", and the month follows in the genitive too (${month.nom} → ${month.gen}).`,
+      ...cardOf("ordinal", "date", "gen"),
     };
     if (answerMode === "choice") {
       const options = ordinalChoices(day, "mInanim", "gen", exercise.answers, rng);
@@ -466,10 +465,12 @@ function buildTimeExercise(
   answerMode: AnswerMode,
   rng: () => number,
   taken: Set<string>,
+  /** Ask this case instead of drawing one (targeted card builds only). */
+  only?: "nom" | "loc",
 ): Exercise | null {
   for (let attempt = 0; attempt < 20; attempt++) {
     const hour = 1 + Math.floor(rng() * 12);
-    const asked = rng() < 0.5 ? "loc" : "nom";
+    const asked = only ?? (rng() < 0.5 ? "loc" : "nom");
     const key = `time|${hour}|${asked}`;
     if (taken.has(key) && attempt < 15) continue;
     taken.add(key);
@@ -496,6 +497,7 @@ function buildTimeExercise(
         asked === "loc"
           ? `The hour is a feminine ordinal agreeing with the unspoken "godzina", and "o" puts it in the locative: o ${form}.`
           : `"Która godzina?" — the hour is a feminine ordinal in the nominative: ${form}.`,
+      ...cardOf("ordinal", "time", asked),
     };
     if (answerMode === "choice") {
       const options = ordinalChoices(hour, "f", asked as Case, exercise.answers, rng);
@@ -506,6 +508,26 @@ function buildTimeExercise(
   return null;
 }
 
+/**
+ * The shuffled nouns as a frame takes them: one it cannot take ("Opiekuję się
+ * drugą kolacją", "Widzę jedenastą trawę") gives way to the next one it can of
+ * the same gender, so the ending drilled and the options offered stay the ones
+ * drawn; with none of that gender left it is skipped.
+ */
+function takenBy(tpl: Template, shuffled: Noun[]): Noun[] {
+  const used = new Set<Noun>();
+  const out: Noun[] = [];
+  for (const [i, noun] of shuffled.entries()) {
+    const fit = [noun, ...shuffled.slice(i + 1)].find(
+      (n) => !used.has(n) && n.gender === noun.gender && countsIn(n, tpl),
+    );
+    if (!fit) continue;
+    used.add(fit);
+    out.push(fit);
+  }
+  return out;
+}
+
 /** Ordinals are drilled in the singular — "the twelfth shops" is not a phrase. */
 function buildOrdinalAgreement(
   kase: Case,
@@ -513,14 +535,16 @@ function buildOrdinalAgreement(
   answerMode: AnswerMode,
   rng: () => number,
   taken: Set<string>,
+  /** Frames above this level are left out (targeted card builds only). */
+  maxLevel?: Level,
 ): Exercise | null {
   const number: GramNumber = "sg";
   for (let attempt = 0; attempt < 20; attempt++) {
-    const templates = agreementTemplatesFor(kase, number);
+    const templates = agreementTemplatesFor(kase, number, maxLevel);
     if (templates.length === 0) continue;
 
     for (const tpl of shuffle(templates, rng)) {
-      for (const noun of shuffle(nouns, rng)) {
+      for (const noun of takenBy(tpl, shuffle(nouns, rng))) {
         const n = 1 + Math.floor(rng() * 20);
         const key = `ord|${n}|${noun.lemma}|${tpl.pl}|${number}`;
         if (taken.has(key) && attempt < 15) continue;
@@ -547,6 +571,7 @@ function buildOrdinalAgreement(
           note: `An ordinal is an adjective: "${ordinalLemma(n)}" agrees with ${noun.lemma} — ${
             GENDER_WORD[genderGroup(noun.gender)]
           } singular, ${CASE_INFO[kase].en.toLowerCase()}. ${tpl.note}`,
+          ...cardOf("ordinal", "plain", kase),
         };
 
         if (answerMode === "choice") {
@@ -609,7 +634,7 @@ export function buildNumberSession(config: Config, seed = Date.now()): Exercise[
     (NUMBER_CASES as readonly string[]).includes(c),
   );
   const cases = selected.length ? selected : [...NUMBER_CASES];
-  const nouns = lexicon(config.genders);
+  const nouns = lexicon(config.genders, config.maxLevel);
   const answerMode: AnswerMode = config.answerMode === "choice" ? "choice" : "typing";
 
   const taken = new Set<string>();
@@ -617,9 +642,9 @@ export function buildNumberSession(config: Config, seed = Date.now()): Exercise[
   let pool: NumberDrill[] = [];
 
   // a drill that runs dry falls back to the others rather than dropping a question
-  const attempt = (drill: NumberDrill): Exercise | null => {
+  const attempt = (drill: NumberDrill, from = nouns): Exercise | null => {
     for (const candidate of [drill, ...shuffle(drills, rng)]) {
-      const exercise = buildOne(candidate, config, cases, nouns, answerMode, rng, taken);
+      const exercise = buildOne(candidate, config, cases, from, answerMode, rng, taken);
       if (exercise) return exercise;
     }
     return null;
@@ -634,7 +659,246 @@ export function buildNumberSession(config: Config, seed = Date.now()): Exercise[
       taken.clear();
       exercise = attempt(drill);
     }
+    if (!exercise && config.genders?.length) {
+      // the genders chosen have no noun the frame can take (no neuter person is
+      // counted: dziecko wants "dwoje", see @collective), so count any gender
+      exercise = attempt(drill, lexicon(undefined, config.maxLevel));
+    }
     if (exercise) exercises.push(exercise);
   }
   return exercises;
+}
+
+// ------------------------------------------------------------- SRS cards
+
+/** Card and skill ids for one exercise: `numbers:<drill>|<facets>`; the skill keeps the first facet. */
+function cardOf(drill: NumberDrill, ...facets: string[]): { card: string; skill: string } {
+  return { card: `numbers:${drill}|${facets.join("|")}`, skill: `numbers:${drill}|${facets[0]}` };
+}
+
+/** What decides the counted noun's form, in the order a learner meets it. */
+export const COUNT_BANDS = ["1", "2-4", "5+", "teens", "compound2-4", "compound", "men"] as const;
+export type CountBand = (typeof COUNT_BANDS)[number];
+
+/**
+ * The counting rule a number falls under for a noun of this gender: 1; plain
+ * 2-4; 5-10 and round numbers (20, 30, 100); the -naście numbers (11-19 and
+ * 111-119: the 12-14 trap); compounds ending in 2-4 (22, 32, 102: nominative
+ * plural); other compounds (21, 25, 101: genitive plural); and men, where
+ * every n ≥ 2 takes the -u form and the genitive plural.
+ */
+export function countBand(n: number, gender: Gender): CountBand {
+  if (n === 1) return "1";
+  if (gender === "mPers") return "men";
+  if (n >= 2 && n <= 4) return "2-4";
+  const last2 = n % 100;
+  if (last2 >= 11 && last2 <= 19) return "teens";
+  if (n <= 10 || n % 10 === 0) return "5+";
+  return government(n, gender) === "nomPl" ? "compound2-4" : "compound";
+}
+
+/** The numeral's own paradigm: jeden, 2-4, 5 and up (teens and tens alike), sto, and the men's -u form. */
+export const NUMERAL_CLASSES = ["1", "2-4", "5+", "100", "men"] as const;
+export type NumeralClass = (typeof NUMERAL_CLASSES)[number];
+
+export function numeralClass(n: number, gender: Gender, kase: Case): NumeralClass {
+  if (n === 1) return "1";
+  // only the nominative and accusative tell men apart: pięciu studentów, pięć kotów
+  if (gender === "mPers" && (kase === "nom" || kase === "acc")) return "men";
+  if (n >= 2 && n <= 4) return "2-4";
+  return n === 100 ? "100" : "5+";
+}
+
+/** How big a figure to write out; the thousands split by what "tysiąc" turns into. */
+export const SPELL_MAGNITUDES = [
+  "units", "teens", "tens", "hundreds", "thousand", "thousands2-4", "thousands5+",
+] as const;
+export type SpellMagnitude = (typeof SPELL_MAGNITUDES)[number];
+
+/** The figures each magnitude covers, inclusive. */
+export const SPELL_SPANS: Record<SpellMagnitude, [number, number]> = {
+  units: [0, 10],
+  teens: [11, 19],
+  tens: [20, 99],
+  hundreds: [100, 999],
+  thousand: [1000, 1999], // tysiąc
+  "thousands2-4": [2000, 4999], // dwa tysiące
+  "thousands5+": [5000, 9999], // pięć tysięcy
+};
+
+export function spellMagnitude(n: number): SpellMagnitude {
+  return SPELL_MAGNITUDES.find((m) => n <= SPELL_SPANS[m][1]) ?? "thousands5+";
+}
+
+/** The numbers a count band is drilled with: the counting pool, split by band. */
+const bandNumbers = (band: CountBand): number[] =>
+  band === "men"
+    ? COUNT_POOL.filter((n) => n > 1)
+    : COUNT_POOL.filter((n) => countBand(n, "mInanim") === band);
+
+/** The numbers a numeral class is drilled with: the numeral pool, split by class. */
+const classNumbers = (cls: NumeralClass): number[] =>
+  cls === "men"
+    ? NUMERAL_POOL.filter((n) => n > 1)
+    : NUMERAL_POOL.filter((n) => numeralClass(n, "mInanim", "gen") === cls);
+
+const levelIndex = (level: Level) => LEVELS.indexOf(level);
+const higher = (a: Level, b: Level): Level => (levelIndex(a) >= levelIndex(b) ? a : b);
+
+/** The easiest of some levels, or null when there are none. */
+const easiest = (levels: Level[]): Level | null =>
+  levels.length === 0 ? null : levels.reduce((a, b) => (levelIndex(a) <= levelIndex(b) ? a : b));
+
+/** The grammar's own level for a card, before its words and frames have their say. */
+function ruleLevel(drill: NumberDrill, facets: string[]): Level {
+  const [head, kase] = facets;
+  if (drill === "count") {
+    if (head === "men") return "B1";
+    return head === "1" || head === "2-4" || head === "5+" ? "A1" : "A2";
+  }
+  if (drill === "numeral") {
+    if (head === "men" || (kase !== "nom" && kase !== "acc")) return "B1";
+    return head === "100" ? "A2" : "A1";
+  }
+  if (drill === "spell") return head === "units" || head === "teens" || head === "tens" ? "A1" : "A2";
+  if (head === "date") return "A2";
+  if (head === "time") return kase === "nom" ? "A1" : "A2";
+  return "A1"; // plain ordinals: the frame's own level decides the oblique cases
+}
+
+/**
+ * The easiest level a card can be built at: its rule level, raised to the
+ * easiest noun (for plain ordinals, noun and frame together) that can carry
+ * it. Null when no published word or frame can.
+ */
+function cardLevel(drill: NumberDrill, facets: string[]): Level | null {
+  const nouns = lexicon();
+  const rule = ruleLevel(drill, facets);
+  let words: Level | null = rule;
+
+  if (drill === "count") {
+    const band = facets[0] as CountBand;
+    const kase = facets[1] as Case;
+    const n = bandNumbers(band)[0];
+    if (n === undefined) return null;
+    words = easiest(
+      COUNT_TEMPLATES.filter((t) => t.case === kase).flatMap((tpl) =>
+        nouns
+          .filter((noun) => countBand(n, noun.gender) === band && countsIn(noun, tpl))
+          .filter((noun) => {
+            const cell = countedCell(n, noun.gender, kase);
+            return nounVariants(noun, cell.number, cell.case).length > 0;
+          })
+          .map((noun) => noun.level),
+      ),
+    );
+  } else if (drill === "numeral") {
+    const cls = facets[0] as NumeralClass;
+    const kase = facets[1] as Case;
+    const tpl = NUMERAL_TEMPLATES[kase];
+    const n = classNumbers(cls)[0];
+    if (!tpl || n === undefined) return null;
+    words = easiest(
+      nouns
+        .filter((noun) => numeralClass(n, noun.gender, kase) === cls && countsIn(noun, tpl))
+        .filter((noun) => {
+          const cell = countedCell(n, noun.gender, kase);
+          return !!nounVariants(noun, cell.number, cell.case)[0];
+        })
+        .map((noun) => noun.level),
+    );
+  } else if (drill === "ordinal" && facets[0] === "plain") {
+    const kase = facets[1] as Case;
+    words = easiest(
+      agreementTemplatesFor(kase, "sg").flatMap((tpl) =>
+        nouns
+          .filter((noun) => countsIn(noun, tpl) && !!nounVariants(noun, "sg", kase)[0])
+          .map((noun) => higher(tpl.level, noun.level)),
+      ),
+    );
+  }
+  return words && higher(rule, words);
+}
+
+/** The count frames' two cases, and the other drills' cases in teaching order. */
+const COUNT_CASES: Case[] = ["nom", "acc"];
+const TEACHING_CASES: Case[] = ["nom", "acc", "gen", "loc", "ins", "dat"];
+
+/** Every candidate card in teaching order: spell, count, numeral, ordinal; small numbers first. */
+function candidates(): [NumberDrill, string[]][] {
+  const out: [NumberDrill, string[]][] = [];
+  for (const m of SPELL_MAGNITUDES) out.push(["spell", [m]]);
+  for (const b of COUNT_BANDS) for (const k of COUNT_CASES) out.push(["count", [b, k]]);
+  for (const c of NUMERAL_CLASSES) for (const k of TEACHING_CASES) out.push(["numeral", [c, k]]);
+  out.push(["ordinal", ["time", "nom"]], ["ordinal", ["time", "loc"]], ["ordinal", ["date", "gen"]]);
+  for (const k of TEACHING_CASES) out.push(["ordinal", ["plain", k]]);
+  return out;
+}
+
+export type NumberCardInfo = { id: string; skill: string; level: Level };
+
+let catalog: NumberCardInfo[] | null = null;
+
+/**
+ * Every card the loaded lexicon can build, with its level, in teaching order
+ * (not yet sorted by level). Computed once.
+ */
+export function numberCardCatalog(): NumberCardInfo[] {
+  if (!catalog) {
+    catalog = [];
+    for (const [drill, facets] of candidates()) {
+      const level = cardLevel(drill, facets);
+      const { card, skill } = cardOf(drill, ...facets);
+      if (level) catalog.push({ id: card, skill, level });
+    }
+  }
+  return catalog;
+}
+
+/**
+ * One exercise for exactly this card, deterministic in `seed`, or null for an
+ * id the loaded lexicon can't build. Words and frames are capped at the card's
+ * own level, so an A1 card never shows a B2 noun.
+ */
+export function buildNumberCard(
+  card: string,
+  seed: number,
+  answerMode: AnswerMode = "typing",
+): Exercise | null {
+  const info = numberCardCatalog().find((c) => c.id === card);
+  if (!info) return null;
+  const [drill, head, kase] = card.slice("numbers:".length).split("|") as [NumberDrill, string, Case];
+  const rng = makeRng(seed);
+  const level = info.level;
+  const taken = new Set<string>();
+
+  if (drill === "spell") {
+    const [lo, hi] = SPELL_SPANS[head as SpellMagnitude];
+    // near misses stay at or below the magnitude's top: no "sto osiem" next to "osiem"
+    return spellExercise(lo + Math.floor(rng() * (hi - lo + 1)), hi, answerMode, rng);
+  }
+
+  if (drill === "count") {
+    const band = head as CountBand;
+    const n = pick(bandNumbers(band), rng);
+    const nouns = lexicon(undefined, level).filter((noun) => countBand(n, noun.gender) === band);
+    const frames = COUNT_TEMPLATES.filter((t) => t.case === kase);
+    const exercise = buildCountExercise(n, nouns, rng, taken, frames);
+    if (exercise && answerMode === "choice") {
+      const options = buildOptions(exercise, rng);
+      if (options.length > 1) exercise.options = options;
+    }
+    return exercise;
+  }
+
+  if (drill === "numeral") {
+    const cls = head as NumeralClass;
+    const n = pick(classNumbers(cls), rng);
+    const nouns = lexicon(undefined, level).filter((noun) => numeralClass(n, noun.gender, kase) === cls);
+    return buildNumeralExercise(n, kase, nouns, answerMode, rng, taken);
+  }
+
+  if (head === "date") return buildDateExercise(answerMode, rng, taken);
+  if (head === "time") return buildTimeExercise(answerMode, rng, taken, kase as "nom" | "loc");
+  return buildOrdinalAgreement(kase, lexicon(undefined, level), answerMode, rng, taken, level);
 }

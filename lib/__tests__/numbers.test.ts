@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { renderSolution } from "../generate";
 import { grade } from "../grade";
+import { numbersCards } from "../cards/numbers";
 import { buildNumberSession, countedCell } from "../numbers";
 import { cardinal, government } from "../numerals";
 import { parseSession, sessionParams } from "../session";
@@ -86,17 +87,27 @@ describe("buildNumberSession", () => {
   });
 
   it("still fills a long session off an exhausted pool, repeating rather than dropping", () => {
-    // 15 neuter nouns x 28 numerals = 420 distinct dative questions, and we ask 500
+    // the neuter nouns the genitive frame takes x 28 numerals is well under 500 questions
     const session = buildNumberSession(
-      config({ drills: ["numeral"], genders: ["n"], cases: ["dat"], count: 500 }),
+      config({ drills: ["numeral"], genders: ["n"], cases: ["gen"], count: 500 }),
       13,
     );
     expect(session).toHaveLength(500);
     expect(new Set(session.map((e) => e.id)).size).toBeLessThan(500); // it repeated
     for (const exercise of session) {
-      expect(exercise.case).toBe("dat");
+      expect(exercise.case).toBe("gen");
       expect(grade(exercise.answers[0], exercise)).toBe("correct");
     }
+  });
+
+  it("counts other genders rather than dropping questions when the chosen ones fit no frame", () => {
+    // the dative frame takes people, and no neuter person is counted (dziecko: @collective)
+    const session = buildNumberSession(
+      config({ drills: ["numeral"], genders: ["n"], cases: ["dat"], count: 10 }),
+      13,
+    );
+    expect(session).toHaveLength(10);
+    for (const exercise of session) expect(exercise.case).toBe("dat");
   });
 
   it("only spells numbers inside the chosen range", () => {
@@ -120,6 +131,28 @@ describe("buildNumberSession", () => {
     for (const exercise of session) {
       expect(government(1, "n")).toBe("nomSg"); // guards the fixture, not the session
       expect(exercise.hint).toMatch(/[oeęum]$/);
+    }
+  });
+});
+
+describe("collective nouns (@collective in data/groups.json)", () => {
+  // "dwoje / pięcioro dzieci": the app has no collective numerals, so dziecko is never counted
+  const counted = (ex: { card?: string; id: string }) =>
+    /^numbers:(count|numeral)\|/.test(ex.card ?? "") && ex.id.split("|")[2] === "dziecko";
+
+  it("keeps dziecko out of the count and numeral drills", () => {
+    for (let seed = 1; seed <= 60; seed++) {
+      const session = buildNumberSession(config({ drills: ["count", "numeral"], genders: ["n"], count: 40 }), seed);
+      expect(session.filter(counted).map((ex) => ex.id)).toEqual([]);
+    }
+  });
+
+  it("keeps dziecko out of every count and numeral card build", () => {
+    for (const card of numbersCards.all().filter((c) => /^numbers:(count|numeral)\|/.test(c.id))) {
+      for (let seed = 1; seed <= 20; seed++) {
+        const ex = numbersCards.build(card.id, seed);
+        if (ex) expect(counted(ex), `${card.id} @ ${seed}`).toBe(false);
+      }
     }
   });
 });

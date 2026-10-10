@@ -5,7 +5,7 @@ import {
   renderAgreementEnglish,
 } from "./agreement";
 import { CASE_INFO } from "./cases";
-import { makeRng, nounForm, nounsFor, pick, shuffle } from "./generate";
+import { casesWithin, makeRng, nounForm, nounsFor, pick, shuffle } from "./generate";
 import { POSSESSIVE_CASES, POSSESSIVES, genderGroup } from "./types";
 import type {
   AnswerMode,
@@ -15,6 +15,7 @@ import type {
   Gender,
   GenderGroup,
   GramNumber,
+  Level,
   Noun,
   Possessive,
   Template,
@@ -215,8 +216,13 @@ const isFixed = (owner: Possessive) => OWNER_INFO[owner].family === "fixed";
  * "swój" only ever refers back to the subject, so it is drilled in the
  * sentences that have one; the rest are open to every possessor.
  */
-function templatesForOwner(owner: Possessive, kase: Case, number: GramNumber): Template[] {
-  const templates = agreementTemplatesFor(kase, number);
+export function templatesForOwner(
+  owner: Possessive,
+  kase: Case,
+  number: GramNumber,
+  maxLevel?: Level,
+): Template[] {
+  const templates = agreementTemplatesFor(kase, number, maxLevel);
   return owner === "swoj" ? templates.filter((t) => t.subject === "1sg") : templates;
 }
 
@@ -261,6 +267,16 @@ function note(
   return head;
 }
 
+/** The SRS card and skill of a possessive question: owner × paradigm cell (plans/phase-2.md §1). */
+export function possessiveCard(
+  owner: Possessive,
+  kase: Case,
+  gender: Gender,
+  number: GramNumber,
+): { card: string; skill: string } {
+  return { card: `possessives:${owner}|${kase}|${gender}|${number}`, skill: `possessives:${kase}|${number}` };
+}
+
 export function buildPossessiveExercise(
   owner: Possessive,
   kase: Case,
@@ -269,15 +285,21 @@ export function buildPossessiveExercise(
   rng: () => number,
   taken: Set<string> = new Set(),
   genders?: GenderGroup[],
+  maxLevel?: Level,
+  /** Only nouns of exactly this gender: how an SRS card asks for its paradigm cell. */
+  gender?: Gender,
 ): Exercise | null {
   for (let attempt = 0; attempt < 40; attempt++) {
     const number = pick(numbers, rng);
-    const templates = templatesForOwner(owner, kase, number);
+    const templates = templatesForOwner(owner, kase, number, maxLevel);
     if (templates.length === 0) continue;
 
     for (const tpl of shuffle(templates, rng)) {
-      const nouns = nounsFor(tpl, number, genders);
+      const fitting = nounsFor(tpl, number, genders, maxLevel);
+      const nouns = gender ? fitting.filter((n) => n.gender === gender) : fitting;
       for (const noun of shuffle(nouns, rng)) {
+        // "mój Polak", "mój komar": skipped after the shuffle, so no random draw changes
+        if (noun.noPossessive) continue;
         const key = `${owner}|${tpl.pl}|${noun.lemma}|${number}`;
         if (taken.has(key) && attempt < 30) continue;
         taken.add(key);
@@ -308,6 +330,7 @@ export function buildPossessiveExercise(
           }`,
           en: renderAgreementEnglish(tpl, noun, OWNER_INFO[owner].en, number),
           answers,
+          ...possessiveCard(owner, kase, noun.gender, number),
           note: note(owner, noun, number, kase, tpl),
         };
 
@@ -362,8 +385,12 @@ export function buildPossessiveSession(config: Config, seed = Date.now()): Exerc
   const selected = config.cases.filter((c): c is Case =>
     (POSSESSIVE_CASES as readonly string[]).includes(c),
   );
-  const cases = selected.length ? selected : (["nom"] as Case[]);
   const numbers = config.numbers.length ? config.numbers : (["sg"] as GramNumber[]);
+  const cases = casesWithin(
+    selected.length ? selected : (["nom"] as Case[]),
+    config.maxLevel,
+    (kase) => numbers.some((n) => agreementTemplatesFor(kase, n, config.maxLevel).length > 0),
+  );
   const owners = config.owners?.length ? config.owners : [...POSSESSIVES];
   const answerMode: AnswerMode = config.answerMode === "choice" ? "choice" : "typing";
 
@@ -383,6 +410,7 @@ export function buildPossessiveSession(config: Config, seed = Date.now()): Exerc
         rng,
         taken,
         config.genders,
+        config.maxLevel,
       );
       if (exercise) {
         exercises.push(exercise);

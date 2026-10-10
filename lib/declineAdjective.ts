@@ -1,26 +1,29 @@
 import type { Adjective, Case, Gender, GramNumber } from "./types";
 
+/** All the declension needs: lexicon adjectives, and the ordinals and "jeden" built in code. */
+export type AdjectiveStem = Pick<Adjective, "stem" | "type" | "virilePl">;
+
 /**
  * Adjective endings are fully regular once you know the stem hardness.
  * Soft stems insert -i- before every ending (tan + ia = tania);
  * velar stems (k, g) insert it before everything except -a and -ą
  * (drog + a = droga, but drog + iego = drogiego).
  */
-function join(adj: Adjective, ending: string): string {
+function join(adj: AdjectiveStem, ending: string): string {
   if (adj.type === "hard") return adj.stem + ending;
   if (adj.type === "soft") return adj.stem + "i" + ending;
   return /^[aą]/.test(ending) ? adj.stem + ending : adj.stem + "i" + ending;
 }
 
 /** Endings whose hard variant starts with -y-: -y, -ym, -ych, -ymi. */
-function yEnding(adj: Adjective, rest: string): string {
+function yEnding(adj: AdjectiveStem, rest: string): string {
   return adj.type === "hard" ? adj.stem + "y" + rest : join(adj, rest);
 }
 
 const VIRILE: Gender[] = ["mPers"];
 
 export function declineAdjective(
-  adj: Adjective,
+  adj: AdjectiveStem,
   gender: Gender,
   number: GramNumber,
   kase: Case,

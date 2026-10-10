@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSession, makeRng, renderPrompt, renderSolution, resolvePrep } from "../generate";
+import { article, buildSession, makeRng, renderPrompt, renderSolution, resolvePrep } from "../generate";
 import { grade, normalise } from "../grade";
 import { NOUNS } from "../nouns";
 import { CASES, genderGroup } from "../types";
@@ -124,5 +124,19 @@ describe("buildSession", () => {
 
   it("normalises punctuation and spacing", () => {
     expect(normalise("  Czarnego   Kota. ")).toBe("czarnego kota");
+  });
+});
+
+describe("small print", () => {
+  it("picks the English article by sound", () => {
+    expect(["young man", "year", "hour", "old house", "university", "umbrella", "European city"].map(article)).toEqual(
+      ["a", "a", "an", "an", "a", "an", "a"],
+    );
+  });
+
+  it("only grows z into ze before a consonant cluster", () => {
+    expect(["szefem", "szkołą", "siostrą", "żoną", "zdjęciem", "psem"].map((w) => resolvePrep("z", w))).toEqual(
+      ["z", "ze", "z", "z", "ze", "z"],
+    );
   });
 });

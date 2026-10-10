@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# agent worktrees
+/.claude/worktrees/
+
+# review sheets (npm run review:export) are working files
+/review/*.csv
+
+# pre-rendered audio (npm run audio:render / audio:upload) are working files;
+# audio/manifest.jsonl is committed
+/audio/out/
+/audio/uploaded.txt

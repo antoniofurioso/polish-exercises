@@ -1,7 +1,9 @@
-import { capitalise, shuffle } from "./generate";
+import { capitalise, nounFits, shuffle } from "./generate";
 import { normalise, stripDiacritics } from "./grade";
-import { PRONOUN_CASES } from "./types";
-import type { Case, Gender, GenderGroup, GramNumber, Noun, Tag, Template } from "./types";
+import { LEXICON } from "./lexicon";
+import { NOUNS } from "./nouns";
+import { LEVELS, PRONOUN_CASES, withinLevel } from "./types";
+import type { Case, Gender, GenderGroup, GramNumber, Level, Noun, Template } from "./types";
 
 /**
  * Shared machinery for the drills where the noun is handed over already
@@ -17,38 +19,15 @@ export const GENDER_WORD: Record<GenderGroup, string> = {
 
 /**
  * A handful of simple sentence frames, one trigger per case, kept plain so the
- * only thing being tested is the agreement of the blanked word.
+ * only thing being tested is the agreement of the blanked word. Each is
+ * levelled like the case it drills in data/templates.json. They live in
+ * data/agreement-frames.json, in the same schema as the templates.
  */
-const TANGIBLE: Tag[] = ["person", "animal", "object", "vehicle", "text", "food", "drink"];
+export const AGREEMENT_TEMPLATES: Template[] = LEXICON.agreement;
 
-export const AGREEMENT_TEMPLATES: Template[] = [
-  { case: "nom", number: "sg", pl: "Tu jest {NP}.", en: "{np} is here.",
-    requires: [...TANGIBLE, "placeIn"], note: "The subject of the sentence stays in the nominative." },
-  { case: "nom", number: "pl", pl: "Tu są {NP}.", en: "{np} are here.",
-    requires: [...TANGIBLE, "placeIn"], note: "The subject of the sentence stays in the nominative." },
-  { case: "gen", number: "any", pl: "Nie ma tu {NP}.", en: "{np} isn't here.",
-    enPl: "{np} aren't here.", requires: ["person", "animal", "object", "vehicle", "text"],
-    note: "'nie ma' (there isn't) takes the genitive." },
-  { case: "dat", number: "any", pl: "Przyglądam się {NP}.", en: "I'm looking at {np}.",
-    requires: ["person", "animal", "plant"], lemmas: ["dom", "samochód", "rower"],
-    excludeLemmas: ["pan", "pani"],
-    subject: "1sg", note: "'przyglądać się' takes the dative." },
-  { case: "acc", number: "any", pl: "Widzę {NP}.", en: "I can see {np}.",
-    requires: [...TANGIBLE, "placeIn", "placeTo", "water", "plant"], lemmas: ["okno"],
-    subject: "1sg", note: "A direct object takes the accusative." },
-  { case: "ins", number: "any", pl: "Opiekuję się {NP}.", en: "I take care of {np}.",
-    requires: ["family", "animal"], lemmas: ["chłopiec", "ogród", "dom", "mieszkanie"],
-    excludeLemmas: ["pająk", "słoń"],
-    subject: "1sg", note: "'opiekować się' takes the instrumental." },
-  { case: "loc", number: "any", pl: "Myślę o {NP}.", en: "I'm thinking about {np}.",
-    requires: ["family", "friend", "profession", "animal", "placeIn", "placeTo", "water", "vehicle", "time", "show"],
-    lemmas: ["praca", "imię", "projekt"],
-    subject: "1sg", note: "'o' (about) takes the locative." },
-];
-
-export function agreementTemplatesFor(kase: Case, number: GramNumber): Template[] {
+export function agreementTemplatesFor(kase: Case, number: GramNumber, maxLevel?: Level): Template[] {
   return AGREEMENT_TEMPLATES.filter(
-    (t) => t.case === kase && (t.number === "any" || t.number === number),
+    (t) => t.case === kase && (t.number === "any" || t.number === number) && withinLevel(t, maxLevel),
   );
 }
 
@@ -101,4 +80,26 @@ export function buildAgreementOptions(
   const distractors = [...shuffle(near, rng), ...shuffle(far, rng)].slice(0, count - 1);
   if (distractors.length < 1) return [];
   return shuffle([correct, ...distractors], rng);
+}
+
+/**
+ * The lowest level at which one paradigm cell can be drilled: the easiest
+ * frame among `templates`, paired with the easiest noun that fits it in this
+ * number and passes `accept` (a gender, no "mój Polak"...). Null when no frame
+ * has such a noun. This is an SRS card's level in the agreement drills.
+ */
+export function cellLevel(
+  templates: Template[],
+  number: GramNumber,
+  accept: (noun: Noun) => boolean,
+): Level | null {
+  let best: number | null = null;
+  for (const tpl of templates) {
+    for (const noun of NOUNS) {
+      if (!accept(noun) || !nounFits(noun, tpl, number)) continue;
+      const level = Math.max(LEVELS.indexOf(tpl.level), LEVELS.indexOf(noun.level));
+      if (best === null || level < best) best = level;
+    }
+  }
+  return best === null ? null : LEVELS[best];
 }
