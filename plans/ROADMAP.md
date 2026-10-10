@@ -12,7 +12,7 @@ Status key: ☐ todo · ◐ in progress · ☑ done
 | 1 | Content ×2–4 and natural audio | 3–5 weeks | ◐ code done; waiting on native review; audio engine chosen, render deferred — see [phase-1.md](./phase-1.md) |
 | 2 | Retention: SRS, "today's practice", streaks | 2–3 weeks | ☑ code done; tune in the Phase 3 beta — see [phase-2.md](./phase-2.md) |
 | 3 | Ship the web app: PWA, brand, landing page, beta | 1–2 weeks | ☑ live at polishup.app; beta running — see [phase-3.md](./phase-3.md) |
-| 4 | Accounts, sync, payments | ~2 weeks | ◐ decisions made, spec in progress |
+| 4 | Accounts, sync, payments | ~2 weeks | ◐ spec written, build started — see [phase-4.md](./phase-4.md) |
 | 5 | Mobile apps (Capacitor) | ~2 weeks | ☐ |
 
 **Critical path:** the native-speaker review of the Phase 1 drafts
@@ -87,23 +87,28 @@ audio on every device.
 
 ## Phase 4: Accounts and money
 
-- Auth and progress sync on Cloudflare Workers + D1, next to the audio Worker.
-  Sign-in by email only (a one-time code; no Google for now).
-- Payments through Stripe (the owner's existing account): Checkout, Customer
-  Portal, webhooks to the Worker. VAT is on the owner (Stripe Tax + EU OSS
-  returns) unless Stripe's merchant-of-record option is used.
-- No free plan. A 3-day free trial, card required, then the plan the learner
-  picked. The guides and the landing sample stay free (they bring the search
-  traffic). The trial lands on `/today`, with a reminder email on day 2.
-- Prices (decided 2026-10-10):
+Full spec: [phase-4.md](./phase-4.md).
+
+- Auth and progress sync on Cloudflare Workers + D1 (`workers/api`, free plan).
+  Sign-in by email only: a 6-digit code typed in the app; no Google for now.
+- Payments: Stripe Managed Payments (Stripe is merchant of record and handles
+  VAT) on the owner's existing account.
+- Beta: while `BETA_OPEN` is on, every new account gets Pro free, for good. The
+  owner closes it later; existing beta accounts keep Pro.
+- After the beta: no free plan. A 3-day free trial, card required, landing on
+  `/today`, with a reminder email on day 2. The guides and the landing sample
+  stay free.
+- Prices:
 
   | Plan | EUR | USD | PLN |
   | --- | --- | --- | --- |
   | Monthly | €6.99 | $7.99 | 29.99 zł |
   | Annual (default) | €49 | $54.99 | 199 zł |
-  | Lifetime | €99 | $109 | 399 zł |
+  | Lifetime (limited-time offer) | €99 | $109 | 399 zł |
 
-  Lifetime is for beta users only. Raise prices later for new users only.
+  Raise prices later for new users only.
+- Email list in Resend, one segment per plan, kept in step by the Worker;
+  marketing email only with opt-in.
 
 ## Phase 5: Mobile
 
@@ -113,7 +118,6 @@ audio on every device.
 
 ## Later
 
-- `/billing`: a price and Pro feature list once Phase 4 decides them.
 - **Reminders**, opt-in, for the streak and due reviews: web push notifications
   through the service worker (on iPhone only for the installed app, iOS 16.4+), and
   email reminders once Phase 4 has accounts and an address to send to.
