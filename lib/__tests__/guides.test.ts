@@ -115,11 +115,12 @@ describe("site", () => {
     for (const page of TOPIC_PAGES) expect(INDEXED_PATHS).toContain(page.path);
   });
 
-  it("leaves URLs out while there is no domain", () => {
-    // the tests run without NEXT_PUBLIC_SITE_URL
-    expect(absoluteUrl("/polish-cases")).toBe("");
+  it("points canonical and Open Graph URLs at the production domain", () => {
+    // the tests run without NEXT_PUBLIC_SITE_URL, so BRAND.url is its default
+    expect(absoluteUrl("/polish-cases")).toBe("https://polishup.app/polish-cases");
+    expect(absoluteUrl("/")).toBe("https://polishup.app/");
     const meta = pageMetadata({ title: "T", description: "D", path: "/polish-cases" });
-    expect(meta.alternates).toBeUndefined();
+    expect(meta.alternates).toMatchObject({ canonical: "https://polishup.app/polish-cases" });
     expect(meta.openGraph).toMatchObject({ title: expect.stringContaining("T"), description: "D" });
   });
 });

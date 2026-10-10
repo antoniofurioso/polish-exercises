@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { BRAND } from "@/lib/brand";
 import { GoalRing, useTodayStatus } from "@/components/today";
 import { Choice, Field } from "@/components/ui";
 import { GOAL_CHOICES, weakSpots, type WeakSpot } from "@/lib/progress";
@@ -27,7 +28,7 @@ export function ProgressPage() {
     <main className="mx-auto w-full max-w-3xl px-5 py-10 sm:py-16">
       <header className="mb-10">
         <Link href="/learn" className="text-sm uppercase tracking-[0.2em] text-accent">
-          Ćwiczenia
+          {BRAND.name}
         </Link>
         <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Your progress</h1>
         <p className="mt-3 text-muted">Your streak, your daily goal and where you slip up most.</p>

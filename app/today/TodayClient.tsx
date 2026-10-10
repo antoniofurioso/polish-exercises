@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { BRAND } from "@/lib/brand";
 import { Runner } from "@/components/Runner";
 import { GoalStatus } from "@/components/today";
 import { dayKey } from "@/lib/srs";
@@ -103,7 +104,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:py-14">
       <Link href="/learn" className="text-sm uppercase tracking-[0.2em] text-accent">
-        Ćwiczenia
+        {BRAND.name}
       </Link>
       <div className="mt-8">{children}</div>
     </main>

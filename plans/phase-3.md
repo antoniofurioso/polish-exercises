@@ -7,10 +7,10 @@ offline and come back to, plus the measurement to tell whether they do.
 
 | Question | Decision |
 | --- | --- |
-| Name, colours, logo | **Not chosen yet.** Name research for SEO in [naming.md](./naming.md) (recommends **Polski Gym**, runner-up **Odmiana**; domains still to be checked); the owner picks. Until then everything reads from `lib/brand.ts` (placeholder "Ćwiczenia"), so the rename is a one-file change plus the icons |
+| Name, colours, logo | **PolishUp** (owner's pick after [naming.md](./naming.md)). In `lib/brand.ts` only; the placeholder monogram icon is generated from its first letter. Colours stay the current Polish red; a real logo replaces `public/brand/icon.svg` later |
 | Analytics | **PostHog**, EU cloud, only after consent |
 | Privacy policy | Draft under the owner's name (Antonio Furioso); contact email to be created (`NEXT_PUBLIC_CONTACT_EMAIL`) |
-| Domain | **None yet.** `NEXT_PUBLIC_SITE_URL` is empty until there is one; sitemap / canonical URLs use it when set |
+| Domain | **polishup.app**: `BRAND.url` defaults to `https://polishup.app` (`NEXT_PUBLIC_SITE_URL` overrides it), so canonical links, Open Graph and the sitemap name it on every deployment, previews included |
 
 ## 1. Brand in one place
 
@@ -96,9 +96,9 @@ name and domain exist.
 
 ## Done when
 
-- [ ] The name is chosen and in `lib/brand.ts`, with icons. **Owner:** pick from
-  [naming.md](./naming.md) and check the domains; then edit `lib/brand.ts`, run
-  `npm run icons`, and apply the colours.
+- [x] The name is chosen and in `lib/brand.ts`, with icons: PolishUp, polishup.app.
+  A designed logo can replace the monogram later (`public/brand/icon.svg`, then
+  `npm run icons`).
 - [x] The app installs and runs a session offline: manifest, icons and the service
   worker checked in Chromium with the server stopped (pages, a practice answer,
   `/today`, cached audio). Not yet tried on a real Android or iOS phone.
@@ -114,12 +114,12 @@ name and domain exist.
 
 ## Left for the owner
 
-1. Choose the name, buy the domain, set `NEXT_PUBLIC_SITE_URL` (turns on the sitemap
-   and canonical URLs).
+1. Point polishup.app at the Cloudflare Pages project (custom domain), then add it
+   to Google Search Console and submit `https://polishup.app/sitemap.xml`.
 2. Create the contact email, set `NEXT_PUBLIC_CONTACT_EMAIL`, review `/privacy`.
 3. PostHog EU project and `NEXT_PUBLIC_POSTHOG_KEY` in the Cloudflare Pages build
    (build command `npm run build`, output `out`).
-4. Recruit the beta (posts in `plans/beta-posts.md` once name and domain exist).
+4. Recruit the beta (posts in `plans/beta-posts.md`).
 
 ## Known gaps
 

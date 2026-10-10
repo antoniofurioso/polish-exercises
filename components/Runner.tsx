@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { BRAND } from "@/lib/brand";
 import { ExerciseCard } from "@/components/ExerciseCard";
 import { ResultsSummary, type Result } from "@/components/ResultsSummary";
 import { track, trackGoal, type Source } from "@/lib/analytics";
@@ -32,7 +33,7 @@ export function Runner({
   exercises: Exercise[];
   /** Recorded for exercises that do not name their own drill. */
   kind: ExerciseKind;
-  /** Where "Ćwiczenia", "Quit" and the summary's home button lead. */
+  /** Where the brand name, "Quit" and the summary's home button lead. */
   home: string;
   onRestart: () => void;
   restartLabel?: string;
@@ -122,7 +123,7 @@ export function Runner({
     <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:py-14">
       <div className="mb-8 flex items-center justify-between">
         <Link href={home} className="text-sm uppercase tracking-[0.2em] text-accent">
-          Ćwiczenia
+          {BRAND.name}
         </Link>
         <div className="flex items-center gap-4">
           <button

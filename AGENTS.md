@@ -8,9 +8,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# Ćwiczenia: project guide for agents
+# PolishUp: project guide for agents
 
-A Polish grammar drill app (fill-in-the-blank, with English translation and the
+PolishUp (polishup.app) is a Polish grammar drill app (fill-in-the-blank, with English translation and the
 rule after every answer) on its way to becoming a paid product: web first (PWA),
 then the app stores. The roadmap and phase status live in `plans/`, and the
 user-facing overview is in `README.md`. Read `plans/ROADMAP.md` before starting
@@ -60,7 +60,7 @@ Delete anything the change made untrue.
 | `app/page.tsx` | Landing page (server component): headline, `SampleQuestion` (fixed-seed questions from `sampleQuestions()`), drills, how it works, `StartButton` → `/today` |
 | `app/learn/` | The app's home: the "Today's practice" button (`components/TodayButton`), then the drill menu from the registry. Links that mean "back to the app" go here, never to `/` |
 | `app/polish-cases/`, `polish-pronouns/`, `polish-numbers/`, `polish-verbs/` | Grammar reference pages for search, static, built from `lib/guides.ts` with `components/Guide.tsx`. Polish text goes in `<Pl>` (`lang="pl"`) |
-| `app/sitemap.ts`, `app/robots.ts` | Metadata routes (`dynamic = "force-static"`, required by the static export). Sitemap empty and no `Sitemap:` line while `BRAND.url` is empty |
+| `app/sitemap.ts`, `app/robots.ts` | Metadata routes (`dynamic = "force-static"`, required by the static export). Absolute URLs from `BRAND.url` (`https://polishup.app` unless `NEXT_PUBLIC_SITE_URL` overrides it) |
 | `app/today/` | Today's practice: `buildToday` on a progress snapshot taken at mount, run by the shared `Runner`; a wrong card is asked once more at the end |
 | `app/progress/` | Streak, today's goal ring, the last 28 days, weak spots (each linking to a configured `/practice` session) and the goal / new-per-day settings |
 | `app/<drill>/page.tsx` | One configurator per drill (cases, pronouns, possessives, numbers, verbs, shuffle). They write the session URL |
@@ -224,6 +224,7 @@ See `plans/ROADMAP.md`.
   answer log, `/today` and `/progress`. Spec, decisions and open points are in
   `plans/phase-2.md`.
 - **Phase 3 (ship the web app): code done** (landing page, topic pages, PWA and
-  offline, PostHog after consent, `/privacy`). Waiting on the owner: the name
-  (research in `plans/naming.md`; it lives only in `lib/brand.ts`), contact
-  email, PostHog key, domain and the beta. See `plans/phase-3.md`.
+  offline, PostHog after consent, `/privacy`). The name is **PolishUp** and the
+  domain **polishup.app** (both only in `lib/brand.ts`). Waiting on the owner:
+  contact email, PostHog key, pointing the domain at Cloudflare Pages, and the
+  beta. See `plans/phase-3.md`.

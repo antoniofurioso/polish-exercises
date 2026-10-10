@@ -1,4 +1,4 @@
-# Ćwiczenia — Polish practice
+# PolishUp — Polish grammar practice (polishup.app)
 
 Fill-in-the-blank drills for Polish, in the style of courseofpolish.com. The site
 opens on a landing page (`/`); the app's own home is `/learn`, which starts with a
@@ -10,7 +10,7 @@ exercises:
 | `/` | Landing page: the pitch, three live sample questions (built at build time, nothing recorded), the drills, how daily practice and spaced repetition work, and "Start practising" → `/today` (a returning learner sees "Continue — N due"). |
 | `/learn` | The app's home: the Today's practice button and the drill menu. Every "back to the menu" link points here. |
 | `/polish-cases`, `/polish-pronouns`, `/polish-numbers`, `/polish-verbs` | Grammar reference pages written for search: explanations, paradigm tables and example sentences, all generated at build time from the grammar code and the published lexicon (`lib/guides.ts`), each with "Practise …" links to configured `/practice` sessions. |
-| `/sitemap.xml`, `/robots.txt` | Built from `NEXT_PUBLIC_SITE_URL` (`BRAND.url`): without it the sitemap is empty and robots.txt has no `Sitemap:` line. `/practice` and `/today` are `noindex`. |
+| `/sitemap.xml`, `/robots.txt` | Built from `BRAND.url` (`https://polishup.app`, or `NEXT_PUBLIC_SITE_URL` when set): absolute sitemap URLs and a `Sitemap:` line in robots.txt. `/practice` and `/today` are `noindex`. |
 | `/today` | Today's practice: due reviews first, then new words, then filler, built from your progress with no setup. A wrong answer is asked again at the end. "Extra practice" (weakest skills) once nothing is due. |
 | `/progress` | Streak (with one grace day per week), today's goal, the last 28 days, your weak spots with their most common mistakes and a link to drill each, and the daily goal (10 / 20 / 40) and new words per day settings. |
 | `/privacy` | The privacy policy: what stays on the device, what analytics collect (only with consent), your rights; change the analytics choice or delete your data from this device. |
