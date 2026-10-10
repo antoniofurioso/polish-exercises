@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { BRAND } from "@/lib/brand";
-import { ClearLocalData, ConsentChoice } from "./PrivacyClient";
+import { ClearLocalData, ConsentChoice } from "@/components/Privacy";
 
 export const metadata: Metadata = {
   title: "Privacy policy",
@@ -9,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 /** Shown on the page; update it with every change to this policy. */
-const LAST_UPDATED = "9 October 2026";
+const LAST_UPDATED = "10 October 2026";
 
 /**
  * The privacy policy (plans/phase-3.md §5). Server-rendered text; the consent
@@ -25,11 +24,9 @@ export default function Privacy() {
   );
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:py-14">
-      <Link href="/" className="text-sm uppercase tracking-[0.2em] text-accent">
-        {BRAND.name}
-      </Link>
-      <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Privacy policy</h1>
+    <main className="container-page max-w-3xl py-12 sm:py-20">
+      <p className="eyebrow">{BRAND.name}</p>
+      <h1 className="heading mt-3">Privacy policy</h1>
       <p className="mt-2 text-sm text-muted">Last updated: {LAST_UPDATED}</p>
       <p className="mt-4 rounded-xl border border-warn/40 bg-warn-soft px-4 py-3 text-sm text-warn">
         Draft for the owner to review before launch. It is not legal advice.
@@ -62,7 +59,8 @@ export default function Privacy() {
           </p>
           <ul>
             <li>your answer history (which card, right or wrong, the kind of mistake, the date and time) and the progress worked out from it: streak, daily goal, what is due for review;</li>
-            <li>your settings: daily goal, new words per day, sound on or off, the last options you chose for each exercise;</li>
+            <li>your settings: daily goal, new words per day, sound on or off, light or dark appearance, the last options you chose for each exercise;</li>
+            <li>the name you give on your profile page, if you give one;</li>
             <li>your analytics choice, and the day the “goal met” event was last sent.</li>
           </ul>
           <p>
@@ -70,7 +68,9 @@ export default function Privacy() {
             you clear it. Your typed answers are graded in your browser and are not stored or sent
             anywhere.
           </p>
-          <ClearLocalData />
+          <div className="mt-5">
+            <ClearLocalData />
+          </div>
         </section>
 
         <section>
@@ -95,7 +95,9 @@ export default function Privacy() {
             link this data to your name or e-mail (we never ask for them). Events are kept for 12
             months, a retention period set in our PostHog project, and then deleted.
           </p>
-          <ConsentChoice />
+          <div className="card mt-5 p-5">
+            <ConsentChoice />
+          </div>
         </section>
 
         <section>

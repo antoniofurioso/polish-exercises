@@ -1,8 +1,8 @@
 "use client";
 
+import { Volume2, VolumeX, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { BRAND } from "@/lib/brand";
 import { ExerciseCard } from "@/components/ExerciseCard";
 import { ResultsSummary, type Result } from "@/components/ResultsSummary";
 import { track, trackGoal, type Source } from "@/lib/analytics";
@@ -33,7 +33,7 @@ export function Runner({
   exercises: Exercise[];
   /** Recorded for exercises that do not name their own drill. */
   kind: ExerciseKind;
-  /** Where the brand name, "Quit" and the summary's home button lead. */
+  /** Where "Quit" (the ✕) and the summary's home button lead. */
   home: string;
   onRestart: () => void;
   restartLabel?: string;
@@ -119,59 +119,70 @@ export function Runner({
     setDone(false);
   };
 
-  return (
-    <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:py-14">
-      <div className="mb-8 flex items-center justify-between">
-        <Link href={home} className="text-sm uppercase tracking-[0.2em] text-accent">
-          {BRAND.name}
-        </Link>
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={() => {
-              if (soundOn) stopSpeaking();
-              setSoundOn(!soundOn);
-            }}
-            aria-pressed={soundOn}
-            aria-label={soundOn ? "Turn sound off" : "Turn sound on"}
-            title={soundOn ? "Sound on" : "Sound off"}
-            className="text-sm text-muted hover:text-accent cursor-pointer"
-          >
-            {soundOn ? "🔊" : "🔇"}
-          </button>
-          <Link href={home} className="text-sm text-muted underline underline-offset-4">
-            Quit
-          </Link>
-        </div>
-      </div>
+  const finished = done || !exercise;
+  const progressShare = finished ? 1 : (index + (verdict === null ? 0 : 1)) / exercises.length;
 
-      {done || !exercise ? (
-        <div className="space-y-8">
-          {summaryExtra}
-          <ResultsSummary
-            results={results}
-            onRetryMissed={retryMissed}
-            onRestart={onRestart}
-            home={home}
-            restartLabel={restartLabel}
-            homeLabel={homeLabel}
-          />
+  return (
+    <div className="flex min-h-screen flex-1 flex-col bg-background">
+      <header className="mx-auto flex w-full max-w-3xl items-center gap-4 px-4 py-4 sm:px-6 sm:py-6">
+        <Link href={home} className="icon-btn" aria-label="Quit the session">
+          <X size={20} aria-hidden="true" />
+        </Link>
+        <div
+          role="progressbar"
+          aria-label="Session progress"
+          aria-valuemin={0}
+          aria-valuemax={exercises.length}
+          aria-valuenow={finished ? exercises.length : index}
+          className="meter flex-1"
+        >
+          <span className="transition-[width] duration-300" style={{ width: `${progressShare * 100}%` }} />
         </div>
-      ) : (
-        <ExerciseCard
-          exercise={exercise}
-          index={index}
-          total={exercises.length}
-          score={score}
-          value={value}
-          verdict={verdict}
-          onChange={setValue}
-          onSubmit={submit}
-          isLast={index + 1 >= exercises.length}
-          soundOn={soundOn}
-        />
-      )}
-    </main>
+        <span className="text-sm font-semibold tabular-nums">
+          {finished ? exercises.length : index + 1} / {exercises.length}
+        </span>
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            if (soundOn) stopSpeaking();
+            setSoundOn(!soundOn);
+          }}
+          aria-pressed={soundOn}
+          aria-label="Sound"
+          title={soundOn ? "Sound on" : "Sound off"}
+          className="icon-btn"
+        >
+          {soundOn ? <Volume2 size={20} aria-hidden="true" /> : <VolumeX size={20} aria-hidden="true" />}
+        </button>
+      </header>
+
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16 pt-4 sm:px-6 sm:pt-10">
+        {finished ? (
+          <div className="space-y-6">
+            {summaryExtra}
+            <ResultsSummary
+              results={results}
+              onRetryMissed={retryMissed}
+              onRestart={onRestart}
+              home={home}
+              restartLabel={restartLabel}
+              homeLabel={homeLabel}
+            />
+          </div>
+        ) : (
+          <ExerciseCard
+            exercise={exercise}
+            score={score}
+            value={value}
+            verdict={verdict}
+            onChange={setValue}
+            onSubmit={submit}
+            isLast={index + 1 >= exercises.length}
+            soundOn={soundOn}
+          />
+        )}
+      </main>
+    </div>
   );
 }

@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { BRAND } from "@/lib/brand";
 import { Choice, Field } from "@/components/ui";
 import { CASE_INFO } from "@/lib/cases";
 import { randomSeed, sessionParams } from "@/lib/session";
@@ -123,19 +121,17 @@ export default function NumbersConfiguratorPage() {
   const ready = config.cases.length > 0;
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-5 py-10 sm:py-16">
+    <main className="mx-auto w-full max-w-3xl px-4 py-7 sm:px-8 sm:py-10">
       <header className="mb-10">
-        <Link href="/learn" className="text-sm uppercase tracking-[0.2em] text-accent">
-          {BRAND.name}
-        </Link>
-        <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Numbers</h1>
+        <p className="eyebrow">Set up a session</p>
+        <h1 className="page-title mt-2">Numbers</h1>
         <p className="mt-3 text-muted">
           Polish numbers push the noun around: 1 leaves it alone, 2–4 pluralise it, 5 and up send
           it to the genitive. Pick what to drill.
         </p>
       </header>
 
-      <div className="space-y-9">
+      <div className="space-y-4">
         <Field label="1 · What to drill" hint="Choose one or more.">
           <div className="grid gap-3 sm:grid-cols-2">
             {NUMBER_DRILLS.map((drill) => (
@@ -144,7 +140,7 @@ export default function NumbersConfiguratorPage() {
                 selected={drills.includes(drill)}
                 onClick={() => toggleDrill(drill)}
               >
-                <span className="block text-xs uppercase tracking-[0.2em] text-accent">
+                <span className="eyebrow block text-xs">
                   {DRILL_INFO[drill].pl}
                 </span>
                 <span className="mt-1 block font-medium">{DRILL_INFO[drill].title}</span>
@@ -185,14 +181,14 @@ export default function NumbersConfiguratorPage() {
             <div className="flex gap-3 text-sm">
               <button
                 type="button"
-                className="text-accent underline underline-offset-4 cursor-pointer"
+                className="link cursor-pointer"
                 onClick={() => setConfig((c) => ({ ...c, cases: [...NUMBER_CASES] }))}
               >
                 Select all
               </button>
               <button
                 type="button"
-                className="text-muted underline underline-offset-4 cursor-pointer"
+                className="cursor-pointer font-medium text-muted hover:text-foreground"
                 onClick={() => setConfig((c) => ({ ...c, cases: [] }))}
               >
                 Clear
@@ -258,7 +254,7 @@ export default function NumbersConfiguratorPage() {
                 <span className="font-medium">{count}</span>
               </Choice>
             ))}
-            <label className="flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-3">
+            <label className="flex min-h-12 items-center gap-2 rounded-xl border border-line-strong bg-surface px-4">
               <span className="text-sm text-muted">custom</span>
               <input
                 type="number"
@@ -281,7 +277,7 @@ export default function NumbersConfiguratorPage() {
           type="button"
           onClick={start}
           disabled={!ready}
-          className="w-full rounded-xl bg-accent px-6 py-4 text-lg font-medium text-white transition-opacity disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+          className="btn btn-primary btn-lg btn-block"
         >
           Start · {config.count} sentences
         </button>

@@ -124,3 +124,19 @@ describe("site", () => {
     expect(meta.openGraph).toMatchObject({ title: expect.stringContaining("T"), description: "D" });
   });
 });
+
+describe("landing infographics", () => {
+  it("splits each case form of kot at the ending, from the lexicon", async () => {
+    const { caseForms } = await import("../guides");
+    const forms = caseForms("kot");
+    expect(forms.map((f) => f.kase)).toEqual([...CASES]);
+    expect(forms.map((f) => f.stem + f.ending)).toEqual(["kot", "kota", "kotu", "kota", "kotem", "kocie", "kocie"]);
+    expect(forms.find((f) => f.kase === "ins")).toEqual({ kase: "ins", stem: "kot", ending: "em" });
+    expect(forms.find((f) => f.kase === "nom")?.ending).toBe("");
+  });
+
+  it("shows the scheduler's real review intervals", async () => {
+    const { reviewIntervals } = await import("../guides");
+    expect(reviewIntervals(4)).toEqual([1, 3, 8, 21]);
+  });
+});

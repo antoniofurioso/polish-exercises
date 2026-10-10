@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { BRAND } from "@/lib/brand";
 import { Choice, Field } from "@/components/ui";
 import { randomSeed, sessionParams } from "@/lib/session";
 import { saveConfig, useStoredConfig } from "@/lib/storage";
@@ -59,18 +57,16 @@ export default function ShuffleConfiguratorPage() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-5 py-10 sm:py-16">
+    <main className="mx-auto w-full max-w-3xl px-4 py-7 sm:px-8 sm:py-10">
       <header className="mb-10">
-        <Link href="/learn" className="text-sm uppercase tracking-[0.2em] text-accent">
-          {BRAND.name}
-        </Link>
-        <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Shuffle</h1>
+        <p className="eyebrow">Set up a session</p>
+        <h1 className="page-title mt-2">Shuffle</h1>
         <p className="mt-3 text-muted">
           Questions from every exercise, dealt out in random order with all their options on.
         </p>
       </header>
 
-      <div className="space-y-9">
+      <div className="space-y-4">
         <Field label="1 · Exercises to mix" hint="Choose one or more.">
           <div className="grid gap-3 sm:grid-cols-2">
             {DRILL_KINDS.map((kind) => (
@@ -109,7 +105,7 @@ export default function ShuffleConfiguratorPage() {
                 <span className="font-medium">{count}</span>
               </Choice>
             ))}
-            <label className="flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-3">
+            <label className="flex min-h-12 items-center gap-2 rounded-xl border border-line-strong bg-surface px-4">
               <span className="text-sm text-muted">custom</span>
               <input
                 type="number"
@@ -131,7 +127,7 @@ export default function ShuffleConfiguratorPage() {
         <button
           type="button"
           onClick={start}
-          className="w-full rounded-xl bg-accent px-6 py-4 text-lg font-medium text-white transition-opacity cursor-pointer"
+          className="btn btn-primary btn-lg btn-block"
         >
           Start · {config.count} sentences
         </button>

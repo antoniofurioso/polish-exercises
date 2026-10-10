@@ -1,41 +1,33 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { BRAND } from "@/lib/brand";
 import { Choice, Field } from "@/components/ui";
 import { CASE_INFO } from "@/lib/cases";
-import { OWNER_INFO } from "@/lib/possessives";
 import { randomSeed, sessionParams } from "@/lib/session";
 import { saveConfig, useStoredConfig, useStoredStats } from "@/lib/storage";
-import { ANSWER_MODES, GENDER_GROUPS, POSSESSIVE_CASES, POSSESSIVES } from "@/lib/types";
+import { ANSWER_MODES, GENDER_GROUPS, PRONOUN_CASES } from "@/lib/types";
 import type {
   AnswerMode,
   Case,
   Config,
+  DemoChoice,
   GenderGroup,
   GramNumber,
-  Possessive,
 } from "@/lib/types";
 
 const COUNTS = [10, 20, 30, 50];
 
-const OWNER_BLURB: Record<Possessive, string> = {
-  moj: "my — declines like twój",
-  twoj: "your (one person)",
-  jego: "his / its — never changes",
-  jej: "her — never changes",
-  nasz: "our — declines like wasz",
-  wasz: "your (more than one)",
-  ich: "their — never changes",
-  swoj: "own, pointing back at the subject — no nominative",
+const DEMO_LABELS: Record<DemoChoice, { title: string; blurb: string }> = {
+  ten: { title: "ten / ta / to", blurb: "this — the near demonstrative." },
+  tamten: { title: "tamten / tamta / tamto", blurb: "that — the far demonstrative." },
+  both: { title: "Both", blurb: "Mix ten and tamten." },
 };
 
 const GENDER_LABELS: Record<GenderGroup, { title: string; blurb: string }> = {
-  m: { title: "Masculine", blurb: "mój pan, mój kot, mój dom" },
-  f: { title: "Feminine", blurb: "moja kobieta, moja kawa" },
-  n: { title: "Neuter", blurb: "moje okno, moje dziecko" },
+  m: { title: "Masculine", blurb: "ten pan, ten kot, ten dom" },
+  f: { title: "Feminine", blurb: "ta kobieta, ta kawa" },
+  n: { title: "Neuter", blurb: "to okno, to dziecko" },
 };
 
 const ANSWER_LABELS: Record<AnswerMode, { title: string; blurb: string }> = {
@@ -44,35 +36,25 @@ const ANSWER_LABELS: Record<AnswerMode, { title: string; blurb: string }> = {
 };
 
 const DEFAULT_CONFIG: Config = {
-  kind: "possessives",
-  owners: ["moj", "twoj", "nasz", "wasz"],
+  kind: "pronouns",
+  demo: "both",
   cases: ["gen", "acc", "ins", "loc"],
   numbers: ["sg"],
-  mode: "nouns", // unused by the possessive drill
+  mode: "nouns", // unused by the pronoun drill
   count: 20,
   answerMode: "typing",
 };
 
-export default function PossessiveConfiguratorPage() {
+export default function PronounConfiguratorPage() {
   const router = useRouter();
-  const stored = useStoredConfig("possessives");
-  const stats = useStoredStats("possessives");
+  const stored = useStoredConfig("pronouns");
+  const stats = useStoredStats("pronouns");
   const [draft, setDraft] = useState<Config | null>(null);
 
   const config: Config =
     draft ?? (stored?.cases?.length && stored.numbers?.length ? stored : DEFAULT_CONFIG);
-  const owners = config.owners?.length ? config.owners : [...POSSESSIVES];
 
   const setConfig = (update: (current: Config) => Config) => setDraft(update(config));
-
-  const toggleOwner = (owner: Possessive) =>
-    setConfig((c) => {
-      const current = c.owners?.length ? c.owners : [...POSSESSIVES];
-      const next = current.includes(owner)
-        ? current.filter((x) => x !== owner)
-        : [...current, owner];
-      return next.length ? { ...c, owners: next } : c;
-    });
 
   const toggleCase = (kase: Case) =>
     setConfig((c) => ({
@@ -97,38 +79,34 @@ export default function PossessiveConfiguratorPage() {
     });
 
   const start = () => {
-    saveConfig("possessives", config);
+    saveConfig("pronouns", config);
     router.push(`/practice?${sessionParams(config, randomSeed())}`);
   };
 
-  // "swój" only shows up in object position, so it needs a case other than the nominative
-  const onlySwoj = owners.length === 1 && owners[0] === "swoj";
-  const ready = config.cases.length > 0 && !(onlySwoj && config.cases.every((c) => c === "nom"));
+  const ready = config.cases.length > 0;
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-5 py-10 sm:py-16">
+    <main className="mx-auto w-full max-w-3xl px-4 py-7 sm:px-8 sm:py-10">
       <header className="mb-10">
-        <Link href="/learn" className="text-sm uppercase tracking-[0.2em] text-accent">
-          {BRAND.name}
-        </Link>
-        <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Possessive pronouns</h1>
+        <p className="eyebrow">Set up a session</p>
+        <h1 className="page-title mt-2">Demonstrative pronouns</h1>
         <p className="mt-3 text-muted">
-          The noun is given in the right case — put the possessive that agrees with it in the
+          The noun is given in the right case — put the demonstrative that agrees with it in the
           blank.
         </p>
       </header>
 
-      <div className="space-y-9">
-        <Field label="1 · Whose" hint="Choose one or more.">
-          <div className="grid gap-3 sm:grid-cols-2">
-            {POSSESSIVES.map((owner) => (
+      <div className="space-y-4">
+        <Field label="1 · Which word">
+          <div className="grid gap-3 sm:grid-cols-3">
+            {(Object.keys(DEMO_LABELS) as DemoChoice[]).map((demo) => (
               <Choice
-                key={owner}
-                selected={owners.includes(owner)}
-                onClick={() => toggleOwner(owner)}
+                key={demo}
+                selected={(config.demo ?? "both") === demo}
+                onClick={() => setConfig((c) => ({ ...c, demo }))}
               >
-                <span className="block font-medium">{OWNER_INFO[owner].lemma}</span>
-                <span className="block text-sm text-muted">{OWNER_BLURB[owner]}</span>
+                <span className="block font-medium">{DEMO_LABELS[demo].title}</span>
+                <span className="block text-sm text-muted">{DEMO_LABELS[demo].blurb}</span>
               </Choice>
             ))}
           </div>
@@ -136,15 +114,11 @@ export default function PossessiveConfiguratorPage() {
 
         <Field label="2 · Cases" hint="Choose one or more.">
           <div className="grid gap-3 sm:grid-cols-2">
-            {POSSESSIVE_CASES.map((kase) => {
+            {PRONOUN_CASES.map((kase) => {
               const info = CASE_INFO[kase];
               const stat = stats[kase];
               return (
-                <Choice
-                  key={kase}
-                  selected={config.cases.includes(kase)}
-                  onClick={() => toggleCase(kase)}
-                >
+                <Choice key={kase} selected={config.cases.includes(kase)} onClick={() => toggleCase(kase)}>
                   <span className="block font-medium">{info.pl}</span>
                   <span className="block text-sm text-muted">
                     {info.en} · {info.question}
@@ -161,14 +135,14 @@ export default function PossessiveConfiguratorPage() {
           <div className="flex gap-3 text-sm">
             <button
               type="button"
-              className="text-accent underline underline-offset-4 cursor-pointer"
-              onClick={() => setConfig((c) => ({ ...c, cases: [...POSSESSIVE_CASES] }))}
+              className="link cursor-pointer"
+              onClick={() => setConfig((c) => ({ ...c, cases: [...PRONOUN_CASES] }))}
             >
               Select all
             </button>
             <button
               type="button"
-              className="text-muted underline underline-offset-4 cursor-pointer"
+              className="cursor-pointer font-medium text-muted hover:text-foreground"
               onClick={() => setConfig((c) => ({ ...c, cases: [] }))}
             >
               Clear
@@ -232,7 +206,7 @@ export default function PossessiveConfiguratorPage() {
                 <span className="font-medium">{count}</span>
               </Choice>
             ))}
-            <label className="flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-3">
+            <label className="flex min-h-12 items-center gap-2 rounded-xl border border-line-strong bg-surface px-4">
               <span className="text-sm text-muted">custom</span>
               <input
                 type="number"
@@ -255,18 +229,11 @@ export default function PossessiveConfiguratorPage() {
           type="button"
           onClick={start}
           disabled={!ready}
-          className="w-full rounded-xl bg-accent px-6 py-4 text-lg font-medium text-white transition-opacity disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+          className="btn btn-primary btn-lg btn-block"
         >
           Start · {config.count} sentences
         </button>
-        {config.cases.length === 0 ? (
-          <p className="text-center text-sm text-accent">Pick at least one case.</p>
-        ) : null}
-        {onlySwoj && config.cases.every((c) => c === "nom") ? (
-          <p className="text-center text-sm text-accent">
-            &quot;Swój&quot; never stands in the subject — add another case or another possessive.
-          </p>
-        ) : null}
+        {!ready ? <p className="text-center text-sm text-accent">Pick at least one case.</p> : null}
       </div>
     </main>
   );

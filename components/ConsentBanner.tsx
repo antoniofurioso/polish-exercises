@@ -17,13 +17,13 @@ export function ConsentBanner() {
     <div
       role="region"
       aria-label="Analytics consent"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-surface/95 px-5 py-4 shadow-lg backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-surface/95 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 shadow-raised backdrop-blur"
     >
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-foreground">
           May we count how the app is used (sessions, right or wrong, never what you type)? It
           helps us improve it. Your progress stays on this device either way.{" "}
-          <Link href="/privacy" className="text-accent underline underline-offset-4">
+          <Link href="/privacy" className="link">
             Privacy
           </Link>
         </p>
@@ -51,9 +51,7 @@ export function ConsentButton({
       type="button"
       onClick={onClick}
       aria-pressed={pressed}
-      className={`flex-1 cursor-pointer rounded-xl border px-4 py-2 text-sm font-medium transition-colors sm:flex-none ${
-        pressed ? "border-accent bg-accent-soft" : "border-line bg-surface hover:border-accent/50"
-      }`}
+      className={`btn btn-secondary btn-sm flex-1 sm:flex-none ${pressed ? "border-accent bg-accent-soft text-accent-strong" : ""}`}
     >
       {children}
     </button>

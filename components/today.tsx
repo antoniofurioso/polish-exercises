@@ -60,37 +60,53 @@ export function useTodayStatus(): TodayStatus {
   }, [hydrated, ready, progress, settings, now]);
 }
 
-/** A progress ring for today's goal. */
-export function GoalRing({ answered, goal, size = 64 }: { answered: number; goal: number; size?: number }) {
-  const stroke = 6;
+/** A progress ring for today's goal; `onAccent` draws it white, for the red panel. */
+export function GoalRing({
+  answered,
+  goal,
+  size = 64,
+  onAccent = false,
+}: {
+  answered: number;
+  goal: number;
+  size?: number;
+  onAccent?: boolean;
+}) {
+  const stroke = Math.max(6, Math.round(size / 11));
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const share = goal > 0 ? Math.min(1, answered / goal) : 0;
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={`${answered} of ${goal} questions today`}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" strokeWidth={stroke} className="stroke-line" />
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={r}
-        fill="none"
-        strokeWidth={stroke}
-        strokeLinecap="round"
-        strokeDasharray={c}
-        strokeDashoffset={c * (1 - share)}
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        className={share >= 1 ? "stroke-ok" : "stroke-accent"}
-      />
-      <text
-        x="50%"
-        y="50%"
-        dominantBaseline="central"
-        textAnchor="middle"
-        className="fill-foreground text-xs font-medium"
-      >
-        {Math.min(answered, 999)}/{goal}
-      </text>
-    </svg>
+    <span className="relative inline-flex shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={`${answered} of ${goal} questions today`}>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          strokeWidth={stroke}
+          className={onAccent ? "stroke-white/25" : "stroke-chip"}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={c * (1 - share)}
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          className={onAccent ? "stroke-white" : share >= 1 ? "stroke-ok" : "stroke-accent"}
+        />
+      </svg>
+      <span aria-hidden="true" className="absolute inset-0 flex flex-col items-center justify-center leading-none">
+        <span className="font-bold" style={{ fontSize: Math.round(size * 0.24) }}>
+          {Math.min(answered, 999)}
+        </span>
+        <span className={`mt-0.5 text-[0.6875rem] ${onAccent ? "text-on-accent-soft" : "text-muted"}`}>of {goal}</span>
+      </span>
+    </span>
   );
 }
 
@@ -109,10 +125,10 @@ export function GoalStatus() {
   if (!status.hydrated) return null;
   const met = status.answered >= status.goal;
   return (
-    <div className="flex items-center gap-5 rounded-2xl border border-line bg-surface p-5">
+    <div className="card flex items-center gap-5 p-5">
       <GoalRing answered={status.answered} goal={status.goal} />
       <div>
-        <p className="font-medium">
+        <p className="font-semibold">
           {met
             ? "Daily goal reached"
             : `${plural(status.goal - status.answered, "question", "questions")} to today’s goal`}

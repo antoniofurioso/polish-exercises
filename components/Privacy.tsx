@@ -1,5 +1,6 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { ConsentButton } from "@/components/ConsentBanner";
 import { POSTHOG_KEY, setConsent, useConsent } from "@/lib/analytics";
@@ -7,15 +8,13 @@ import { POSTHOG_KEY, setConsent, useConsent } from "@/lib/analytics";
 /** Prefix of every key this site keeps in localStorage (lib/storage.ts, lib/analytics.ts). */
 const LOCAL_PREFIX = "polish.";
 
-/** The analytics choice, changeable at any time (plans/phase-3.md §5). */
+/** The analytics choice, changeable at any time (plans/phase-3.md §5); on /privacy and /settings. */
 export function ConsentChoice() {
   const consent = useConsent();
 
   if (!POSTHOG_KEY) {
     return (
-      <p className="rounded-xl border border-line bg-surface px-4 py-3 text-sm">
-        Analytics are switched off on this version of the site: nothing is sent.
-      </p>
+      <p className="text-sm text-muted">Analytics are switched off on this version of the site: nothing is sent.</p>
     );
   }
   if (consent === undefined) return null;
@@ -28,11 +27,11 @@ export function ConsentChoice() {
         : "You have not chosen yet, so analytics are off.";
 
   return (
-    <div className="mt-4 rounded-xl border border-line bg-surface px-4 py-4">
+    <div>
       <p className="text-sm font-medium" role="status">
         {status}
       </p>
-      <div className="mt-3 flex gap-2">
+      <div className="mt-3 flex flex-wrap gap-2">
         <ConsentButton pressed={consent === "granted"} onClick={() => setConsent("granted")}>
           Allow analytics
         </ConsentButton>
@@ -44,7 +43,7 @@ export function ConsentChoice() {
   );
 }
 
-/** Deletes everything this site stored on the device, after a confirmation. */
+/** Deletes everything this site stored on the device, after a confirmation; on /privacy and /settings. */
 export function ClearLocalData() {
   const [failed, setFailed] = useState(false);
 
@@ -66,12 +65,9 @@ export function ClearLocalData() {
   };
 
   return (
-    <div className="mt-4">
-      <button
-        type="button"
-        onClick={clear}
-        className="cursor-pointer rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium hover:border-accent/50"
-      >
+    <div>
+      <button type="button" onClick={clear} className="btn btn-danger">
+        <Trash2 size={18} aria-hidden="true" />
         Delete my data from this device
       </button>
       {failed ? (

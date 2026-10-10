@@ -16,6 +16,7 @@ import {
 import { OWNER_INFO, buildPossessiveSession, declinePossessive } from "./possessives";
 import { buildPronounSession, declineDemonstrative, type Demonstrative } from "./pronouns";
 import { sessionParams } from "./session";
+import { schedule, type CardState } from "./srs";
 import { TEMPLATES } from "./templates";
 import { CASES, LEVELS, POSSESSIVES, PRONOUN_CASES } from "./types";
 import type {
@@ -507,4 +508,35 @@ export function reflexiveSample(inf = "uczyć się") {
       withSie(verb, futureCompound(verb.impf, 1, "pl", "vir")[0])[0],
     ],
   };
+}
+
+// ------------------------------------------------------------------- landing
+
+export type CaseForm = { kase: Case; stem: string; ending: string };
+
+/**
+ * One noun in all seven singular cases, each split where it leaves the
+ * dictionary form ("kot" + "em", "ko" + "cie"), for the landing infographic.
+ */
+export function caseForms(lemma = "kot"): CaseForm[] {
+  const noun = lexiconNoun(lemma);
+  return CASES.map((kase) => {
+    const form = nounVariants(noun, "sg", kase)[0];
+    let i = 0;
+    while (i < form.length && i < lemma.length && form[i] === lemma[i]) i++;
+    return { kase, stem: form.slice(0, i), ending: form.slice(i) };
+  });
+}
+
+/** Days between reviews of a card answered right every time, from the real scheduler: 1, 3, 8, 21… */
+export function reviewIntervals(count = 4): number[] {
+  const out: number[] = [];
+  let card: CardState | undefined;
+  let t = Date.UTC(2026, 0, 5, 9);
+  for (let i = 0; i < count; i++) {
+    card = schedule(card, "correct", t);
+    out.push(card.interval);
+    t = card.due + 9 * 3_600_000;
+  }
+  return out;
 }

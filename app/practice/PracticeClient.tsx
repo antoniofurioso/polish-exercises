@@ -18,9 +18,9 @@ export function PracticePage() {
 
   if (!session) {
     return (
-      <main className="mx-auto w-full max-w-2xl px-5 py-20 text-center">
+      <main className="mx-auto w-full max-w-2xl px-4 py-24 text-center">
         <p className="text-muted">This practice link has no settings in it.</p>
-        <Link href="/learn" className="mt-4 inline-block text-accent underline underline-offset-4">
+        <Link href="/learn" className="btn btn-primary mt-6">
           Set up a session
         </Link>
       </main>

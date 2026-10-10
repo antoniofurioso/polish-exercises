@@ -91,3 +91,32 @@ describe("safely", () => {
     ).toBe(0);
   });
 });
+
+describe("dashboard and profile numbers", () => {
+  const card = (right: number) => ({ due: 0, interval: 1, ease: 2.5, reps: 1, lapses: 0, last: 0, first: 0, seen: right || 1, right });
+  const now = new Date(2026, 9, 10, 12).getTime();
+
+  it("counts cards per drill, answers and recent accuracy", async () => {
+    const { cardsByDrill, recentAccuracy, totalAnswered } = await import("../progressView");
+    const progress: Progress = {
+      ...EMPTY_PROGRESS,
+      cards: { "cases:kot|gen|sg": card(1), "cases:dom|loc|sg": card(0), "verbs:pisać|past": card(2) },
+      days: { [dayKey(now)]: { answered: 10, correct: 8 }, "2025-01-01": { answered: 5, correct: 1 } },
+    };
+    expect(cardsByDrill(progress)).toEqual({ cases: 2, pronouns: 0, possessives: 0, numbers: 0, verbs: 1 });
+    expect(totalAnswered(progress)).toBe(15);
+    expect(recentAccuracy(progress.days, now)).toEqual({ answered: 10, correct: 8 });
+  });
+
+  it("reaches milestones from cards answered right and the best streak", async () => {
+    const { casesPractised, milestones } = await import("../progressView");
+    const progress: Progress = {
+      ...EMPTY_PROGRESS,
+      cards: { "cases:kot|gen|sg": card(1), "cases:dom|loc|sg": card(0) },
+      days: { [dayKey(now)]: { answered: 3, correct: 2 } },
+    };
+    expect([...casesPractised(progress)]).toEqual(["gen"]);
+    const reached = Object.fromEntries(milestones(progress, 7).map((m) => [m.id, m.reached]));
+    expect(reached).toEqual({ first: true, week: true, hundred: false, cases: false, month: false });
+  });
+});

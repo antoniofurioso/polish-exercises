@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { SiteHeader } from "@/components/SiteHeader";
 import type { Example } from "@/lib/guides";
 import { TOPIC_PAGES } from "@/lib/site";
 
@@ -33,40 +32,34 @@ export function GuideLayout({
 }) {
   const others = TOPIC_PAGES.filter((p) => p.path !== path);
   return (
-    <>
-      <SiteHeader />
-      <main className="mx-auto w-full max-w-3xl px-5 pb-12 pt-6 sm:pb-20">
-        <header>
-          <p className="text-sm uppercase tracking-[0.2em] text-accent">{eyebrow}</p>
-          <h1 className="mt-2 text-3xl font-semibold leading-tight sm:text-4xl">{title}</h1>
-          <div className="mt-4 space-y-3 text-lg text-muted">{intro}</div>
-        </header>
-        <div className="mt-10 space-y-14">{children}</div>
-        <nav aria-label="More grammar guides" className="mt-16 border-t border-line pt-8">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">More grammar guides</h2>
-          <ul className="mt-3 grid gap-3 sm:grid-cols-3">
-            {others.map((p) => (
-              <li key={p.path}>
-                <Link
-                  href={p.path}
-                  className="block h-full rounded-xl border border-line bg-surface px-4 py-3 transition-colors hover:border-accent/50"
-                >
-                  <span className="block font-medium">{p.name}</span>
-                  <span className="mt-1 block text-sm text-muted">{p.blurb}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </main>
-    </>
+    <main className="container-page max-w-4xl pb-20 pt-10 sm:pb-28 sm:pt-16">
+      <header>
+        <p className="eyebrow">{eyebrow}</p>
+        <h1 className="heading mt-3">{title}</h1>
+        <div className="lead mt-5 space-y-3">{intro}</div>
+      </header>
+      <div className="mt-14 space-y-16">{children}</div>
+      <nav aria-label="More grammar guides" className="mt-20 border-t border-line pt-10">
+        <h2 className="label-caps">More grammar guides</h2>
+        <ul className="mt-4 grid gap-3 sm:grid-cols-3">
+          {others.map((p) => (
+            <li key={p.path}>
+              <Link href={p.path} className="card card-link h-full px-5 py-4">
+                <span className="block font-semibold">{p.name}</span>
+                <span className="mt-1 block text-sm text-muted">{p.blurb}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </main>
   );
 }
 
 export function Section({ id, title, children }: { id: string; title: ReactNode; children: ReactNode }) {
   return (
     <section aria-labelledby={id} className="space-y-4">
-      <h2 id={id} className="scroll-mt-6 text-2xl font-semibold">
+      <h2 id={id} className="scroll-mt-24 text-2xl font-semibold tracking-tight sm:text-[1.75rem]">
         {title}
       </h2>
       {children}
@@ -81,7 +74,7 @@ export function ExampleLine({ example, showNote = false }: { example: Example; s
       <p lang="pl" className="sentence text-lg">
         {example.parts.map((part, i) =>
           part.key ? (
-            <strong key={i} className="font-semibold text-accent">
+            <strong key={i} className="font-semibold text-accent-strong">
               {part.text}
             </strong>
           ) : (
@@ -99,7 +92,7 @@ export function ExampleList({ examples, showNote = true }: { examples: Example[]
   return (
     <ul className="space-y-3">
       {examples.map((example, i) => (
-        <li key={i} className="rounded-xl border border-line bg-surface px-4 py-3">
+        <li key={i} className="card px-5 py-4">
           <ExampleLine example={example} showNote={showNote} />
         </li>
       ))}
@@ -110,10 +103,7 @@ export function ExampleList({ examples, showNote = true }: { examples: Example[]
 /** "Practise the genitive →": a configured /practice session. */
 export function PractiseLink({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link
-      href={href}
-      className="inline-flex items-center rounded-xl bg-accent px-5 py-3 font-medium text-white transition-opacity hover:opacity-90"
-    >
+    <Link href={href} className="btn btn-primary">
       {children} →
     </Link>
   );
@@ -122,14 +112,14 @@ export function PractiseLink({ href, children }: { href: string; children: React
 /** A scrollable table: wide paradigms scroll inside their box, never the page. */
 export function TableBox({ caption, children }: { caption?: ReactNode; children: ReactNode }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-line bg-surface">
+    <div className="card overflow-x-auto">
       <table className="w-full border-collapse text-left text-sm">
-        {caption ? <caption className="px-4 pt-3 text-left text-sm text-muted">{caption}</caption> : null}
+        {caption ? <caption className="px-4 pt-4 text-left text-sm text-muted">{caption}</caption> : null}
         {children}
       </table>
     </div>
   );
 }
 
-export const TH = "border-b border-line px-3 py-2 font-medium text-muted whitespace-nowrap";
-export const TD = "border-b border-line px-3 py-2 align-top";
+export const TH = "border-b border-line px-4 py-3 font-semibold text-muted whitespace-nowrap";
+export const TD = "border-b border-line px-4 py-3 align-top";

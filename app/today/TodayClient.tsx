@@ -1,8 +1,8 @@
 "use client";
 
+import { X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { BRAND } from "@/lib/brand";
 import { Runner } from "@/components/Runner";
 import { GoalStatus } from "@/components/today";
 import { dayKey } from "@/lib/srs";
@@ -46,7 +46,7 @@ function TodaySession({ round, onAnotherRound }: { round: number; onAnotherRound
   if ("error" in built) {
     return (
       <Shell>
-        <h1 className="text-2xl font-semibold">Today’s practice isn’t ready</h1>
+        <h1 className="page-title">Today’s practice isn’t ready</h1>
         <p className="mt-3 text-muted">
           Something went wrong putting the session together. Pick an exercise from the menu
           instead; your answers there still count toward your progress.
@@ -60,7 +60,7 @@ function TodaySession({ round, onAnotherRound }: { round: number; onAnotherRound
   if (plan.exercises.length === 0) {
     return (
       <Shell>
-        <h1 className="text-2xl font-semibold">Nothing to practise right now</h1>
+        <h1 className="page-title">Nothing to practise right now</h1>
         <p className="mt-3 text-muted">
           There are no reviews due and no new words to introduce. Pick an exercise from the menu
           to keep going.
@@ -77,12 +77,12 @@ function TodaySession({ round, onAnotherRound }: { round: number; onAnotherRound
       home="/learn"
       onRestart={onAnotherRound}
       restartLabel="Another round"
-      homeLabel="Back to the menu"
+      homeLabel="Back home"
       reaskWrong
       source="today"
       summaryExtra={
         <div className="space-y-3">
-          <p className="text-sm text-muted">{planSummary(plan)}</p>
+          <p className="text-sm font-medium text-muted">{planSummary(plan)}</p>
           <GoalStatus />
         </div>
       }
@@ -102,22 +102,21 @@ function planSummary(plan: TodayPlan): string {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:py-14">
-      <Link href="/learn" className="text-sm uppercase tracking-[0.2em] text-accent">
-        {BRAND.name}
-      </Link>
-      <div className="mt-8">{children}</div>
-    </main>
+    <div className="flex min-h-screen flex-1 flex-col">
+      <header className="mx-auto flex w-full max-w-3xl px-4 py-4 sm:px-6 sm:py-6">
+        <Link href="/learn" className="icon-btn" aria-label="Back home">
+          <X size={20} aria-hidden="true" />
+        </Link>
+      </header>
+      <main className="mx-auto w-full max-w-3xl px-4 pt-6 sm:px-6 sm:pt-12">{children}</main>
+    </div>
   );
 }
 
 function HomeLink() {
   return (
-    <Link
-      href="/learn"
-      className="mt-6 inline-block rounded-xl border border-line bg-surface px-6 py-3 font-medium hover:border-accent/50"
-    >
-      Back to the menu
+    <Link href="/learn" className="btn btn-secondary mt-7">
+      Back home
     </Link>
   );
 }

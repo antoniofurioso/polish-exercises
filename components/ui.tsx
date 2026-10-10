@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 
+/** A selectable card in the drill configurators: one option of a group, aria-pressed when chosen. */
 export function Choice({
   selected,
   onClick,
@@ -18,10 +19,10 @@ export function Choice({
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`rounded-xl border px-4 py-3 text-left transition-colors cursor-pointer ${
+      className={`min-h-12 cursor-pointer rounded-xl border px-4 py-3 text-left transition-colors ${
         selected
-          ? "border-accent bg-accent-soft text-foreground"
-          : "border-line bg-surface text-foreground hover:border-accent/50"
+          ? "border-accent bg-accent-soft text-foreground shadow-[inset_0_0_0_1px_var(--accent)]"
+          : "border-line-strong bg-surface text-foreground hover:border-accent"
       } ${className}`}
     >
       {children}
@@ -29,12 +30,13 @@ export function Choice({
   );
 }
 
+/** One numbered step of a configurator: a caption, a hint and its choices. */
 export function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
-    <section className="space-y-3">
+    <section className="card space-y-4 p-5 sm:p-6">
       <div>
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">{label}</h2>
-        {hint ? <p className="text-sm text-muted">{hint}</p> : null}
+        <h2 className="label-caps text-accent">{label}</h2>
+        {hint ? <p className="mt-1 text-sm text-muted">{hint}</p> : null}
       </div>
       {children}
     </section>

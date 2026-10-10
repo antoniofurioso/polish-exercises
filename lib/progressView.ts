@@ -1,8 +1,9 @@
+import { drillOfCard } from "./cards";
 import type { DayCount, Progress } from "./progress";
 import { sessionParams } from "./session";
 import { dayKey, startOfDay } from "./srs";
-import { CASES, NUMBER_CASES, NUMBER_DRILLS, PRONOUN_CASES, TENSES } from "./types";
-import type { Case, Config, GramNumber, MissKind, NumberDrill, Tense } from "./types";
+import { CASES, DRILL_KINDS, NUMBER_CASES, NUMBER_DRILLS, PRONOUN_CASES, TENSES } from "./types";
+import type { Case, Config, DrillKind, GramNumber, MissKind, NumberDrill, Tense } from "./types";
 
 /**
  * Pure helpers behind the home button, /today and /progress: plain-English
@@ -112,4 +113,69 @@ export function safely<T>(fn: () => T, fallback: T): T {
   } catch {
     return fallback;
   }
+}
+
+// ---- dashboard and profile numbers --------------------------------------------
+
+/** Right and answered over the last `n` local days, today included. */
+export function recentAccuracy(
+  days: Record<string, DayCount>,
+  now: number,
+  n = 7,
+): { answered: number; correct: number } {
+  let answered = 0;
+  let correct = 0;
+  for (const day of lastDays(days, now, n)) {
+    answered += day.answered;
+    correct += day.correct;
+  }
+  return { answered, correct };
+}
+
+/** Every answer on record (compacted ones included, since days survive compaction). */
+export function totalAnswered(progress: Progress): number {
+  let n = 0;
+  for (const count of Object.values(progress.days)) n += count.answered;
+  return n;
+}
+
+/** Cards practised so far, per drill. */
+export function cardsByDrill(progress: Progress): Record<DrillKind, number> {
+  const out = Object.fromEntries(DRILL_KINDS.map((k) => [k, 0])) as Record<DrillKind, number>;
+  for (const id of Object.keys(progress.cards)) {
+    const drill = drillOfCard(id, DRILL_KINDS);
+    if (drill) out[drill] += 1;
+  }
+  return out;
+}
+
+/** The cases with at least one cases-drill card answered right ("cases:kot|gen|sg"). */
+export function casesPractised(progress: Progress): Set<Case> {
+  const out = new Set<Case>();
+  for (const [id, card] of Object.entries(progress.cards)) {
+    if (!id.startsWith("cases:") || card.right === 0) continue;
+    const kase = id.split("|")[1];
+    if (includes<Case>(CASES, kase)) out.add(kase);
+  }
+  return out;
+}
+
+export type Milestone = { id: string; title: string; detail: string; reached: boolean };
+
+/** The profile's milestones, from the progress and the best streak. */
+export function milestones(progress: Progress, bestStreak: number): Milestone[] {
+  const cards = Object.keys(progress.cards).length;
+  const cases = casesPractised(progress).size;
+  return [
+    { id: "first", title: "First answer", detail: "Answer one question", reached: totalAnswered(progress) > 0 },
+    { id: "week", title: "First week", detail: "A 7-day streak", reached: bestStreak >= 7 },
+    { id: "hundred", title: "Hundred club", detail: "Practise 100 cards", reached: cards >= 100 },
+    {
+      id: "cases",
+      title: "All seven cases",
+      detail: `Get a card right in every case (${cases} of ${CASES.length})`,
+      reached: cases === CASES.length,
+    },
+    { id: "month", title: "A month of Polish", detail: "A 30-day streak", reached: bestStreak >= 30 },
+  ];
 }

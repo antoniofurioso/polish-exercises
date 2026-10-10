@@ -1,5 +1,6 @@
 "use client";
 
+import { RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { CASE_INFO } from "@/lib/cases";
 import { renderPrompt, renderSolution } from "@/lib/generate";
@@ -39,71 +40,67 @@ export function ResultsSummary({
   }
 
   return (
-    <div className="space-y-8">
-      <div className="rounded-2xl border border-line bg-surface p-8 text-center">
-        <p className="text-sm uppercase tracking-[0.2em] text-muted">Koniec</p>
-        <p className="mt-3 text-5xl font-semibold text-accent">{percent}%</p>
+    <div className="space-y-6">
+      <div className="card flex flex-col items-center px-6 py-10 text-center">
+        <p lang="pl" className="eyebrow">
+          Koniec
+        </p>
+        <p className="mt-3 text-6xl font-bold tracking-tight text-accent">{percent}%</p>
         <p className="mt-2 text-muted">
-          {correct} of {results.length} correct
+          {correct} of {results.length} right
         </p>
       </div>
 
-      <div className="space-y-2">
-        {[...byGroup.entries()].map(([group, stat]) => (
-          <div key={group} className="flex items-center gap-3 text-sm">
-            <span className="w-40 shrink-0 text-muted">{group}</span>
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-line">
-              <div
-                className="h-full bg-accent"
-                style={{ width: `${(stat.correct / stat.total) * 100}%` }}
-              />
+      {byGroup.size > 0 ? (
+        <section aria-label="By topic" className="card space-y-3 p-6">
+          {[...byGroup.entries()].map(([group, stat]) => (
+            <div key={group} className="flex items-center gap-3 text-sm">
+              <span className="w-32 shrink-0 truncate font-medium sm:w-44">{group}</span>
+              <div className="meter flex-1" aria-hidden="true">
+                <span style={{ width: `${(stat.correct / stat.total) * 100}%` }} />
+              </div>
+              <span className="w-12 shrink-0 text-right text-muted tabular-nums">
+                {stat.correct}/{stat.total}
+              </span>
             </div>
-            <span className="w-14 shrink-0 text-right text-muted">
-              {stat.correct}/{stat.total}
-            </span>
-          </div>
-        ))}
-      </div>
+          ))}
+        </section>
+      ) : null}
 
       {missed.length > 0 ? (
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
+        <section aria-labelledby="review-title" className="space-y-3">
+          <h2 id="review-title" className="label-caps">
             To review ({missed.length})
           </h2>
-          <ul className="space-y-3">
+          <ul className="space-y-2.5">
             {missed.map(({ exercise }, i) => (
-              <li key={`${exercise.id}-${i}`} className="rounded-xl border border-line bg-surface p-4">
-                <p className="sentence text-lg">{renderSolution(exercise)}</p>
-                <p className="text-sm text-muted">
-                  {renderPrompt(exercise)} ({exercise.hint}) · {groupOf(exercise)}
+              <li key={`${exercise.id}-${i}`} className="card px-5 py-4">
+                <p lang="pl" className="sentence text-lg">
+                  {renderSolution(exercise)}
+                </p>
+                <p className="mt-0.5 text-sm text-muted">
+                  <span lang="pl">
+                    {renderPrompt(exercise)} ({exercise.hint})
+                  </span>{" "}
+                  · {groupOf(exercise)}
                 </p>
               </li>
             ))}
           </ul>
-        </div>
+        </section>
       ) : null}
 
       <div className="flex flex-col gap-3 sm:flex-row">
         {missed.length > 0 ? (
-          <button
-            type="button"
-            onClick={onRetryMissed}
-            className="flex-1 rounded-xl bg-accent px-6 py-3 font-medium text-white cursor-pointer"
-          >
+          <button type="button" onClick={onRetryMissed} className="btn btn-primary flex-1">
+            <RotateCcw size={18} aria-hidden="true" />
             Practise the {missed.length} missed
           </button>
         ) : null}
-        <button
-          type="button"
-          onClick={onRestart}
-          className="flex-1 rounded-xl border border-line bg-surface px-6 py-3 font-medium cursor-pointer hover:border-accent/50"
-        >
+        <button type="button" onClick={onRestart} className="btn btn-secondary flex-1">
           {restartLabel}
         </button>
-        <Link
-          href={home}
-          className="flex-1 rounded-xl border border-line bg-surface px-6 py-3 text-center font-medium hover:border-accent/50"
-        >
+        <Link href={home} className="btn btn-secondary flex-1">
           {homeLabel}
         </Link>
       </div>

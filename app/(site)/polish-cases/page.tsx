@@ -121,7 +121,7 @@ export default function PolishCasesPage() {
             <h3 className="text-sm font-semibold uppercase tracking-wide text-muted">When to use it</h3>
             <ul className="space-y-3">
               {triggers.map((t) => (
-                <li key={t.note} className="rounded-xl border border-line bg-surface px-4 py-3">
+                <li key={t.note} className="card px-5 py-4">
                   <p className="font-medium">{t.note}</p>
                   {t.example ? (
                     <div className="mt-1">

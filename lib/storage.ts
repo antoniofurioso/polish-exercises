@@ -17,6 +17,9 @@ import {
   type Settings,
 } from "./progress";
 import { dayKey } from "./srs";
+import { THEME_KEY, THEMES, type Theme } from "./theme";
+
+export type { Theme } from "./theme";
 import { DRILL_KINDS } from "./types";
 import type { Config, DrillKind, Exercise, ExerciseKind, Stats } from "./types";
 
@@ -30,6 +33,7 @@ import type { Config, DrillKind, Exercise, ExerciseKind, Stats } from "./types";
 const configKey = (kind: ExerciseKind) => `polish.config.${kind}.v1`;
 const v1StatsKey = (kind: ExerciseKind) => `polish.stats.${kind}.v1`;
 const SOUND_KEY = "polish.sound.v1";
+const PROFILE_KEY = "polish.profile.v1";
 export const LOG_KEY = "polish.log.v2";
 export const PROGRESS_KEY = "polish.progress.v2";
 export const SETTINGS_KEY = "polish.settings.v2";
@@ -319,6 +323,37 @@ export const useSettings = (): Settings => useStored<Settings>(SETTINGS_KEY, DEF
 export const readSettings = (): Settings => snapshot(SETTINGS_KEY, DEFAULT_SETTINGS, decodeSettings);
 
 export const saveSettings = (settings: Settings) => write(SETTINGS_KEY, decodeSettings(settings));
+
+// ---- appearance and profile ---------------------------------------------------
+
+const decodeTheme = (value: unknown): Theme => (THEMES.includes(value as Theme) ? (value as Theme) : "system");
+
+/** Light, dark or the device's setting; applied to <html data-theme> (and before paint by the script in app/layout.tsx). */
+export const useTheme = (): Theme => useStored<Theme>(THEME_KEY, "system", decodeTheme);
+
+export function setTheme(theme: Theme): void {
+  write(THEME_KEY, theme);
+  try {
+    if (theme === "system") delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = theme;
+  } catch {
+    // no document (tests): the stored choice applies on the next load
+  }
+}
+
+/** What the learner told us about themselves; on this device only until accounts exist. */
+export type Profile = { name: string };
+const NO_PROFILE: Profile = { name: "" };
+export const PROFILE_NAME_MAX = 40;
+
+function decodeProfile(value: unknown): Profile {
+  if (!isRecord(value) || typeof value.name !== "string") return NO_PROFILE;
+  return { name: value.name.trim().slice(0, PROFILE_NAME_MAX) };
+}
+
+export const useProfile = (): Profile => useStored<Profile>(PROFILE_KEY, NO_PROFILE, decodeProfile);
+
+export const saveProfile = (profile: Profile) => write(PROFILE_KEY, decodeProfile(profile));
 
 // ---- rendering helpers ----------------------------------------------------------
 

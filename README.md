@@ -7,12 +7,15 @@ exercises:
 
 | Route | Page |
 | --- | --- |
-| `/` | Landing page: the pitch, three live sample questions (built at build time, nothing recorded), the drills, how daily practice and spaced repetition work, and "Start practising" → `/today` (a returning learner sees "Continue — N due"). |
-| `/learn` | The app's home: the Today's practice button and the drill menu. Every "back to the menu" link points here. |
+| `/` | Landing page: the pitch with a live sample question (built at build time, nothing recorded), the drills, the infographics (one noun in all seven cases, when a form comes back, what goes into today's practice), the guides, pricing (free beta), and "Start today's practice" → `/today` (a returning learner sees "Continue — N due"). |
+| `/learn` | The app's home dashboard: greeting, the red Today's practice panel with the goal ring, streak / due / cards / 7-day accuracy, the last 28 days, the top weak spots and the drills. Every "back home" link points here. |
+| `/profile` | Your name (on this device), answers, best streak, cards practised per drill and milestones. |
+| `/settings` | Daily goal, new words per day, sound, appearance (system / light / dark), how to install the app, the analytics choice and deleting your data from this device. |
+| `/billing` | The current plan (free beta), Pro "coming later", and empty payment method and invoices: there are no payments yet. |
 | `/polish-cases`, `/polish-pronouns`, `/polish-numbers`, `/polish-verbs` | Grammar reference pages written for search: explanations, paradigm tables and example sentences, all generated at build time from the grammar code and the published lexicon (`lib/guides.ts`), each with "Practise …" links to configured `/practice` sessions. |
 | `/sitemap.xml`, `/robots.txt` | Built from `BRAND.url` (`https://polishup.app`, or `NEXT_PUBLIC_SITE_URL` when set): absolute sitemap URLs and a `Sitemap:` line in robots.txt. `/practice` and `/today` are `noindex`. |
 | `/today` | Today's practice: due reviews first, then new words, then filler, built from your progress with no setup. A wrong answer is asked again at the end. "Extra practice" (weakest skills) once nothing is due. |
-| `/progress` | Streak (with one grace day per week), today's goal, the last 28 days, your weak spots with their most common mistakes and a link to drill each, and the daily goal (10 / 20 / 40) and new words per day settings. |
+| `/progress` | Streak (with one grace day per week), today's goal, the last 28 days, your weak spots with their most common mistakes and a link to drill each. The daily goal and new words per day are on `/settings`. |
 | `/privacy` | The privacy policy: what stays on the device, what analytics collect (only with consent), your rights; change the analytics choice or delete your data from this device. |
 | `/cases` | Decline nouns / adjectives across all seven cases. |
 | `/pronouns` | Make the demonstrative `ten` / `tamten` agree with a given noun in gender, number and case. |
@@ -291,16 +294,19 @@ Everything is generated locally and deterministically — no API calls.
 | `lib/session.ts` | Encodes a session in the query string and reads it back (`type=` selects the drill, `lvl=` caps the CEFR level; drill-specific params come from the registry) |
 | `lib/review/`, `scripts/review-*.ts` | The native-speaker review sheet: CSV export and import of draft entries |
 | `lib/grade.ts` | Normalises the answer; a diacritics-only miss is reported separately |
-| `lib/storage.ts` | localStorage: last config per drill, sound, and the v2 answer log, progress cache and settings (with the one-time v1 migration) |
-| `lib/progressView.ts` | Labels and links for the progress page: miss kinds in English, weak skill → practice URL, the day grid |
+| `lib/storage.ts` | localStorage: last config per drill, sound, appearance, profile name, and the v2 answer log, progress cache and settings (with the one-time v1 migration) |
+| `lib/progressView.ts` | Labels, links and numbers for the dashboard, progress and profile: miss kinds in English, weak skill → practice URL, the day grid, accuracy, cards per drill, milestones |
 | `lib/missKind.ts` | The miss kind logged with a wrong answer |
 | `components/Runner.tsx` | Runs a list of exercises and records every answer; used by `/practice` and `/today`. Sends the session and answer analytics events |
 | `lib/guides.ts` | Content of the grammar reference pages and the landing page's sample questions, built from the grammar code and lexicon (no Polish typed by hand) |
 | `lib/site.ts` | The public pages (`TOPIC_PAGES`, `INDEXED_PATHS` for the sitemap) and `pageMetadata` (title, description, Open Graph, canonical once `BRAND.url` is set) |
-| `components/SiteHeader.tsx`, `SiteFooter.tsx`, `StartButton.tsx`, `SampleQuestion.tsx`, `Guide.tsx` | Landing and reference-page pieces: top bar, the footer on every page, the "Start practising / Continue — N due" button, the live sample question, the reference-page layout and tables |
+| `app/globals.css`, [`DESIGN.md`](DESIGN.md) | The design system: white-and-red colour tokens (light and dark), type, and the shared classes every page uses (buttons, cards, chips, controls). Change the look here |
+| `app/(site)/`, `app/(app)/` | Route groups: the public pages with header and footer, and the app inside the sidebar / bottom-tab shell (`components/AppShell.tsx`). `/today` and `/practice` run full screen |
+| `components/SiteHeader.tsx`, `SiteFooter.tsx`, `StartButton.tsx`, `SampleQuestion.tsx`, `Infographics.tsx`, `Guide.tsx` | Public-page pieces: top bar, footer, the "Start today's practice / Continue — N due" button, the live sample question, the landing infographics, the reference-page layout and tables |
+| `components/AppShell.tsx`, `Dashboard.tsx`, `progress.tsx`, `TodayButton.tsx`, `AccountTabs.tsx`, `DrillIcon.tsx`, `Logo.tsx` | App pieces: the sidebar / bottom tabs, the home dashboard, the activity grid, stat cards and weak spots, the red today panel, the account tabs, one Lucide icon per drill, the flag mark |
 | `lib/analytics.ts` | Analytics with consent: `track` (a no-op without a key and consent), the consent state machine, the event schema, posthog-js loaded lazily from the EU host (see [Analytics and privacy](#analytics-and-privacy)) |
 | `components/Analytics.tsx`, `components/ConsentBanner.tsx` | Mounted on every page: starts PostHog after an earlier consent, sends `pwa_installed`, shows the consent banner |
-| `app/privacy/` | The privacy policy, with the consent toggle and the delete-my-data button |
+| `app/(site)/privacy/`, `components/Privacy.tsx` | The privacy policy; the consent toggle and the delete-my-data button (also on `/settings`) |
 | `lib/sound.ts` | Synthesised right / near-miss / wrong cues |
 | `lib/speak.ts` | pl-PL speech synthesis for reading sentences aloud (TTS Worker audio when configured, else the browser) |
 | `lib/speaker.ts` | Worker-vs-browser selection and fallback, testable without a browser |

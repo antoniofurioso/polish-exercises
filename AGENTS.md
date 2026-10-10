@@ -57,22 +57,28 @@ Delete anything the change made untrue.
 
 | Path | What it is |
 | --- | --- |
-| `app/page.tsx` | Landing page (server component): headline, `SampleQuestion` (fixed-seed questions from `sampleQuestions()`), drills, how it works, `StartButton` → `/today` |
-| `app/learn/` | The app's home: the "Today's practice" button (`components/TodayButton`), then the drill menu from the registry. Links that mean "back to the app" go here, never to `/` |
-| `app/polish-cases/`, `polish-pronouns/`, `polish-numbers/`, `polish-verbs/` | Grammar reference pages for search, static, built from `lib/guides.ts` with `components/Guide.tsx`. Polish text goes in `<Pl>` (`lang="pl"`) |
+| `app/globals.css`, `DESIGN.md` | **The design system**: colour tokens (light, dark, and a `data-theme` override), the Tailwind mapping and the shared component classes (`.btn`, `.card`, `.chip`, `.seg`, `.switch`, `.meter`…). `DESIGN.md` documents them. Pages use these, never raw hex colours |
+| `app/layout.tsx` | Root layout: Inter + Source Serif 4 fonts, the before-paint theme script (`lib/theme.ts`), service worker, analytics |
+| `app/(site)/` | Public pages with `SiteHeader` + `SiteFooter` (its `layout.tsx`): the landing page, the guides, `/privacy` |
+| `app/(site)/page.tsx` | Landing page (server component): hero with `SampleQuestion` (fixed-seed questions from `sampleQuestions()`), drills, the infographics (`components/Infographics.tsx`: `caseForms`, `reviewIntervals`, the session mix), how it works, pricing, `StartButton` → `/today` |
+| `app/(app)/` | The app inside `components/AppShell.tsx` (its `layout.tsx`): sidebar from 768 px, top bar + bottom tabs on a phone |
+| `app/(app)/learn/` | The app's home dashboard (`components/Dashboard.tsx`): greeting, the red "Today's practice" panel (`components/TodayButton`), stats, the last 28 days, weak spots, the drills. Links that mean "back to the app" go here, never to `/` |
+| `app/(app)/profile/`, `settings/`, `billing/` | Account pages (`AccountTabs` on phones). Profile: local name (`polish.profile.v1`), totals, cards per drill, milestones (`lib/progressView.ts`). Settings: goal, new per day, sound, appearance (`polish.theme.v1`), consent, delete data. Billing: the free beta, Pro "coming later", empty payment and invoices; no payments exist |
+| `app/(site)/polish-cases/`, `polish-pronouns/`, `polish-numbers/`, `polish-verbs/` | Grammar reference pages for search, static, built from `lib/guides.ts` with `components/Guide.tsx`. Polish text goes in `<Pl>` (`lang="pl"`) |
 | `app/sitemap.ts`, `app/robots.ts` | Metadata routes (`dynamic = "force-static"`, required by the static export). Absolute URLs from `BRAND.url` (`https://polishup.app` unless `NEXT_PUBLIC_SITE_URL` overrides it) |
 | `app/today/` | Today's practice: `buildToday` on a progress snapshot taken at mount, run by the shared `Runner`; a wrong card is asked once more at the end |
-| `app/progress/` | Streak, today's goal ring, the last 28 days, weak spots (each linking to a configured `/practice` session) and the goal / new-per-day settings |
-| `app/<drill>/page.tsx` | One configurator per drill (cases, pronouns, possessives, numbers, verbs, shuffle). They write the session URL |
+| `app/(app)/progress/` | Streak, today's goal ring, the last 28 days, weak spots (each linking to a configured `/practice` session). The settings are on `/settings` |
+| `app/(app)/<drill>/page.tsx` | One configurator per drill (cases, pronouns, possessives, numbers, verbs, shuffle). They write the session URL |
 | `app/practice/` | Reads the URL, builds the session and hands it to `Runner` |
-| `app/privacy/` | Privacy policy (draft for the owner), consent toggle (`ConsentChoice`), "Delete my data from this device" (`ClearLocalData`: every `polish.*` key) |
+| `app/(site)/privacy/`, `components/Privacy.tsx` | Privacy policy (draft for the owner); `ConsentChoice` and `ClearLocalData` (every `polish.*` key), also used on `/settings` |
 | `lib/analytics.ts` | Analytics (plans/phase-3.md §4): `track(event, props)` is a no-op unless `NEXT_PUBLIC_POSTHOG_KEY` is set and `polish.consent.v1` is `granted`; `EVENT_SCHEMA` lets only enum values and counts through; `nextConsent` state machine; posthog-js is `import()`ed only after consent (EU host). Imports no runtime code but `lib/types`, since every page loads it |
 | `components/Analytics.tsx`, `components/ConsentBanner.tsx` | Mounted in the layout: start PostHog after an earlier consent, `pwa_installed` (`appinstalled` or the `pwa-installed` window event), the banner (only with a key and no choice yet) |
-| `components/` | `SiteHeader`, `SiteFooter` (in `app/layout.tsx`, every page; links Learn, Today, Progress, Privacy and the guides), `StartButton`, `SampleQuestion`, `Guide`, `Runner` (runs a prebuilt `Exercise[]`, grades, records every answer and sends the analytics events; shared by `/practice` and `/today`), `ExerciseCard` (one question, speech, keyboard), `ResultsSummary`, `TodayButton`, `today` (`useTodayStatus`, `useNow`, `GoalRing`, `GoalStatus`), `ui` |
-| `lib/storage.ts` | localStorage: configs, sound, the v2 log / progress / settings hooks (`useProgress`, `useSettings`, `recordAnswer`…), v1 migration, compaction past 20,000 events |
-| `lib/progressView.ts` | Pure helpers for the progress UI: `MISS_LABELS` (miss kind → English), `skillConfig` / `skillHref` (weak skill → configured session), `lastDays`, `dueCount`, `safely` |
+| `components/` | `SiteHeader`, `SiteFooter` (public pages), `AppShell` (+ `AppPage`, `ACCOUNT`), `AccountTabs`, `Logo` (`FlagMark`), `DrillIcon` (one Lucide icon per drill), `Dashboard`, `progress` (`ActivityGrid`, `StatCard`, `WeakSpotList`), `Infographics`, `StartButton`, `SampleQuestion`, `Guide`, `Runner` (full-screen session: ✕, progress bar, sound; grades, records every answer and sends the analytics events; shared by `/practice` and `/today`), `ExerciseCard` (one question, Polish-letter keys, speech, keyboard), `ResultsSummary`, `TodayButton` (the red panel), `today` (`useTodayStatus`, `useNow`, `GoalRing`, `GoalStatus`), `ui` (`Choice`, `Field`) |
+| `lib/storage.ts` | localStorage: configs, sound, theme (`useTheme`, `setTheme`), profile (`useProfile`, `saveProfile`), the v2 log / progress / settings hooks (`useProgress`, `useSettings`, `recordAnswer`…), v1 migration, compaction past 20,000 events |
+| `lib/theme.ts` | `THEME_KEY` and the theme values, React-free so the server layout can build its script from them |
+| `lib/progressView.ts` | Pure helpers for the progress UI: `MISS_LABELS` (miss kind → English), `skillConfig` / `skillHref` (weak skill → configured session), `lastDays`, `dueCount`, `recentAccuracy`, `totalAnswered`, `cardsByDrill`, `casesPractised`, `milestones`, `safely` |
 | `lib/missKind.ts` | `missKindOf(input, exercise)`: the `MissKind` logged with a wrong answer (`diagnoseVerbMiss` for verbs, `diagnoseNumberMiss` for numbers, then `diagnoseMiss`) |
-| `lib/guides.ts` | Reference-page content: ending tables, case triggers (one per distinct template `note`, each with a sentence from `exampleExercise` in `lib/generate.ts`), pronoun / numeral / verb tables, example sentences from the drill builders with fixed seeds, configured `/practice` hrefs, the landing samples. **Every Polish form comes from the grammar code or the lexicon**; model words (student, kot, dom, kobieta, okno, pisać…) throw at build time if they leave the lexicon. Tested in `lib/__tests__/guides.test.ts` |
+| `lib/guides.ts` | Reference-page content: ending tables, case triggers (one per distinct template `note`, each with a sentence from `exampleExercise` in `lib/generate.ts`), pronoun / numeral / verb tables, example sentences from the drill builders with fixed seeds, configured `/practice` hrefs, the landing samples and infographics (`caseForms`, `reviewIntervals` from the real scheduler). **Every Polish form comes from the grammar code or the lexicon**; model words (student, kot, dom, kobieta, okno, pisać…) throw at build time if they leave the lexicon. Tested in `lib/__tests__/guides.test.ts` |
 | `lib/site.ts` | `TOPIC_PAGES`, `INDEXED_PATHS` (sitemap), `pageMetadata` (title, description, Open Graph, canonical when `BRAND.url` is set) and `NOINDEX` (on `/practice`, `/today`) |
 | `lib/brand.ts` | `BRAND`: product name, tagline, description, site URL, owner and contact email. The only place the name is written; titles, manifest, landing and privacy pages read it |
 | `lib/drills.ts` | **Drill registry** (`DRILLS`, `drillFor`): route, menu text, builder, allowed cases, own URL params, shuffle mix. Single source for "which drills exist" |
@@ -155,10 +161,17 @@ Delete anything the change made untrue.
 10. **Icons are generated.** Don't edit the PNGs or `app/favicon.ico` by hand:
    change `public/brand/icon.svg` (or `BRAND.name` / `--accent` while the
    placeholder monogram is in use) and run `npm run icons`.
-11. **Analytics carry no free text.** A new event or prop goes into
+11. **Style through the design system.** Colours, radii and shadows are tokens
+   in `app/globals.css`; buttons, cards, chips and controls are its classes
+   (`DESIGN.md`). A new colour gets a light and a dark value (both dark
+   blocks). Icons are Lucide (`lucide-react`), `aria-hidden` beside a label;
+   drills use `DrillIcon`. Every page must work at 360 px with no horizontal
+   scroll. The first `:root` block must keep `--background` and `--accent`
+   (read by `app/manifest.ts` and `scripts/icons.ts`).
+12. **Analytics carry no free text.** A new event or prop goes into
    `EventProps` and `EVENT_SCHEMA` in `lib/analytics.ts` (enum values or counts
    only), the event table in `README.md` and, if it changes what is collected,
-   the privacy policy (`app/privacy/page.tsx`, with a new date). Nothing from
+   the privacy policy (`app/(site)/privacy/page.tsx`, with a new date). Nothing from
    PostHog may load or be stored before consent; keep `lib/analytics.ts` free
    of the lexicon and progress imports (it is on every page).
 
@@ -167,7 +180,7 @@ Delete anything the change made untrue.
 ```bash
 npm ci                  # also: cd workers/tts && npm ci, for Worker work
 npm run dev             # http://localhost:3000; npm run dev:drafts shows drafts
-npm test                # both vitest projects (~500 tests)
+npm test                # both vitest projects (~610 tests)
 npm run lint
 npm run build           # static export to out/, then stamps out/sw.js + out/sw-precache.json
 npm run icons           # regenerate all icons from public/brand/icon.svg (or BRAND's monogram)

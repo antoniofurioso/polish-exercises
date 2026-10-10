@@ -58,6 +58,18 @@ replacing one file and re-running it.
   text.
 - Runner pages (`/practice`, `/today`) are `noindex`.
 
+### 3a. Visual redesign ☑
+
+- White-and-red design system in `app/globals.css` (tokens, light and dark,
+  shared classes), documented in `DESIGN.md`; Inter + Source Serif 4; Lucide icons.
+- Landing page with infographics generated from the grammar code and scheduler.
+- The app in a shell (`app/(app)/`): home dashboard at `/learn`, `/progress`,
+  and the new account pages `/profile`, `/settings` (the goal settings moved
+  here from `/progress`; appearance choice), `/billing` (free beta; no
+  payments until Phase 4). Full-screen session view for `/today` and `/practice`.
+- Mobile: bottom tabs in the app, a menu in the public header, no page wider
+  than the screen at 360 px.
+
 ## 4. Analytics and consent
 
 - `posthog-js`, EU host, key from `NEXT_PUBLIC_POSTHOG_KEY` (no key → analytics
@@ -122,6 +134,9 @@ name and domain exist.
 4. Recruit the beta (posts in `plans/beta-posts.md`).
 
 ## Known gaps
+
+- `/billing` is a placeholder: Pro has no price or feature list yet, and its
+  "Tell me when it's ready" button appears only once `NEXT_PUBLIC_CONTACT_EMAIL` is set.
 
 - The drill configurator pages are client components and keep the default title.
 - Polish words inside English prose on the landing page and drill blurbs lack

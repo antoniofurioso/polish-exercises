@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { BRAND } from "@/lib/brand";
 import { Choice, Field } from "@/components/ui";
 import { CASE_INFO } from "@/lib/cases";
 import { randomSeed, sessionParams } from "@/lib/session";
@@ -83,18 +81,16 @@ export default function CasesConfiguratorPage() {
   const ready = config.cases.length > 0;
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-5 py-10 sm:py-16">
+    <main className="mx-auto w-full max-w-3xl px-4 py-7 sm:px-8 sm:py-10">
       <header className="mb-10">
-        <Link href="/learn" className="text-sm uppercase tracking-[0.2em] text-accent">
-          {BRAND.name}
-        </Link>
-        <h1 className="mt-2 text-3xl font-semibold sm:text-4xl">Polish case practice</h1>
+        <p className="eyebrow">Set up a session</p>
+        <h1 className="page-title mt-2">Polish case practice</h1>
         <p className="mt-3 text-muted">
           Pick what you want to drill, then fill in one sentence at a time.
         </p>
       </header>
 
-      <div className="space-y-9">
+      <div className="space-y-4">
         <Field label="1 · Cases" hint="Choose one or more.">
           <div className="grid gap-3 sm:grid-cols-2">
             {CASES.map((kase) => {
@@ -118,14 +114,14 @@ export default function CasesConfiguratorPage() {
           <div className="flex gap-3 text-sm">
             <button
               type="button"
-              className="text-accent underline underline-offset-4 cursor-pointer"
+              className="link cursor-pointer"
               onClick={() => setConfig((c) => ({ ...c, cases: [...CASES] }))}
             >
               Select all
             </button>
             <button
               type="button"
-              className="text-muted underline underline-offset-4 cursor-pointer"
+              className="cursor-pointer font-medium text-muted hover:text-foreground"
               onClick={() => setConfig((c) => ({ ...c, cases: [] }))}
             >
               Clear
@@ -187,7 +183,7 @@ export default function CasesConfiguratorPage() {
                 <span className="font-medium">{count}</span>
               </Choice>
             ))}
-            <label className="flex items-center gap-2 rounded-xl border border-line bg-surface px-4 py-3">
+            <label className="flex min-h-12 items-center gap-2 rounded-xl border border-line-strong bg-surface px-4">
               <span className="text-sm text-muted">custom</span>
               <input
                 type="number"
@@ -210,7 +206,7 @@ export default function CasesConfiguratorPage() {
           type="button"
           onClick={start}
           disabled={!ready}
-          className="w-full rounded-xl bg-accent px-6 py-4 text-lg font-medium text-white transition-opacity disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+          className="btn btn-primary btn-lg btn-block"
         >
           Start · {config.count} sentences
         </button>
