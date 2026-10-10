@@ -96,7 +96,6 @@ audio on every device.
 
 ## Later
 
-- Interface translations: Ukrainian and Italian.
 - `/billing`: a price and Pro feature list once Phase 4 decides them.
 - **Reminders**, opt-in, for the streak and due reviews: web push notifications
   through the service worker (on iPhone only for the installed app, iOS 16.4+), and
