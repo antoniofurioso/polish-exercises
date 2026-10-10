@@ -1,6 +1,7 @@
 # Phase 3: Ship the web version
 
-Status: ◐ live at https://polishup.app; the beta is what is left. Goal: a public site that real learners can install, use
+Status: ☑ done. Live at https://polishup.app since 10 October 2026; the beta is
+running, and its day-7 return decides when Phase 4 starts. Goal: a public site that real learners can install, use
 offline and come back to, plus the measurement to tell whether they do.
 
 ## Decisions so far
@@ -113,7 +114,8 @@ name and domain exist.
   `npm run icons`).
 - [x] The app installs and runs a session offline: manifest, icons and the service
   worker checked in Chromium with the server stopped (pages, a practice answer,
-  `/today`, cached audio). **Owner:** try it on a real Android and iOS phone.
+  `/today`, cached audio), then installed and used offline on a real phone by
+  the owner.
 - [x] `/` explains the app and gets a new visitor into a session in one click.
 - [x] Analytics run only after consent, and events arrive in the live PostHog EU
   project. Day-7 retention is a Retention insight on `session_started` (README
@@ -131,21 +133,20 @@ name and domain exist.
   production and preview; `NEXT_PUBLIC_POSTHOG_KEY` for production only, so
   previews never show the banner or send events.
 
-## Left for the owner
+- Google Search Console has the `polishup.app` domain property, with
+  `https://polishup.app/sitemap.xml` submitted.
+- PostHog: the day-7 Retention insight (`session_started` → `session_started`,
+  daily) is on a dashboard. "Discard client IP data", 12-month retention and the
+  signed DPA stay on, because `/privacy` states them.
 
-1. Google Search Console: add the `polishup.app` domain property and submit
-   `https://polishup.app/sitemap.xml`.
-2. PostHog: save the day-7 Retention insight to a dashboard; keep "Discard client
-   IP data", 12-month retention and the signed DPA, as `/privacy` states.
-3. Install the app on a real Android and iOS phone and practise offline.
-4. Recruit the beta: 20–30 learners for 2–3 weeks (posts in `plans/beta-posts.md`),
-   then decide on Phase 4 from day-7 return.
+## The beta (running)
 
-## Known gaps
+20–30 learners for 2–3 weeks, recruited by the owner. Read day-7 return on the
+PostHog dashboard; it decides when Phase 4 (accounts and payments) starts. The
+Phase 2 tuning knobs (`newPerDay`, the 70% review share, the first-day top-up,
+the level-cap thresholds) are adjusted from what the beta shows.
 
-- `/billing` is a placeholder: Pro has no price or feature list yet, and its
-  "Tell me when it's ready" button appears only once `NEXT_PUBLIC_CONTACT_EMAIL` is set.
+## Moved to the roadmap's "Later"
 
-- The drill configurator pages are client components and keep the default title.
-- Polish words inside English prose on the landing page and drill blurbs lack
-  `lang="pl"`.
+`/billing` is a placeholder until Phase 4 sets a price; the drill configurator
+pages keep the default title; Polish words in English prose lack `lang="pl"`.
