@@ -30,7 +30,7 @@ RESEND_SEGMENTS = "{}"
 binding = "DB"
 database_name = "polishup-api"
 # `wrangler d1 create polishup-api`, then paste its id here.
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "5672425c-0cdd-448c-bc4f-5ab0b0fe283a"
 migrations_dir = "migrations"
 
 # Per-IP limits (§4.6). namespace_id is any positive integer unique within the
