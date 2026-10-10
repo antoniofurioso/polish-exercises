@@ -42,7 +42,10 @@ back to the browser's speech synthesis. Without the variable nothing changes.
 
 Install and offline: the built site is a PWA. Browsers offer to install it
 (Android / desktop Chrome: the install prompt or menu; iOS Safari: Share → Add
-to Home Screen), and it opens on `/today` in its own window. After the first
+to Home Screen), and it opens on `/today` in its own window. **Settings → Install
+the app** opens the browser's install prompt where there is one (caught early by
+`INSTALL_SCRIPT` in `lib/install.ts`), shows Safari's steps on iPhone and iPad,
+and says "Installed" inside the installed app. After the first
 visit every page works offline, including `/today`, `/progress` and any
 `/practice?…` session: progress lives in localStorage anyway. Natural-voice
 clips heard online (up to the last 300) replay offline; any other sentence is
@@ -318,6 +321,7 @@ Everything is generated locally and deterministically — no API calls.
 | `app/manifest.ts` | The web app manifest from `BRAND` (start `/today`, standalone, colours from `app/globals.css`) |
 | `public/sw.js`, `scripts/sw-manifest.ts` | The offline service worker (a template) and the post-build step that stamps it with the version and precache list |
 | `components/ServiceWorker.tsx` | Registers the worker in production builds; re-dispatches `appinstalled` as a window `pwa-installed` event |
+| `lib/install.ts`, `components/InstallButton.tsx` | Settings → Install the app: the head script that keeps the browser's install prompt, the install state (installed / prompt / iOS steps / browser menu) and the button |
 | `public/brand/icon.svg`, `scripts/icons.ts` | The icon source and `npm run icons`, which renders every PNG / ICO from it |
 
 Semantic tags on each noun (`food`, `vehicle`, `placeIn`, …) keep sentences sensible —

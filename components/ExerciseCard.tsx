@@ -91,10 +91,19 @@ export function ExerciseCard({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       disabled={answered}
+      onKeyDown={(e) => {
+        // no <form> around the gap: phones treat a text field in a form as a login and
+        // put passwords and contacts above the keyboard, so Enter submits from here
+        if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+          e.preventDefault();
+          onSubmit();
+        }
+      }}
       spellCheck={false}
       type="text"
-      name="answer"
+      enterKeyHint="go"
       autoComplete="off"
+      aria-autocomplete="none"
       autoCorrect="off"
       autoCapitalize="off"
       inputMode="text"
@@ -133,12 +142,7 @@ export function ExerciseCard({
   const style = verdict ? VERDICT_STYLE[verdict] : null;
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit();
-      }}
-    >
+    <div>
       <div className="flex flex-wrap items-center gap-2">
         <span lang={exercise.label ? undefined : "pl"} className="chip chip-accent">
           {exercise.label ?? info.pl}
@@ -253,12 +257,12 @@ export function ExerciseCard({
       {answered || !options ? (
         <div className="mt-8 flex flex-wrap items-center justify-end gap-4">
           <span className="hidden text-[0.8125rem] text-muted sm:inline">Press Enter ↵</span>
-          <button ref={nextRef} type="submit" className="btn btn-primary btn-lg w-full sm:w-auto">
+          <button ref={nextRef} type="button" onClick={() => onSubmit()} className="btn btn-primary btn-lg w-full sm:w-auto">
             {answered ? (isLast ? "See results" : "Next question") : "Check"}
             {answered ? <ArrowRight size={20} aria-hidden="true" /> : null}
           </button>
         </div>
       ) : null}
-    </form>
+    </div>
   );
 }

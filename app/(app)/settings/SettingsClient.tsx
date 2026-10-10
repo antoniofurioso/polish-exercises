@@ -1,10 +1,11 @@
 "use client";
 
-import { Download, Moon, Shield, Smartphone, Sun, SunMoon } from "lucide-react";
+import { Moon, Shield, Smartphone, Sun, SunMoon } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { AccountTabs } from "@/components/AccountTabs";
 import { AppPage } from "@/components/AppShell";
+import { InstallButton } from "@/components/InstallButton";
 import { ClearLocalData, ConsentChoice } from "@/components/Privacy";
 import { GOAL_CHOICES } from "@/lib/progress";
 import { stopSpeaking } from "@/lib/speak";
@@ -90,12 +91,9 @@ export function SettingsPage() {
           <Row
             icon={<Smartphone size={20} aria-hidden="true" />}
             title="Install the app"
-            hint="Use your browser’s Install or Add to Home Screen. It opens straight into today’s practice and works offline."
+            hint="On your home screen, it opens straight into today’s practice and works offline."
           >
-            <span className="chip">
-              <Download size={15} aria-hidden="true" />
-              From the browser menu
-            </span>
+            <InstallButton />
           </Row>
           <Row
             icon={<Shield size={20} aria-hidden="true" />}
