@@ -144,6 +144,21 @@ html {
   scroll-behavior: smooth;
 }
 
+/*
+ * Nothing may make the page pan sideways on a phone. Content is built to fit
+ * (rule 11 in AGENTS.md); this is the safety net. clip, unlike hidden, keeps
+ * the sticky header and sidebar working; hidden on body alone is the fallback.
+ */
+body {
+  overflow-x: hidden;
+}
+@supports (overflow: clip) {
+  html,
+  body {
+    overflow-x: clip;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

@@ -72,7 +72,10 @@ React pieces built on them: `components/ui.tsx` (configurator `Choice` and
   linked by `AccountTabs`.
 - A session (`/today`, `/practice`) runs full screen: ✕, progress bar, sound.
 - Everything works at 360 px wide with no horizontal scroll; touch targets are
-  at least 44 px.
+  at least 44 px. Long content wraps instead of widening the page (the hint
+  after an exercise's gap may drop to the next line, long Polish words break).
+  `overflow-x: clip` on `html` and `body` is only the safety net: fix the
+  element, don't rely on the clip.
 
 ## Rules
 

@@ -82,7 +82,7 @@ export function ExerciseCard({
     : "border-accent";
 
   const gap = options ? (
-    <span className={`inline-block min-w-[5ch] border-b-[3px] px-1 text-center transition-colors ${gapStyle}`}>
+    <span className={`inline-block min-w-[5ch] max-w-full border-b-[3px] px-1 text-center transition-colors ${gapStyle}`}>
       {value || "   "}
     </span>
   ) : (
@@ -103,16 +103,17 @@ export function ExerciseCard({
       data-bwignore="true"
       data-form-type="other"
       aria-label="Your answer"
-      style={{ width: `${width}ch` }}
+      style={{ width: `min(${width}ch, 100%)` }}
       className={`rounded-t-md border-b-[3px] bg-transparent px-1 text-center outline-none transition-colors focus:bg-accent-soft ${gapStyle}`}
     />
   );
 
+  // the hint may drop to the next line on a phone: a long one ("ten duży student") never widens the page
   const gapWithHint = (
-    <span className="whitespace-nowrap">
-      {gap}
-      <span className="ml-1.5 font-sans text-lg text-muted">({exercise.hint})</span>
-    </span>
+    <>
+      {gap}{" "}
+      <span className="font-sans text-lg text-muted">({exercise.hint})</span>
+    </>
   );
 
   const parts: ReactNode[] = [];
@@ -150,7 +151,7 @@ export function ExerciseCard({
       </div>
 
       <p className="mt-8 text-lg italic text-muted">&ldquo;{exercise.en}&rdquo;</p>
-      <p lang="pl" className="sentence mt-3 text-[2rem] leading-snug sm:text-[2.75rem] sm:leading-tight">
+      <p lang="pl" className="sentence mt-3 text-[2rem] leading-snug [overflow-wrap:anywhere] sm:text-[2.75rem] sm:leading-tight">
         {exercise.before}
         {parts}
         {exercise.after}
