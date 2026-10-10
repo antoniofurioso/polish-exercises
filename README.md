@@ -155,7 +155,7 @@ who clicks "Allow analytics" is counted even if the browser sends Do Not Track
    share of people who started a session on day 0 and started one again
    seven days later. Save it to a dashboard.
 
-The privacy policy (`/privacy`) is a draft for the owner to review: it names
+The privacy policy (`/privacy`) is approved by the owner and live: it names
 `BRAND.owner` and `BRAND.email` from `lib/brand.ts`, explains what stays on the
 device, what PostHog receives, the TTS Worker and the learner's GDPR rights, and
 has the consent toggle and a "Delete my data from this device" button (removes
