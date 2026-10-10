@@ -7,16 +7,18 @@ exercises:
 
 | Route | Page |
 | --- | --- |
-| `/` | Landing page: the pitch with a live sample question (built at build time, nothing recorded), the drills, the infographics (one noun in all seven cases, when a form comes back, what goes into today's practice), the guides, pricing (free beta), and "Start today's practice" → `/today` (a returning learner sees "Continue — N due"). |
+| `/` | Landing page: the pitch with a live sample question (built at build time, nothing recorded), the drills, the infographics (one noun in all seven cases, when a form comes back, what goes into today's practice), the guides, pricing (from `lib/plans.ts`; with accounts on, the beta note and the Lifetime offer come from the API's `/config` at run time), and "Start today's practice" → `/today` (a returning learner sees "Continue — N due"). |
 | `/learn` | The app's home dashboard: greeting, the red Today's practice panel with the goal ring, streak / due / cards / 7-day accuracy, the last 28 days, the top weak spots and the drills. Every "back home" link points here. |
-| `/profile` | Your name (on this device), answers, best streak, cards practised per drill and milestones. |
-| `/settings` | Daily goal, new words per day, sound, appearance (system / light / dark), how to install the app, the analytics choice and deleting your data from this device. |
-| `/billing` | The current plan (free beta), Pro "coming later", and empty payment method and invoices: there are no payments yet. |
+| `/profile` | Your name, your plan and email when signed in, answers, best streak, cards practised per drill and milestones. |
+| `/settings` | Daily goal, new words per day, sound, appearance (system / light / dark), how to install the app, the analytics choice and deleting your data from this device. With accounts on: sign in or your email, sign out, the "Email tips" switch (marketing consent), export your data, delete the account. |
+| `/billing` | The current plan. Without accounts: the free beta. With accounts: "Pro · beta", Lifetime, or Monthly / Annual with status and dates, "Manage billing" (Stripe Customer Portal), the plan picker when there is no plan, and the return from Stripe Checkout (`?checkout=done`). |
+| `/signin` | With accounts on: email → 6-digit code, with an unticked "tips and news" checkbox. Returns to `?next=` (same-origin paths only), or `/plans` without access. `noindex`. |
+| `/plans` | With accounts on: Annual (pre-selected), Monthly, and Lifetime while on offer; EUR / USD / PLN; "Start free trial" → Stripe Checkout. `noindex`. |
 | `/polish-cases`, `/polish-pronouns`, `/polish-numbers`, `/polish-verbs` | Grammar reference pages written for search: explanations, paradigm tables and example sentences, all generated at build time from the grammar code and the published lexicon (`lib/guides.ts`), each with "Practise …" links to configured `/practice` sessions. |
-| `/sitemap.xml`, `/robots.txt` | Built from `BRAND.url` (`https://polishup.app`, or `NEXT_PUBLIC_SITE_URL` when set): absolute sitemap URLs and a `Sitemap:` line in robots.txt. `/practice` and `/today` are `noindex`. |
+| `/sitemap.xml`, `/robots.txt` | Built from `BRAND.url` (`https://polishup.app`, or `NEXT_PUBLIC_SITE_URL` when set): absolute sitemap URLs and a `Sitemap:` line in robots.txt. `/practice`, `/today`, `/signin` and `/plans` are `noindex`. |
 | `/today` | Today's practice: due reviews first, then new words, then filler, built from your progress with no setup. A wrong answer is asked again at the end. "Extra practice" (weakest skills) once nothing is due. Leaving midway and coming back the same day continues from the next unanswered question (`polish.today.v1`); another day's or a finished session starts afresh. |
 | `/progress` | Streak (with one grace day per week), today's goal, the last 28 days, your weak spots with their most common mistakes and a link to drill each. The daily goal and new words per day are on `/settings`. |
-| `/privacy` | The privacy policy: what stays on the device, what analytics collect (only with consent), your rights; change the analytics choice or delete your data from this device. |
+| `/privacy` | The privacy policy: the account and what syncs, payments (Stripe), email (Resend; marketing only with consent), what stays on the device, what analytics collect (only with consent), retention, export and deletion, your rights; change the analytics choice or delete your data from this device. |
 | `/cases` | Decline nouns / adjectives across all seven cases. |
 | `/pronouns` | Make the demonstrative `ten` / `tamten` agree with a given noun in gender, number and case. |
 | `/possessives` | Make the possessive (`mój`, `twój`, `nasz`, `wasz`, `swój`) agree with a given noun — and leave `jego` / `jej` / `ich` alone. |
@@ -142,6 +144,16 @@ values and counts only, never answer text):
 | `session_finished` | `source`, `size` (scored questions), `correct` |
 | `goal_met` | `goal`, `streak`, at most once per day |
 | `pwa_installed` | none; from the browser's `appinstalled` event or the app's `pwa-installed` window event |
+| `sign_in_started` | none; the first code request on `/signin` |
+| `signed_in` | `kind` (`new` / `returning` account) |
+| `paywall_shown` | `from` (`today` / `practice`); `AccessGate` sends the learner to `/plans` |
+| `checkout_started` | `plan` (`monthly` / `annual` / `lifetime`), `currency` (`eur` / `usd` / `pln`) |
+| `checkout_completed` | `plan`, `currency`; when `/billing` sees access after the return from Checkout |
+| `account_deleted` | none |
+
+PostHog is never told who the learner is: no `identify`, and never the email,
+the account id or the marketing consent. Revenue and trial conversion are read
+in Stripe.
 
 Autocapture, session recording, surveys, heatmaps and feature flags are off.
 `respect_dnt` is off on purpose: the consent banner is the opt-in, and a learner
@@ -161,12 +173,69 @@ who clicks "Allow analytics" is counted even if the browser sends Do Not Track
    share of people who started a session on day 0 and started one again
    seven days later. Save it to a dashboard.
 
-The privacy policy (`/privacy`) is approved by the owner and live: it names
-`BRAND.owner` and `BRAND.email` from `lib/brand.ts`, explains what stays on the
-device, what PostHog receives, the TTS Worker and the learner's GDPR rights, and
-has the consent toggle and a "Delete my data from this device" button (removes
-every `polish.*` localStorage key after a confirmation). Update its "Last
-updated" date with every change.
+The privacy policy (`/privacy`) names `BRAND.owner` and `BRAND.email` from
+`lib/brand.ts`, explains the account and what syncs, Stripe as merchant of
+record, Resend (codes, trial reminder, the contact list; marketing only with
+consent), what stays on the device, what PostHog receives, the TTS Worker,
+retention and the learner's GDPR rights, and
+has the consent toggle and a "Delete my data from this device" button (signs
+out, then removes every `polish.*` localStorage key after a confirmation).
+Update its "Last updated" date with every change. **The version written for
+accounts (10 October 2026) must be re-approved by the owner before
+`NEXT_PUBLIC_API_URL` is set in production.**
+
+## Accounts and billing
+
+Off unless the build sets **`NEXT_PUBLIC_API_URL`** (the API Worker's URL,
+`https://api.polishup.app`; inlined at build time). Unset (development, tests,
+current production): no sign-in, no sync, no paywall, and the app works as
+before. The Worker, its endpoints, vars, secrets and the owner's setup
+checklist are in [`workers/api/README.md`](workers/api/README.md); the spec is
+[`plans/phase-4.md`](plans/phase-4.md).
+
+| Env var (build time) | Meaning |
+| --- | --- |
+| `NEXT_PUBLIC_API_URL` | The `workers/api` base URL. Unset: accounts, sync and the paywall are off. |
+
+With it set:
+
+- **Sign-in** is email only: a 6-digit code (valid 10 minutes, 5 tries) typed
+  on `/signin`. No password, no magic link (on iOS a link would open Safari,
+  whose storage is not the installed app's). The session token is kept in
+  `polish.account.v1` and sent as `Authorization: Bearer`; no cookies.
+- **The gate:** `/today` and `/practice` need an account with access
+  (`components/AccessGate.tsx`); signed out → `/signin`, no access → `/plans`.
+  The landing page, the guides, `/privacy` and the app's dashboard and account
+  pages stay open. Gating is client-side only, and that is accepted; the server
+  decides the entitlement and the client caches it (offline access until the
+  later of the plan's end and 7 days after the last check).
+- **Sync:** the answer log, the daily goal / new-per-day settings and the
+  profile name follow the account to every device (`lib/sync.ts`). Answers
+  wait in `polish.outbox.v1` until the server has them; the merged log is
+  always fully replayed. On first sign-in the whole local log is uploaded, so
+  learners from before accounts keep their progress. Signing out keeps the
+  local data.
+- **Beta:** while the Worker's `BETA_OPEN` is `"true"`, every new account gets
+  Pro free for good. After it: a 3-day free trial (card required) on Monthly
+  and Annual, once per email address (a hash is kept after account deletion),
+  and Lifetime while `LIFETIME_OFFER_UNTIL` is ahead.
+- **Payments:** Stripe Managed Payments (Stripe is merchant of record and
+  handles VAT). Prices: `lib/plans.ts` (display), the Stripe Prices and
+  `PRICE_TEXT` in `workers/api/src/billing.ts` must agree.
+
+  | Plan | EUR | USD | PLN |
+  | --- | --- | --- | --- |
+  | Monthly (3-day trial) | €6.99 | $7.99 | 29.99 zł |
+  | Annual (3-day trial, default) | €49 | $54.99 | 199 zł |
+  | Lifetime (limited offer) | €99 | $109 | 399 zł |
+
+- **Email (Resend):** login codes, a trial reminder about a day and a half
+  before the trial ends, and the contact list: every account is a contact in
+  the segment of its plan, `unsubscribed` unless it ticked "tips and news"
+  (changeable in Settings, or with the signed link in every marketing email).
+- **Export and delete:** Settings → Export your data (JSON) and Delete account
+  (cancels any subscription at once, deletes the Stripe customer, the Resend
+  contact and every row).
 
 ## Audio
 
@@ -302,9 +371,14 @@ Everything is generated locally and deterministically — no API calls.
 | `lib/session.ts` | Encodes a session in the query string and reads it back (`type=` selects the drill, `lvl=` caps the CEFR level; drill-specific params come from the registry) |
 | `lib/review/`, `scripts/review-*.ts` | The native-speaker review sheet: CSV export and import of draft entries |
 | `lib/grade.ts` | Normalises the answer; a diacritics-only miss is reported separately |
-| `lib/storage.ts` | localStorage: last config per drill, sound, appearance, profile name, and the v2 answer log, progress cache and settings (with the one-time v1 migration), today's unfinished session, the install card's dismissal |
+| `lib/storage.ts` | localStorage: last config per drill, sound, appearance, profile name, and the v2 answer log, progress cache and settings (with the one-time v1 migration), today's unfinished session, the install card's dismissal; with accounts, the account cache, the outbox, the sync state and the cached `/config` |
 | `lib/progressView.ts` | Labels, links and numbers for the dashboard, progress and profile: miss kinds in English, weak skill → practice URL, the day grid, accuracy, cards per drill, milestones |
 | `lib/missKind.ts` | The miss kind logged with a wrong answer |
+| `lib/account.ts` | The API client for `workers/api` (typed from its `src/contract.ts`), the cached account and `hasAccess` |
+| `lib/sync.ts` | Sync: merge the logs by `(t, card)`, replay, push the outbox, pull other devices' answers, settings and name |
+| `lib/plans.ts` | Plans and prices for display (EUR / USD / PLN), `formatPrice`, the Lifetime offer check |
+| `components/AccessGate.tsx`, `AccountSync.tsx`, `account.tsx`, `PricingLive.tsx` | The paywall around a session, background sync on app start / focus / online, shared account bits (plan names, the "progress merged" notice, sync after a session), the landing page's run-time pricing |
+| `app/(site)/signin/`, `app/(site)/plans/`, `app/(app)/billing/BillingClient.tsx` | Sign-in with an email code, the plan picker, the billing page |
 | `components/Runner.tsx` | Runs a list of exercises and records every answer; used by `/practice` and `/today`. Sends the session and answer analytics events |
 | `lib/guides.ts` | Content of the grammar reference pages and the landing page's sample questions, built from the grammar code and lexicon (no Polish typed by hand) |
 | `lib/site.ts` | The public pages (`TOPIC_PAGES`, `INDEXED_PATHS` for the sitemap) and `pageMetadata` (title, description, Open Graph, canonical once `BRAND.url` is set) |
@@ -321,6 +395,7 @@ Everything is generated locally and deterministically — no API calls.
 | `lib/ttsUrl.ts` | The Worker URL for a sentence (and voice) |
 | `scripts/audio/` | The pre-rendered audio pipeline: manifest, render engines, R2 upload (see [Audio](#audio)) |
 | `workers/tts/` | The Cloudflare Worker that serves sentence audio from R2 (its own package and README) |
+| `workers/api/` | The Cloudflare Worker + D1 for accounts, sync, Stripe billing and the Resend list (its own package and [README](workers/api/README.md)) |
 | `app/manifest.ts` | The web app manifest from `BRAND` (start `/today`, standalone, colours from `app/globals.css`) |
 | `public/sw.js`, `scripts/sw-manifest.ts` | The offline service worker (a template) and the post-build step that stamps it with the version and precache list |
 | `components/ServiceWorker.tsx` | Registers the worker in production builds; re-dispatches `appinstalled` as a window `pwa-installed` event |

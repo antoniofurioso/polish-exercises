@@ -212,6 +212,18 @@ describe("event props carry no free text", () => {
   });
 });
 
+describe("Phase 4 events", () => {
+  it("carry only plan, currency, kind and source enums", () => {
+    expect(cleanProps("sign_in_started", { email: "a@b.co" })).toEqual({});
+    expect(cleanProps("signed_in", { kind: "new", userId: "u1" })).toEqual({ kind: "new" });
+    expect(cleanProps("signed_in", { kind: "someone" })).toEqual({});
+    expect(cleanProps("paywall_shown", { from: "today" })).toEqual({ from: "today" });
+    expect(cleanProps("checkout_started", { plan: "annual", currency: "pln" })).toEqual({ plan: "annual", currency: "pln" });
+    expect(cleanProps("checkout_completed", { plan: "beta", currency: "gbp" })).toEqual({});
+    expect(cleanProps("account_deleted", { marketingConsent: true })).toEqual({});
+  });
+});
+
 describe("goal_met", () => {
   const base = { answered: 20, goal: 20, streak: 4, today: "2026-10-09", lastSent: null };
 

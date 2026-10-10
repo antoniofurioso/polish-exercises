@@ -23,6 +23,7 @@ import { THEME_KEY, THEMES, type Theme } from "./theme";
 export type { Theme } from "./theme";
 import { DRILL_KINDS } from "./types";
 import type { Config, DrillKind, Exercise, ExerciseKind, Stats } from "./types";
+import type { Entitlement, PublicConfig, User } from "../workers/api/src/contract";
 
 /**
  * localStorage wiring (plans/phase-2.md §4). Schema v2 is an append-only answer
@@ -40,6 +41,12 @@ const INSTALL_CARD_KEY = "polish.installCard.v1";
 export const LOG_KEY = "polish.log.v2";
 export const PROGRESS_KEY = "polish.progress.v2";
 export const SETTINGS_KEY = "polish.settings.v2";
+/** Phase 4 (plans/phase-4.md §5, §6.1): the account cache, unsynced events, sync cursor and stamps. */
+export const ACCOUNT_KEY = "polish.account.v1";
+export const OUTBOX_KEY = "polish.outbox.v1";
+export const SYNC_KEY = "polish.sync.v1";
+/** `GET /config`, cached; kept on sign-out (it is not about the account). */
+export const PUBLIC_CONFIG_KEY = "polish.apiConfig.v1";
 
 /** The log is compacted past this many events, keeping the newest COMPACT_KEEP. */
 const COMPACT_AT = 20_000;
@@ -275,13 +282,15 @@ export function recordAnswer(exercise: Exercise, kind: ExerciseKind, verdict: Ve
 
     const current = loadProgress();
     let events = [...readLog(), event];
+    const signedIn = readStoredAccount() !== null;
+    const outbox = signedIn ? [...readOutbox(), event] : [];
     let progress: Progress | null = null;
     if (current.ok) {
       try {
         progress = apply(current.progress, event);
         if (events.length > COMPACT_AT) {
           try {
-            const compacted = compact(progress, events, COMPACT_KEEP);
+            const compacted = compact(progress, events, outboxSafeKeep(events, outbox, COMPACT_KEEP));
             progress = compacted.progress;
             events = compacted.events;
           } catch {
@@ -294,6 +303,8 @@ export function recordAnswer(exercise: Exercise, kind: ExerciseKind, verdict: Ve
     }
 
     writeRaw(LOG_KEY, JSON.stringify(events));
+    // the same write as the log: an event answered while signed in waits here for the server
+    if (signedIn) writeRaw(OUTBOX_KEY, JSON.stringify(outbox));
     if (progress) {
       writeRaw(PROGRESS_KEY, JSON.stringify(progress));
     } else if (!current.ok || !current.progress.base) {
@@ -325,7 +336,19 @@ export const useSettings = (): Settings => useStored<Settings>(SETTINGS_KEY, DEF
 
 export const readSettings = (): Settings => snapshot(SETTINGS_KEY, DEFAULT_SETTINGS, decodeSettings);
 
-export const saveSettings = (settings: Settings) => write(SETTINGS_KEY, decodeSettings(settings));
+export function saveSettings(settings: Settings): void {
+  stampSync({ settingsAt: Date.now() });
+  write(SETTINGS_KEY, decodeSettings(settings));
+}
+
+/** Writes settings that came from the account (sync), stamped with the account's time. */
+export function adoptSettings(settings: Settings, updatedAt: number): void {
+  stampSync({ settingsAt: updatedAt });
+  write(SETTINGS_KEY, decodeSettings(settings));
+}
+
+/** Whether the learner ever saved settings on this device (the defaults are not synced). */
+export const hasStoredSettings = (): boolean => !!readRaw(SETTINGS_KEY);
 
 // ---- appearance and profile ---------------------------------------------------
 
@@ -356,7 +379,20 @@ function decodeProfile(value: unknown): Profile {
 
 export const useProfile = (): Profile => useStored<Profile>(PROFILE_KEY, NO_PROFILE, decodeProfile);
 
-export const saveProfile = (profile: Profile) => write(PROFILE_KEY, decodeProfile(profile));
+export function saveProfile(profile: Profile): void {
+  stampSync({ profileAt: Date.now() });
+  write(PROFILE_KEY, decodeProfile(profile));
+}
+
+export const readProfile = (): Profile => snapshot(PROFILE_KEY, NO_PROFILE, decodeProfile);
+
+/** Writes a profile that came from the account (sync), stamped with the account's time. */
+export function adoptProfile(profile: Profile, updatedAt: number): void {
+  stampSync({ profileAt: updatedAt });
+  write(PROFILE_KEY, decodeProfile(profile));
+}
+
+export const hasStoredProfile = (): boolean => !!readRaw(PROFILE_KEY);
 
 // ---- today's session and the install card ----------------------------------------
 
@@ -380,6 +416,194 @@ export const useInstallCardDismissedOn = (): number =>
   );
 
 export const dismissInstallCard = (practiceDay: number) => write(INSTALL_CARD_KEY, practiceDay);
+
+// ---- Phase 4: account cache, outbox and sync state (plans/phase-4.md §5, §6) ----------
+
+/** What polish.account.v1 holds while signed in. */
+export type StoredAccount = {
+  token: string;
+  email: string;
+  user: User | null;
+  entitlement: Entitlement | null;
+};
+
+/** The signed-in account as the UI sees it; null when signed out. */
+export type AccountState = StoredAccount & { config: PublicConfig | null };
+
+function decodeAccount(value: unknown): StoredAccount | null {
+  if (!isRecord(value) || typeof value.token !== "string" || !value.token) return null;
+  return {
+    token: value.token,
+    email: typeof value.email === "string" ? value.email : "",
+    user: isRecord(value.user) ? (value.user as User) : null,
+    entitlement: isRecord(value.entitlement) ? (value.entitlement as Entitlement) : null,
+  };
+}
+
+const decodePublicConfig = (value: unknown): PublicConfig | null =>
+  isRecord(value) && typeof value.betaOpen === "boolean" ? (value as PublicConfig) : null;
+
+/** The stored account, or null when signed out or unreadable. */
+export const readStoredAccount = (): StoredAccount | null => snapshot(ACCOUNT_KEY, null, decodeAccount);
+
+/** Saves the account (null signs out locally: only the account key is removed). */
+export function writeStoredAccount(account: StoredAccount | null): void {
+  if (account) write(ACCOUNT_KEY, account);
+  else {
+    writeRaw(ACCOUNT_KEY, null);
+    cache.delete(ACCOUNT_KEY);
+    notify();
+  }
+}
+
+/** `GET /config` as last fetched, or null. */
+export const readPublicConfig = (): PublicConfig | null => snapshot(PUBLIC_CONFIG_KEY, null, decodePublicConfig);
+
+export const writePublicConfig = (config: PublicConfig) => write(PUBLIC_CONFIG_KEY, config);
+
+/** `GET /config` as last fetched, live; null before the first fetch, on the server and during hydration. */
+export const usePublicConfig = (): PublicConfig | null =>
+  useSyncExternalStore(subscribe, readPublicConfig, () => null);
+
+let composed: { account: StoredAccount; config: PublicConfig | null; value: AccountState } | null = null;
+
+/** The signed-in account with the cached config; null when signed out. Referentially stable. */
+export function readAccount(): AccountState | null {
+  const account = readStoredAccount();
+  if (!account) return null;
+  const config = readPublicConfig();
+  if (composed && composed.account === account && composed.config === config) return composed.value;
+  composed = { account, config, value: { ...account, config } };
+  return composed.value;
+}
+
+/** The signed-in account, live; null when signed out, on the server and during hydration. */
+export const useAccount = (): AccountState | null => useSyncExternalStore(subscribe, readAccount, () => null);
+
+/** An event's identity across devices (plans/phase-4.md: the event key). */
+export const eventKey = (e: Pick<AnswerEvent, "t" | "card">): string => `${e.t}|${e.card}`;
+
+/**
+ * How many of the newest log events compaction must keep so that no event still
+ * in the outbox is folded into `base` (§6.5): at least `keep`, and everything from
+ * the oldest outbox event on.
+ */
+export function outboxSafeKeep(events: AnswerEvent[], outbox: AnswerEvent[], keep: number): number {
+  if (outbox.length === 0) return keep;
+  const pending = new Set(outbox.map(eventKey));
+  const first = events.findIndex((e) => pending.has(eventKey(e)));
+  return first < 0 ? keep : Math.max(keep, events.length - first);
+}
+
+/** Events answered while signed in that the server has not acknowledged, oldest first. */
+export function readOutbox(): AnswerEvent[] {
+  const parsed = parse(readRaw(OUTBOX_KEY));
+  return Array.isArray(parsed) ? (parsed as AnswerEvent[]) : [];
+}
+
+export function writeOutbox(events: AnswerEvent[]): void {
+  writeRaw(OUTBOX_KEY, events.length ? JSON.stringify(events) : null);
+}
+
+/** The answer log (polish.log.v2), oldest first. */
+export const readLogEvents = (): AnswerEvent[] => readLog();
+
+/** The progress cache as loaded (null when the progress logic fails on this device). */
+export function readLoadedProgress(): Progress | null {
+  const current = loadProgress();
+  return current.ok ? current.progress : null;
+}
+
+/** Replaces the log and the cache together (a sync merge) and tells the hooks. */
+export function writeLogAndProgress(events: AnswerEvent[], progress: Progress): void {
+  writeRaw(LOG_KEY, JSON.stringify(events));
+  writeRaw(PROGRESS_KEY, JSON.stringify(progress));
+  notify();
+}
+
+/**
+ * polish.sync.v1. `cursor`: highest server seq received. `settingsAt` / `profileAt`:
+ * when the local value last changed (0 = never stamped). `settingsSynced` /
+ * `profileSynced`: the stamp the server is known to hold. `merged`: the first sync
+ * folded this device's own progress into the account (the UI says so once).
+ * `joined`: a first sync since sign-in has succeeded (cleared on sign-out).
+ */
+export type SyncState = {
+  cursor: number;
+  settingsAt: number;
+  profileAt: number;
+  settingsSynced?: number;
+  profileSynced?: number;
+  merged?: boolean;
+  joined?: boolean;
+};
+
+const NO_SYNC: SyncState = { cursor: 0, settingsAt: 0, profileAt: 0 };
+const num = (x: unknown): number => (typeof x === "number" && Number.isFinite(x) && x >= 0 ? x : 0);
+
+function decodeSync(value: unknown): SyncState {
+  if (!isRecord(value)) return NO_SYNC;
+  const out: SyncState = { cursor: num(value.cursor), settingsAt: num(value.settingsAt), profileAt: num(value.profileAt) };
+  if (typeof value.settingsSynced === "number") out.settingsSynced = num(value.settingsSynced);
+  if (typeof value.profileSynced === "number") out.profileSynced = num(value.profileSynced);
+  if (value.merged === true) out.merged = true;
+  if (value.joined === true) out.joined = true;
+  return out;
+}
+
+export const readSyncState = (): SyncState => snapshot(SYNC_KEY, NO_SYNC, decodeSync);
+
+export const writeSyncState = (state: SyncState) => write(SYNC_KEY, state);
+
+/** Merges fields into polish.sync.v1 without notifying (the caller's own write does). */
+function stampSync(patch: Partial<SyncState>): void {
+  writeRaw(SYNC_KEY, JSON.stringify({ ...readSyncState(), ...patch }));
+  cache.delete(SYNC_KEY);
+}
+
+/** True once after a first sync merged this device's progress into the account. */
+export const useMergedNotice = (): boolean =>
+  useSyncExternalStore(subscribe, () => readSyncState().merged === true, () => false);
+
+export function dismissMergedNotice(): void {
+  const next = { ...readSyncState() };
+  delete next.merged;
+  writeSyncState(next);
+}
+
+/**
+ * Signing out (or a 401): the token, cached entitlement, outbox and cursor go;
+ * the log, progress, settings and profile stay on this device (§7). The
+ * settings / profile stamps stay too: they describe the local values.
+ */
+export function clearAccountState(): void {
+  const { settingsAt, profileAt } = readSyncState();
+  writeRaw(OUTBOX_KEY, null);
+  writeRaw(SYNC_KEY, JSON.stringify({ cursor: 0, settingsAt, profileAt }));
+  cache.delete(SYNC_KEY);
+  writeStoredAccount(null);
+}
+
+/**
+ * Signing in: the outbox becomes the whole local log (deduplicated with any
+ * leftover outbox), and the cursor starts at 0 (§7.1).
+ */
+export function startAccountState(account: StoredAccount): void {
+  const seen = new Set<string>();
+  const outbox: AnswerEvent[] = [];
+  for (const e of [...readLog(), ...readOutbox()]) {
+    const key = eventKey(e);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    outbox.push(e);
+  }
+  outbox.sort((a, b) => a.t - b.t || (a.card < b.card ? -1 : a.card > b.card ? 1 : 0));
+  writeOutbox(outbox);
+  const { settingsAt, profileAt } = readSyncState();
+  writeRaw(SYNC_KEY, JSON.stringify({ cursor: 0, settingsAt, profileAt }));
+  cache.delete(SYNC_KEY);
+  write(ACCOUNT_KEY, account);
+}
 
 // ---- rendering helpers ----------------------------------------------------------
 

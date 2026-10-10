@@ -1,14 +1,17 @@
 import { ArrowRight, BookOpen, Check, Flame, Lightbulb, Repeat, Sparkles, Target } from "lucide-react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { DrillIcon } from "@/components/DrillIcon";
 import { PlText } from "@/components/Guide";
 import { CaseForms, ReviewCurve, SessionMix } from "@/components/Infographics";
 import { SampleQuestion } from "@/components/SampleQuestion";
+import { BetaNote, LifetimeCard, TrialPerk } from "@/components/PricingLive";
 import { StartButton } from "@/components/StartButton";
 import { BRAND } from "@/lib/brand";
 import { DRILLS } from "@/lib/drills";
 import { caseForms, reviewIntervals, sampleQuestions } from "@/lib/guides";
-import { TOPIC_PAGES, pageMetadata } from "@/lib/site";
+import { PLAN_INFO, TAX_NOTE, TRIAL_DAYS, formatPrice, type Plan } from "@/lib/plans";
+import { ACCOUNTS_ON, TOPIC_PAGES, pageMetadata } from "@/lib/site";
 import { EXERCISE_KINDS } from "@/lib/types";
 
 const HEADLINE = "Practise Polish grammar: cases, verbs and numbers";
@@ -55,7 +58,24 @@ const STEPS = [
   },
 ];
 
-const PERKS = ["Free during the beta", "No sign-up", "Works offline"];
+/** Under the hero. With accounts, the first one follows `/config` (beta open or the trial). */
+const PERKS: { key: string; text: ReactNode }[] = ACCOUNTS_ON
+  ? [
+      { key: "offer", text: <TrialPerk /> },
+      { key: "devices", text: "Progress on every device" },
+      { key: "offline", text: "Works offline" },
+    ]
+  : [
+      { key: "beta", text: "Free during the beta" },
+      { key: "signup", text: "No sign-up" },
+      { key: "offline", text: "Works offline" },
+    ];
+
+/** What Pro includes, on the pricing cards. */
+const PRO_FEATURES = ["All six drills and the grammar guides", "Today’s practice with spaced repetition", "Your progress on every device"];
+
+/** The plans sold all the time, shown statically in euros; Lifetime is added at run time while on offer. */
+const STATIC_PLANS: Plan[] = ["monthly", "annual"];
 
 /** The landing page: what the app is, a live question, the drills, how it works, and the way in. */
 export default function LandingPage() {
@@ -89,9 +109,9 @@ export default function LandingPage() {
             </div>
             <ul className="mt-9 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
               {PERKS.map((perk) => (
-                <li key={perk} className="flex items-center gap-2">
+                <li key={perk.key} className="flex items-center gap-2">
                   <Check size={18} className="text-accent" aria-hidden="true" />
-                  {perk}
+                  {perk.text}
                 </li>
               ))}
             </ul>
@@ -266,54 +286,7 @@ export default function LandingPage() {
       </section>
 
       {/* pricing */}
-      <section id="pricing" aria-labelledby="pricing-title" className="section section-alt scroll-mt-20">
-        <div className="container-page">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="eyebrow">Pricing</p>
-            <h2 id="pricing-title" className="heading mt-3.5">
-              Free while we’re in beta
-            </h2>
-            <p className="lead mt-4">Every drill and every level is free today. Paid plans come later, with accounts.</p>
-          </div>
-          <div className="mx-auto mt-14 grid grid-cols-1 max-w-3xl gap-5 sm:grid-cols-2">
-            <div className="card flex flex-col p-8">
-              <p className="font-semibold">Beta</p>
-              <p className="mt-3 text-[2.75rem] font-bold tracking-tight">€0</p>
-              <ul className="mt-6 flex flex-col gap-3 text-[0.9375rem]">
-                {["All six drills and the grammar guides", "Today’s practice with spaced repetition", "Progress saved on this device"].map(
-                  (f) => (
-                    <li key={f} className="flex gap-2.5">
-                      <Check size={20} className="shrink-0 text-accent" aria-hidden="true" />
-                      {f}
-                    </li>
-                  ),
-                )}
-              </ul>
-              <Link href="/today" className="btn btn-primary btn-block mt-8">
-                Start free
-              </Link>
-            </div>
-            <div className="card relative flex flex-col border-2 border-accent p-8">
-              <span className="absolute -top-3.5 left-8 rounded-full bg-accent-fill px-3 py-1 text-xs font-semibold text-on-accent">
-                Coming later
-              </span>
-              <p className="font-semibold">Pro</p>
-              <p className="mt-3 text-[2.75rem] font-bold tracking-tight text-muted">Soon</p>
-              <ul className="mt-6 flex flex-col gap-3 text-[0.9375rem]">
-                {["Everything in the beta", "An account, with your progress on every device"].map((f) => (
-                  <li key={f} className="flex gap-2.5">
-                    <Check size={20} className="shrink-0 text-accent" aria-hidden="true" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/billing" className="btn btn-secondary btn-block mt-auto">
-                See plans
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      {ACCOUNTS_ON ? <Pricing /> : <BetaPricing />}
 
       {/* call to action */}
       <section className="bg-subtle pb-20 sm:pb-28">
@@ -337,5 +310,119 @@ export default function LandingPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+/** #pricing without accounts in the build: everything is free in the beta. */
+function BetaPricing() {
+  return (
+    <section id="pricing" aria-labelledby="pricing-title" className="section section-alt scroll-mt-20">
+      <div className="container-page">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="eyebrow">Pricing</p>
+          <h2 id="pricing-title" className="heading mt-3.5">
+            Free while we’re in beta
+          </h2>
+          <p className="lead mt-4">Every drill and every level is free today. Paid plans come later, with accounts.</p>
+        </div>
+        <div className="mx-auto mt-14 grid grid-cols-1 max-w-3xl gap-5 sm:grid-cols-2">
+          <div className="card flex flex-col p-8">
+            <p className="font-semibold">Beta</p>
+            <p className="mt-3 text-[2.75rem] font-bold tracking-tight">€0</p>
+            <ul className="mt-6 flex flex-col gap-3 text-[0.9375rem]">
+              {["All six drills and the grammar guides", "Today’s practice with spaced repetition", "Progress saved on this device"].map(
+                (f) => (
+                  <li key={f} className="flex gap-2.5">
+                    <Check size={20} className="shrink-0 text-accent" aria-hidden="true" />
+                    {f}
+                  </li>
+                ),
+              )}
+            </ul>
+            <Link href="/today" className="btn btn-primary btn-block mt-8">
+              Start free
+            </Link>
+          </div>
+          <div className="card relative flex flex-col border-2 border-accent p-8">
+            <span className="absolute -top-3.5 left-8 rounded-full bg-accent-fill px-3 py-1 text-xs font-semibold text-on-accent">
+              Coming later
+            </span>
+            <p className="font-semibold">Pro</p>
+            <p className="mt-3 text-[2.75rem] font-bold tracking-tight text-muted">Soon</p>
+            <ul className="mt-6 flex flex-col gap-3 text-[0.9375rem]">
+              {["Everything in the beta", "An account, with your progress on every device"].map((f) => (
+                <li key={f} className="flex gap-2.5">
+                  <Check size={20} className="shrink-0 text-accent" aria-hidden="true" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <Link href="/billing" className="btn btn-secondary btn-block mt-auto">
+              See plans
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** #pricing with accounts (plans/phase-4.md §13.3): Monthly and Annual with the trial, plus the live beta note and Lifetime. */
+function Pricing() {
+  return (
+    <section id="pricing" aria-labelledby="pricing-title" className="section section-alt scroll-mt-20">
+      <div className="container-page">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="eyebrow">Pricing</p>
+          <h2 id="pricing-title" className="heading mt-3.5">
+            One plan, every drill
+          </h2>
+          <p className="lead mt-4">
+            {BRAND.name} Pro: every drill and level, today’s practice and your progress on every device. Start with a{" "}
+            {TRIAL_DAYS}-day free trial and cancel any time.
+          </p>
+        </div>
+        <BetaNote />
+        <div className="mx-auto mt-14 flex max-w-5xl flex-wrap justify-center gap-5">
+          {STATIC_PLANS.map((plan) => {
+            const info = PLAN_INFO[plan];
+            const featured = plan === "annual";
+            return (
+              <div
+                key={plan}
+                className={`card relative flex min-w-0 flex-[1_1_16rem] flex-col p-8 sm:max-w-sm ${featured ? "border-2 border-accent" : ""}`}
+              >
+                {featured ? (
+                  <span className="absolute -top-3.5 left-8 rounded-full bg-accent-fill px-3 py-1 text-xs font-semibold text-on-accent">
+                    Best value
+                  </span>
+                ) : null}
+                <p className="font-semibold">{info.label}</p>
+                <p className="mt-3 text-[2.75rem] font-bold tracking-tight">{formatPrice(plan, "eur")}</p>
+                <p className="text-sm text-muted">
+                  per {info.period} · {TAX_NOTE.eur}
+                </p>
+                <p className="mt-2 text-sm font-medium text-accent-strong">{TRIAL_DAYS}-day free trial</p>
+                <ul className="mt-6 flex flex-col gap-3 text-[0.9375rem]">
+                  {PRO_FEATURES.map((f) => (
+                    <li key={f} className="flex gap-2.5">
+                      <Check size={20} className="shrink-0 text-accent" aria-hidden="true" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-auto pt-8">
+                  <Link href="/today" className={`btn btn-block ${featured ? "btn-primary" : "btn-secondary"}`}>
+                    Start free trial
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+          <LifetimeCard features={PRO_FEATURES} />
+        </div>
+        <p className="mt-8 text-center text-sm text-muted">Also in US dollars and Polish złoty. Payments by Stripe.</p>
+      </div>
+    </section>
   );
 }

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
+import { AccessGate } from "@/components/AccessGate";
+import { SyncOnFinish } from "@/components/account";
 import { Runner } from "@/components/Runner";
 import { DRILLS } from "@/lib/drills";
 import { parseSession, randomSeed, sessionParams } from "@/lib/session";
@@ -28,7 +30,11 @@ export function PracticePage() {
   }
 
   // a new seed means a new set of sentences, so start the runner from scratch
-  return <ConfiguredSession key={session.seed} config={session.config} seed={session.seed} />;
+  return (
+    <AccessGate from="practice">
+      <ConfiguredSession key={session.seed} config={session.config} seed={session.seed} />
+    </AccessGate>
+  );
 }
 
 function ConfiguredSession({ config, seed }: { config: Config; seed: number }) {
@@ -42,6 +48,7 @@ function ConfiguredSession({ config, seed }: { config: Config; seed: number }) {
       kind={kind}
       home={DRILLS[kind].route}
       onRestart={() => router.push(`/practice?${sessionParams(config, randomSeed())}`)}
+      summaryExtra={<SyncOnFinish />}
     />
   );
 }

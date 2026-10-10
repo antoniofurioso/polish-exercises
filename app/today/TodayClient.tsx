@@ -3,6 +3,8 @@
 import { X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { AccessGate } from "@/components/AccessGate";
+import { SyncOnFinish } from "@/components/account";
 import { Runner } from "@/components/Runner";
 import { GoalStatus } from "@/components/today";
 import { dayKey } from "@/lib/srs";
@@ -21,9 +23,18 @@ import { buildToday, daySeed, type RunState, type TodayPlan } from "@/lib/today"
  * (plans/phase-2.md §6), so answering does not reshuffle the session under the
  * learner. "Another round" takes a fresh snapshot. The session is saved after
  * every answer (lib/storage.ts), so leaving midway and coming back the same day
- * continues from the next unanswered question.
+ * continues from the next unanswered question. With accounts on, `AccessGate`
+ * decides first whether the learner may practise.
  */
 export function TodayPage() {
+  return (
+    <AccessGate from="today">
+      <Today />
+    </AccessGate>
+  );
+}
+
+function Today() {
   const hydrated = useHydrated();
   // the saved session's round, so a later round resumes as itself (0 without one)
   const [round, setRound] = useState(savedRound);
@@ -104,6 +115,7 @@ function TodaySession({ round, onAnotherRound }: { round: number; onAnotherRound
       onProgress={(run) => saveTodaySession({ v: 1, day, round, plan, run })}
       summaryExtra={
         <div className="space-y-3">
+          <SyncOnFinish />
           <p className="text-sm font-medium text-muted">{planSummary(plan)}</p>
           <GoalStatus />
         </div>

@@ -48,10 +48,15 @@ Delete anything the change made untrue.
 - Persistence is localStorage only (`lib/storage.ts`): last config per drill,
   and schema v2 (`polish.log.v2` answer log, `polish.progress.v2` cache derived
   from it by replay, `polish.settings.v2` goal and new cards per day). v1
-  per-case stats are migrated once and left in place. There are no accounts yet.
+  per-case stats are migrated once and left in place.
   Every call from `lib/storage.ts` into the progress logic is wrapped so a throw
   never stops practice: the log is written first and a stale cache is dropped
   and rebuilt by replay on the next load.
+- **Accounts (Phase 4) exist only when `NEXT_PUBLIC_API_URL` is set** at build
+  time: sign-in with an email code, sync of the log / settings / profile name,
+  and the paywall, all against `workers/api` (Worker + D1, Stripe Managed
+  Payments, Resend). The token goes in `Authorization: Bearer`, never a cookie.
+  Unset (dev, tests, current production), the app behaves as before.
 
 ## Codebase map
 
@@ -63,7 +68,9 @@ Delete anything the change made untrue.
 | `app/(site)/page.tsx` | Landing page (server component): hero with `SampleQuestion` (fixed-seed questions from `sampleQuestions()`), drills, the infographics (`components/Infographics.tsx`: `caseForms`, `reviewIntervals`, the session mix), how it works, pricing, `StartButton` → `/today` |
 | `app/(app)/` | The app inside `components/AppShell.tsx` (its `layout.tsx`): sidebar from 768 px, top bar + bottom tabs on a phone |
 | `app/(app)/learn/` | The app's home dashboard (`components/Dashboard.tsx`): greeting, the red "Today's practice" panel (`components/TodayButton`), stats, the last 28 days, weak spots, the drills. Links that mean "back to the app" go here, never to `/` |
-| `app/(app)/profile/`, `settings/`, `billing/` | Account pages (`AccountTabs` on phones). Profile: local name (`polish.profile.v1`), totals, cards per drill, milestones (`lib/progressView.ts`). Settings: goal, new per day, sound, appearance (`polish.theme.v1`), consent, delete data. Billing: the free beta, Pro "coming later", empty payment and invoices; no payments exist |
+| `app/(app)/profile/`, `settings/`, `billing/` | Account pages (`AccountTabs` on phones). Profile: name (`polish.profile.v1`), the plan and email when signed in, totals, cards per drill, milestones (`lib/progressView.ts`). Settings: goal, new per day, sound, appearance (`polish.theme.v1`), analytics consent, delete device data; with accounts on, an Account group (sign in / email, sign out, "Email tips" marketing switch, export, delete account after typing the email). Billing: `BillingClient.tsx`, the current plan ("Pro · beta", Lifetime, Monthly / Annual with status and dates), "Manage billing" (Stripe Portal), the plan picker without a plan, and the `?checkout=done` return (`POST /billing/refresh`, then polls `/me` every 2 s for 30 s; sends `checkout_completed`); without an API, the free beta as before |
+| `app/(site)/signin/` | Sign-in (noindex): email + the unticked marketing checkbox (text = `CONSENT_TEXT_V1`) → 6-digit code (`autocomplete="one-time-code"`) → `next` (made safe by `safeNext`), or `/plans?next=…` without access. Sends `sign_in_started`, `signed_in` |
+| `app/(site)/plans/` | Plan picker (noindex): Annual pre-selected, Monthly, Lifetime while `/config` offers it; currency switch (default from `/config`); → `POST /billing/checkout` → Stripe Checkout. Sends `checkout_started` |
 | `app/(site)/polish-cases/`, `polish-pronouns/`, `polish-numbers/`, `polish-verbs/` | Grammar reference pages for search, static, built from `lib/guides.ts` with `components/Guide.tsx`. Polish text goes in `<Pl>` (`lang="pl"`); a plain string with Polish words in it (the drill blurbs in `lib/drills.ts`) marks them `*like this*` and renders through `PlText` |
 | `app/sitemap.ts`, `app/robots.ts` | Metadata routes (`dynamic = "force-static"`, required by the static export). Absolute URLs from `BRAND.url` (`https://polishup.app` unless `NEXT_PUBLIC_SITE_URL` overrides it) |
 | `app/today/` | Today's practice: `buildToday` on a progress snapshot taken at mount, run by the shared `Runner`; a wrong card is asked once more at the end. Saved after every answer (`polish.today.v1`, via `Runner`'s `onProgress`) and resumed the same day (`resume`) |
@@ -72,14 +79,21 @@ Delete anything the change made untrue.
 | `app/practice/` | Reads the URL, builds the session and hands it to `Runner` |
 | `app/(site)/privacy/`, `components/Privacy.tsx` | Privacy policy (approved by the owner; change its `LAST_UPDATED` with every edit, and keep it true to `lib/analytics.ts` and the PostHog settings); `ConsentChoice` and `ClearLocalData` (every `polish.*` key), also used on `/settings` |
 | `lib/analytics.ts` | Analytics (plans/phase-3.md §4): `track(event, props)` is a no-op unless `NEXT_PUBLIC_POSTHOG_KEY` is set and `polish.consent.v1` is `granted`; `EVENT_SCHEMA` lets only enum values and counts through; `nextConsent` state machine; posthog-js is `import()`ed only after consent (EU host). Imports no runtime code but `lib/types`, since every page loads it |
+| `components/AccessGate.tsx` | The paywall around `Runner` in `/today` and `/practice`, before the session is built. No API → pass-through; until hydrated → nothing; signed out → `/signin?next=…`; no access in the cached entitlement → one `GET /me`, then `/plans?next=…` (`paywall_shown`). Client-only, bypassable, accepted. Access is judged at mount |
+| `components/AccountSync.tsx` | Mounted in the layout: with accounts on, `import()`s `lib/sync` and runs `startAutoSync` (so pages without accounts never load it) |
+| `components/account.tsx` | Shared account bits: `SyncOnFinish` (forced sync in a session's results), `useLiveConfig`, `planName`, `formatDate`, `MergedNotice` (once, after a first sync merged this device's progress), `markCheckout` / `takeCheckout` (plan + currency in sessionStorage `polish.checkout.v1`, this tab only) |
+| `components/PricingLive.tsx` | The landing page's run-time pricing (with accounts on): `TrialPerk`, `BetaNote` ("Free during the beta: sign in to start"), `LifetimeCard` while the offer runs, all from `/config` |
 | `components/Analytics.tsx`, `components/ConsentBanner.tsx` | Mounted in the layout: start PostHog after an earlier consent, `pwa_installed` (`appinstalled` or the `pwa-installed` window event), the banner (only with a key and no choice yet) |
 | `components/` | (`ExerciseCard`'s gap is deliberately not in a `<form>` and has no `name`: phones took it for a login and offered passwords above the keyboard; Enter is handled on the input.) `SiteHeader`, `SiteFooter` (public pages), `AppShell` (+ `AppPage`, `ACCOUNT`), `AccountTabs`, `Logo` (`FlagMark`), `DrillIcon` (one Lucide icon per drill), `Dashboard`, `progress` (`ActivityGrid`, `StatCard`, `WeakSpotList`), `Infographics`, `StartButton`, `SampleQuestion`, `Guide`, `Runner` (full-screen session: ✕, progress bar, sound; grades, records every answer and sends the analytics events; shared by `/practice` and `/today`), `ExerciseCard` (one question, Polish-letter keys, speech, keyboard), `ResultsSummary` (with `InstallCard`), `TodayButton` (the red panel), `today` (`useTodayStatus`, `useNow`, `GoalRing`, `GoalStatus`), `ui` (`Choice`, `Field`) |
-| `lib/storage.ts` | localStorage: configs, sound, theme (`useTheme`, `setTheme`), profile (`useProfile`, `saveProfile`), the v2 log / progress / settings hooks (`useProgress`, `useSettings`, `recordAnswer`…), v1 migration, compaction past 20,000 events, today's session (`readTodaySession`, `saveTodaySession`), the install card's dismissal (`polish.installCard.v1`) |
+| `lib/storage.ts` | localStorage: configs, sound, theme (`useTheme`, `setTheme`), profile (`useProfile`, `saveProfile`), the v2 log / progress / settings hooks (`useProgress`, `useSettings`, `recordAnswer`…), v1 migration, compaction past 20,000 events, today's session (`readTodaySession`, `saveTodaySession`), the install card's dismissal (`polish.installCard.v1`). Phase 4 keys: `polish.account.v1` (`{ token, email, user, entitlement }`, `useAccount`), `polish.outbox.v1` (events answered while signed in that the server has not acknowledged; `recordAnswer` appends in the same write as the log), `polish.sync.v1` (`cursor` = highest server seq, `settingsAt` / `profileAt` = when the local value changed, `settingsSynced` / `profileSynced` = the stamp the server holds, `joined` = a first sync since sign-in succeeded, cleared on sign-out; `merged` = show `MergedNotice` once, only when that first sync pushed local progress), `polish.apiConfig.v1` (`GET /config`, kept on sign-out). `startAccountState` (sign-in: outbox = whole log, cursor 0), `clearAccountState` (sign-out / 401: token, entitlement, outbox, cursor go; local progress stays), `eventKey`, `outboxSafeKeep` |
+| `lib/account.ts` | API client for `workers/api`, typed with `import type` from `workers/api/src/contract.ts`: `apiEnabled`, `request` (throws `ApiFailure`; a 401 clears the account), `getConfig`, `startSignIn`, `verifyCode`, `fetchMe`, `setConsent`, `startCheckout`, `refreshBilling`, `openPortal`, `exportData`, `deleteAccount`, `signOut`; `hasAccess(entitlement, now)` = `access` and `now < max(until ?? ∞, checkedAt + 7 days)` |
+| `lib/sync.ts` | Sync (plans/phase-4.md §6–7): `mergeLogs` (union by `(t, card)`, sorted), `rebuild` (always a full `replay`), `syncNow` (push ≤ 500 outbox events, pull, loop while `more`; 30 s throttle unless forced; `keepalive` on page hide), `startAutoSync` (app start, `online`, `visibilitychange`; `GET /me` too) |
+| `lib/plans.ts` | Plans and prices for display (`PLAN_INFO` in minor units, EUR / USD / PLN), `formatPrice`, `TAX_NOTE`, `TRIAL_DAYS`, `lifetimeOffered`, `plansOffered`. Must equal the Stripe prices and `PRICE_TEXT` in `workers/api/src/billing.ts` |
 | `lib/theme.ts` | `THEME_KEY` and the theme values, React-free so the server layout can build its script from them |
 | `lib/progressView.ts` | Pure helpers for the progress UI: `MISS_LABELS` (miss kind → English), `skillConfig` / `skillHref` (weak skill → configured session), `lastDays`, `dueCount`, `recentAccuracy`, `totalAnswered`, `cardsByDrill`, `casesPractised`, `milestones`, `safely` |
 | `lib/missKind.ts` | `missKindOf(input, exercise)`: the `MissKind` logged with a wrong answer (`diagnoseVerbMiss` for verbs, `diagnoseNumberMiss` for numbers, then `diagnoseMiss`) |
 | `lib/guides.ts` | Reference-page content: ending tables, case triggers (one per distinct template `note`, each with a sentence from `exampleExercise` in `lib/generate.ts`), pronoun / numeral / verb tables, example sentences from the drill builders with fixed seeds, configured `/practice` hrefs, the landing samples and infographics (`caseForms`, `reviewIntervals` from the real scheduler). **Every Polish form comes from the grammar code or the lexicon**; model words (student, kot, dom, kobieta, okno, pisać…) throw at build time if they leave the lexicon. Tested in `lib/__tests__/guides.test.ts` |
-| `lib/site.ts` | `TOPIC_PAGES`, `INDEXED_PATHS` (sitemap), `pageMetadata` (title, description, Open Graph, canonical when `BRAND.url` is set) and `NOINDEX` (on `/practice`, `/today`) |
+| `lib/site.ts` | `TOPIC_PAGES`, `INDEXED_PATHS` (sitemap), `pageMetadata` (title, description, Open Graph, canonical when `BRAND.url` is set), `NOINDEX` (on `/practice`, `/today`, `/signin`, `/plans`), `ACCOUNTS_ON` (server-safe twin of `apiEnabled`), `safeNext` (a `next` param → same-origin path or fallback), `signInHref`, `plansHref` |
 | `lib/brand.ts` | `BRAND`: product name, tagline, description, site URL, owner and contact email. The only place the name is written; titles, manifest, landing and privacy pages read it |
 | `lib/drills.ts` | **Drill registry** (`DRILLS`, `drillFor`): route, menu text, builder, allowed cases, own URL params, shuffle mix. Single source for "which drills exist" |
 | `lib/cards.ts`, `lib/cards/<drill>.ts` | **SRS card sources** (`CardSource`, reached as `DRILLS[kind].cards`): `all(maxLevel)` in introduction order, `build(card, seed)` for one card, `skillLabel`. Card ids per drill: `plans/phase-2.md` §1. Cases build through `buildCardExercise` in `lib/generate.ts`; pronouns and possessives through their builders' `gender` filter, levelled by `cellLevel` in `lib/agreement.ts` |
@@ -106,6 +120,7 @@ Delete anything the change made untrue.
 | `scripts/audio/` | Pre-rendered audio pipeline: `manifest` → `render` (azure / piper / cmd) → `upload` to R2 |
 | `audio/manifest.jsonl` | Every sentence the published app can speak, with its R2 key. Committed; regenerate when published spoken text changes |
 | `workers/tts/` | Cloudflare Worker serving audio from R2 (Azure optional). Own `package.json`, tests and README, excluded from the root tsconfig and vitest |
+| `workers/api/` | Cloudflare Worker + D1 for accounts (`api.polishup.app`): email-code auth, sessions, `/sync`, `/account/*`, Stripe Managed Payments (`src/stripe.ts` is the only SDK user), the webhook, entitlements, the Resend contact list and signed unsubscribe, two Cron Triggers (hourly: trial reminders, list retries; daily 03:30 UTC: clean-up), per-kind daily email budgets (`EMAIL_BUDGETS`), `trial_history` (one trial per email, kept after deletion). `src/contract.ts` is types and constants only, imported by the app with `import type`. Own `package.json`, tests, README; excluded from the root tsconfig and vitest |
 | `app/manifest.ts` | Web app manifest (static metadata route → `out/manifest.webmanifest`): name from `BRAND`, `start_url` `/today`, standalone, colours parsed from `--background` in `app/globals.css`, icons from `public/icons/` |
 | `public/sw.js` | Hand-written service worker **template**: precache, network-first pages mapped to `<route>.html` (query ignored), cache-first `/_next/static`, LRU-capped (300) cache of TTS Worker audio (base URL from its `?tts=` param), no `skipWaiting`. Its `const BUILD = null;` line is replaced after the build; unstamped it unregisters itself |
 | `scripts/sw-manifest.ts` | Post-build step of `npm run build`: lists `out/` (pages, RSC `.txt`, `_next/static`, icons, manifest), hashes them plus the build time into a version, writes `out/sw-precache.json` and stamps `out/sw.js` |
@@ -176,21 +191,53 @@ Delete anything the change made untrue.
    PostHog may load or be stored before consent; keep `lib/analytics.ts` free
    of the lexicon and progress imports (it is on every page).
 
+13. **Accounts are off without `NEXT_PUBLIC_API_URL`.** `apiEnabled()` /
+   `ACCOUNTS_ON` gate everything: `AccessGate` passes through, nothing syncs, no
+   API call is made. Tests and dev run that way; keep it working.
+14. **An answer's identity is `(t, card)`; merges always replay.** `mergeLogs`
+   unions by that key, then `rebuild` runs a full `replay` from `base`. Never
+   `apply` pulled events one by one: SM-2 is path-dependent. `AnswerEvent` got
+   no new field, so the log format and the golden test are unchanged.
+15. **Outbox events are never compacted.** Compaction keeps at least everything
+   from the oldest outbox event on (`outboxSafeKeep`); the outbox is cleared
+   only of the events a 200 acknowledged. Settings / profile never stamped on
+   this device are sent with `updatedAt` 1, so the account's value wins (§7.5).
+16. **Marketing email only with consent.** The sign-in checkbox is unticked and
+   never a condition; `marketingConsent: false` never withdraws. Every account
+   is a Resend contact, `unsubscribed` unless it consented. Login codes and the
+   trial reminder are transactional. Never send the email, user id or consent
+   to PostHog (no `identify`).
+17. **The Worker validates drills and cases.** `DRILLS` / `CASES` in
+   `workers/api/src/sync.ts` copy `lib/types.ts`; deploy the Worker with a new
+   drill or case before the app that records it, or `/sync` rejects it (400).
+18. **Prices live in three places:** `lib/plans.ts`, the Stripe Prices and
+   `PRICE_TEXT` in `workers/api/src/billing.ts`. Change them together.
+
 ## Commands
 
 ```bash
 npm ci                  # also: cd workers/tts && npm ci, for Worker work
 npm run dev             # http://localhost:3000; npm run dev:drafts shows drafts
-npm test                # both vitest projects (~610 tests)
+npm test                # both vitest projects (~670 tests)
 npm run lint
 npm run build           # static export to out/, then stamps out/sw.js + out/sw-precache.json
 npm run icons           # regenerate all icons from public/brand/icon.svg (or BRAND's monogram)
 npx tsc --noEmit        # run AFTER a build: LayoutProps in app/layout.tsx is generated by next build
 npm run review:export   # review/pending.csv for the native reviewer (git-ignored)
 npm run audio:manifest  # ~90 s; commit audio/manifest.jsonl if it changed
+NEXT_PUBLIC_API_URL=http://localhost:8787 npm run dev   # the app with accounts, against a local workers/api
+# .claude/launch.json: "api" (wrangler dev :8787), "app-accounts" (serves out/ on :3001;
+#   build first with NEXT_PUBLIC_API_URL=http://localhost:8787 npm run build)
+
+cd workers/api          # the API Worker (README there: vars, secrets, owner setup)
+npm test && npm run typecheck
+npx wrangler d1 migrations apply polishup-api --local   # or --remote before a deploy that needs it
+npm run dev             # wrangler dev, http://localhost:8787 (DEV_LOG_EMAIL=true in .dev.vars logs codes instead of emailing)
+npm run deploy
 ```
 
 Before committing, run test, lint, build, then tsc. All four must be clean.
+Touching `workers/api`: also `npm test && npm run typecheck` in it.
 
 ## How to add things
 
@@ -243,6 +290,9 @@ See `plans/ROADMAP.md`.
   (Cloudflare Pages from `main`; landing page, topic pages, PWA and offline,
   PostHog EU after consent, approved `/privacy`, Search Console). The name
   **PolishUp** and the domain live only in `lib/brand.ts`.
-- **Now: the beta is running.** Its day-7 return (PostHog dashboard) decides when
-  Phase 4 (accounts and payments, `plans/ROADMAP.md`) starts. Small leftovers are
-  in the roadmap's "Later" list.
+- **Now: the beta is running.** Small leftovers are in the roadmap's "Later" list.
+- **Phase 4 (accounts, sync, payments) code is done**, behind
+  `NEXT_PUBLIC_API_URL` (unset in production, so nothing changed for
+  learners). Waiting on the owner: Stripe / Resend / Cloudflare setup
+  (`workers/api/README.md`), the end-to-end test in Stripe test mode, and
+  re-approving `/privacy` (rewritten for accounts) before the variable is set.

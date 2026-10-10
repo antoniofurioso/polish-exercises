@@ -10,7 +10,7 @@ compatibility_date = "2026-09-01"
 # Region of the Azure Speech resource, e.g. westeurope or polandcentral.
 AZURE_TTS_REGION = "westeurope"
 # Origins allowed to fetch audio: comma-separated, exact match, no trailing slash.
-ALLOWED_ORIGINS = "https://polish-exercises.pages.dev,http://localhost:3000"
+ALLOWED_ORIGINS = "https://polishup.app,https://polish-exercises.pages.dev,http://localhost:3000"
 # Labels of pre-rendered voices from other engines (npm run audio:render --
 # --engine piper|cmd --voice <label>), comma-separated, e.g. "piper-pl-gosia".
 # They are served from R2 only; a miss is a 404 and the app uses the browser voice.

@@ -80,5 +80,39 @@ export function pageMetadata({
   };
 }
 
-/** For the runner pages: a session URL or today's plan is nothing to index. */
+/**
+ * Accounts, sync and the paywall exist in this build (`NEXT_PUBLIC_API_URL` is
+ * inlined at build time). The same test as `apiEnabled()` in lib/account.ts,
+ * which is a client module: this one is for server components (the landing
+ * page) and for code that must not load the account client.
+ */
+export const ACCOUNTS_ON: boolean = !!process.env.NEXT_PUBLIC_API_URL?.trim();
+
+/**
+ * For the pages with nothing to index: the runner pages (/practice, /today),
+ * the account flow (/signin, /plans) and the app's account pages.
+ */
 export const NOINDEX: Metadata["robots"] = { index: false, follow: true };
+
+/**
+ * A `next` param made safe to navigate to: a same-origin path ("/today?x=1"),
+ * or `fallback` for anything else (absolute or protocol-relative URLs, "/\\",
+ * other origins, junk).
+ */
+export function safeNext(raw: string | null | undefined, fallback = "/learn"): string {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//") || raw.startsWith("/\\")) return fallback;
+  try {
+    const base = "https://same.invalid";
+    const url = new URL(raw, base);
+    if (url.origin !== base) return fallback;
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return fallback;
+  }
+}
+
+/** /signin, coming back to `next` after it. */
+export const signInHref = (next: string): string => `/signin?next=${encodeURIComponent(next)}`;
+
+/** /plans, going on to `next` once there is access. */
+export const plansHref = (next: string): string => `/plans?next=${encodeURIComponent(next)}`;

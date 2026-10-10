@@ -1,6 +1,9 @@
 # Phase 4: Accounts, sync, payments
 
-Status: ◐ decisions made (2026-10-10), spec written, nothing built. Goal: a
+Status: ◐ code done; waiting on owner setup and the end-to-end test in Stripe
+test mode. Everything is behind `NEXT_PUBLIC_API_URL`, unset in production, so
+learners see no change yet. The rewritten `/privacy` needs the owner's
+approval before that variable is set. Goal: a
 learner signs in with an email code, finds the same progress on every device,
 and, once the beta closes, pays to practise. The guides, the landing sample and
 `/privacy` stay free.
@@ -29,7 +32,7 @@ and, once the beta closes, pays to practise. The guides, the landing sample and
 | Lifetime (until `LIFETIME_OFFER_UNTIL`) | €99 | $109 | 399 zł | one-time payment |
 | Beta (while `BETA_OPEN`) | free | free | free | granted at account creation |
 
-## 1. Shape ☐
+## 1. Shape ☑
 
 ```
 polishup.app (static, Cloudflare Pages)          api.polishup.app (workers/api)
@@ -38,7 +41,7 @@ polishup.app (static, Cloudflare Pages)          api.polishup.app (workers/api)
                                                     ├─ Resend (codes, trial reminder, contacts)
   Stripe Checkout / Portal ◀── redirect ──────────  └─ Stripe API
   Stripe ── webhooks ──────────────────────────────▶ POST /billing/webhook
-                                                    Cron (hourly): reminders, list retries, clean-up
+                                                    Cron: hourly reminders + list retries; daily clean-up
 ```
 
 - No cookies. The session token goes in `Authorization: Bearer …`.
@@ -48,7 +51,7 @@ polishup.app (static, Cloudflare Pages)          api.polishup.app (workers/api)
   **Not set → accounts, sync and the paywall are off**: dev, tests and previews
   without it behave as today.
 
-## 2. `workers/api` layout ☐
+## 2. `workers/api` layout ☑
 
 Same layout as `workers/tts`: own `package.json` (`dev`, `deploy`, `test`,
 `typecheck`), `wrangler.toml`, `tsconfig.json`, `vitest.config.ts`, `README.md`,
@@ -87,7 +90,7 @@ written a day, 500 MB per database. A first upload of 5,000 answers writes
 5,000 rows (plus index writes), so uploads go in batches (§6) and the beta
 scale fits easily.
 
-## 3. D1 schema ☐
+## 3. D1 schema ☑
 
 Times are ms since epoch (INTEGER). Ids are random (`crypto.randomUUID()`).
 
@@ -178,7 +181,7 @@ CREATE TABLE counters (                 -- global daily caps (email sends)
 - The event is stored whole in `e`, so a field added to `AnswerEvent` later
   syncs without a migration.
 
-## 4. API contract ☐
+## 4. API contract ☑
 
 Base URL `NEXT_PUBLIC_API_URL` (`https://api.polishup.app`). JSON in and out,
 `Content-Type: application/json`. Authenticated calls send
@@ -232,7 +235,7 @@ type Stamped<T> = { value: T; updatedAt: number };
 | `POST /auth/verify` | – | `{ email, code, marketingConsent?: boolean }` | `{ token, user: User, isNew: boolean, entitlement: Entitlement }` | 400 `invalid_code` `{ attemptsLeft }`, 410 `code_expired` (also: no code, or 5 attempts used), 429 `rate_limited` |
 | `POST /auth/signout` | ✓ | – | `{ ok: true }` (deletes this session) | 401 |
 | `GET /me` | ✓ | – | `{ user: User, entitlement: Entitlement, config: PublicConfig }` | 401 |
-| `POST /sync` | ✓ | `SyncRequest` (§6) | `SyncResponse` (§6) | 400 `bad_request`, 401, 413 `too_large` (more than 1,000 events) |
+| `POST /sync` | ✓ | `SyncRequest` (§6) | `SyncResponse` (§6) | 400 `bad_request`, 401, 413 `too_large` (more than 500 events) |
 | `POST /account/consent` | ✓ | `{ marketing: boolean }` | `{ user: User }` | 401 |
 | `GET /account/export` | ✓ | – | `{ user, entitlement, settings, profile, events: AnswerEvent[] }` (GDPR access and portability) | 401 |
 | `DELETE /account` | ✓ | – | `{ ok: true }` (§12) | 401, 502 `stripe_error` (nothing deleted; try again) |
@@ -240,8 +243,8 @@ type Stamped<T> = { value: T; updatedAt: number };
 | `POST /billing/refresh` | ✓ | – | `{ entitlement }` (re-reads the customer's subscriptions and Lifetime payment from Stripe; same code path as the webhook; for the return from checkout) | 401 |
 | `POST /billing/portal` | ✓ | – | `{ url }` (Customer Portal, return to `/billing`) | 409 `no_customer` |
 | `POST /billing/webhook` | Stripe signature | raw body | `{ received: true }` | 400 `bad_signature` |
-| `GET /email/unsubscribe?u=&s=` | signed link | – | a small HTML page "You are unsubscribed" (§10.3) | 400 `bad_link` |
-| `POST /email/unsubscribe?u=&s=` | signed link | `List-Unsubscribe=One-Click` | `{ ok: true }` (RFC 8058 one-click) | 400 `bad_link` |
+| `GET /email/unsubscribe?u=&s=` | signed link | – | a small HTML page with an "Unsubscribe" button that POSTs `confirm=1` (mail scanners open links, so GET changes nothing) | 400 `bad_link` |
+| `POST /email/unsubscribe?u=&s=` | signed link | `List-Unsubscribe=One-Click`, or `confirm=1` from the button | `{ ok: true }` (RFC 8058 one-click), or the HTML page "You are unsubscribed" | 400 `bad_link` |
 
 - `marketingConsent` at verify: `true` sets consent (source `signin`); `false`
   or missing never withdraws an existing consent.
@@ -283,22 +286,22 @@ maps a plan to `PRICE_*`. The owner keeps the Stripe prices equal to
 | --- | --- | --- |
 | `POST /auth/start` per IP | 5 a minute | `AUTH_IP_LIMITER` binding |
 | `POST /auth/start` per email | 1 a minute, 5 per 15 minutes, 10 a day | `login_codes` row |
-| Code emails, all users | 80 a day (Resend allows 100; 20 stay free for trial reminders) | `counters` (`email`, UTC day) → 503 `email_unavailable` |
+| Emails, all users | per UTC day (Resend allows 100): `email_new` 50 (codes to addresses without an account), `email_known` 30 (codes to accounts), `email_reminder` 20 (trial reminders); `EMAIL_BUDGETS` in `src/email.ts` | `counters` (key, UTC day) → 503 `email_unavailable` |
 | `POST /auth/verify` per IP | 10 a minute | `VERIFY_IP_LIMITER` binding |
 | `POST /auth/verify` per code | 5 attempts | `login_codes.attempts` |
-| `POST /sync` | 1,000 events and 1 MB per request | handler |
+| `POST /sync` | 500 events and 1 MB per request (streamed, cut off past the cap); webhook body 256 KB | handler |
 
 Resend contact calls do not count toward the 100 emails a day, but its API
 allows about 2 requests a second; list updates are spread out (§10.2).
 
-## 5. Entitlement ☐
+## 5. Entitlement ☑
 
 One row per user, written by the beta grant (§4.3) or derived from Stripe
 (webhooks and `/billing/refresh`). The client never decides it, only caches it.
 
 | Status | When (Stripe) | `access` | `until` |
 | --- | --- | --- | --- |
-| `none` | no purchase, or ended: canceled, unpaid, incomplete, incomplete_expired; Lifetime refunded or disputed | no | null |
+| `none` | no purchase, or ended: canceled, unpaid, incomplete, incomplete_expired; Lifetime refunded, or disputed and not won | no | null |
 | `trialing` | subscription `trialing` | yes | trial end |
 | `active` | subscription `active`, not canceling | yes | item `current_period_end` |
 | `past_due` | subscription `past_due` (Stripe retries the card; its dunning settings end it after the last retry) | yes, grace | period end + 7 days |
@@ -323,7 +326,7 @@ One row per user, written by the beta grant (§4.3) or derived from Stripe
   that is later. Refreshed with `GET /me` on app start, on `online`, on
   `visibilitychange` to visible, and after checkout.
 
-## 6. Sync protocol ☐
+## 6. Sync protocol ☑
 
 What syncs: the answer log (`polish.log.v2`), `polish.settings.v2` (the goal
 changes the streak) and the profile name (`polish.profile.v1`). What does not:
@@ -343,14 +346,14 @@ changes the streak) and the profile name (`polish.profile.v1`). What does not:
 ```ts
 type SyncRequest = {
   cursor: number;                   // 0 on a new device
-  events: AnswerEvent[];            // from the outbox, at most 1,000, oldest first
+  events: AnswerEvent[];            // from the outbox, at most 500, oldest first
   settings?: Stamped<Settings>;     // sent when changed since the last sync
   profile?: Stamped<{ name: string }>;
   base?: Progress["base"];          // first sync only, see §7
 };
 type SyncResponse = {
   cursor: number;                   // new highest seq for this user
-  events: AnswerEvent[];            // seq > request cursor, at most 5,000, by seq
+  events: AnswerEvent[];            // seq > request cursor, at most 1,000, by seq
   more: boolean;                    // true → call again with the new cursor
   settings: Stamped<Settings> | null;
   profile: Stamped<{ name: string }> | null;
@@ -394,7 +397,7 @@ into `base`**. An event pulled from another device that is older than the local
 `base` is replayed after `base`, so that device's SM-2 state can drift slightly.
 That is a known limit; at 20,000 answers it is years away for most learners.
 
-## 7. First sign-in of an existing learner ☐
+## 7. First sign-in of an existing learner ☑
 
 1. Sign in. The outbox becomes the whole local log.
 2. First `POST /sync` with `cursor: 0`. If the local cache has a `base` (v1
@@ -414,7 +417,7 @@ That is a known limit; at 20,000 answers it is years away for most learners.
 Signing out keeps the local data (it stays on this device) and clears the token,
 outbox, cursor and cached entitlement.
 
-## 8. Beta and the paywall switch ☐
+## 8. Beta and the paywall switch ☑
 
 - `BETA_OPEN=true` (now): `/signin` creates the account with `beta`; the gate
   (§13.1) sends a signed-out learner to `/signin` and nowhere else. No plan
@@ -429,7 +432,7 @@ outbox, cursor and cached entitlement.
 - `/billing` and `/profile` show "Beta: Pro free, thank you" for `beta` users.
   They cannot start a checkout (409).
 
-## 9. Billing (Stripe Managed Payments) ☐
+## 9. Billing (Stripe Managed Payments) ☑
 
 ### 9.1 The Stripe module
 
@@ -492,7 +495,9 @@ deleteCustomer(customerId: string): Promise<void>;
 Events: `checkout.session.completed`, `customer.subscription.created`,
 `customer.subscription.updated`, `customer.subscription.deleted`,
 `invoice.paid`, `invoice.payment_failed`, `charge.refunded`,
-`charge.dispute.created`.
+`charge.dispute.created`, `charge.dispute.closed`. A dispute carries no
+customer, so its user is found by the Lifetime payment intent. An open or lost
+dispute ends Lifetime; a won one gives it back.
 
 - Read the raw body with `request.text()`; `verifyWebhook` uses
   `constructEventAsync(body, sig, secret, undefined,
@@ -527,7 +532,7 @@ Events: `checkout.session.completed`, `customer.subscription.created`,
 
 While the beta is open, step 3 ends the flow: the new account has `beta`.
 
-## 10. Email list (Resend contacts) ☐
+## 10. Email list (Resend contacts) ☑
 
 ### 10.1 What the list holds
 
@@ -553,7 +558,7 @@ While the beta is open, step 3 ends the flow: the new account has `beta`.
   calls that change nothing.
 - A failure only leaves `list_dirty = 1` (and bumps `list_attempts`). It never
   blocks sign-in, sync, checkout or a webhook response.
-- The hourly cron retries dirty users, at most 10 per run (each takes up to 4
+- The hourly cron retries dirty users, at most 4 per run (each takes up to 4
   Resend calls; the free plan allows 50 subrequests and Resend about 2 calls a
   second). After 24 failed attempts it logs and stops retrying that user until
   the next change.
@@ -581,9 +586,9 @@ While the beta is open, step 3 ends the flow: the new account has `beta`.
 - Transactional emails need no consent and carry no unsubscribe link: login
   codes, the trial reminder, Stripe's receipts and invoices.
 
-## 11. Trial reminder email ☐
+## 11. Trial reminder email ☑
 
-- Cron Trigger, hourly (`crons = ["0 * * * *"]`; the free plan allows Cron
+- Cron Triggers `crons = ["0 * * * *", "30 3 * * *"]`: hourly reminders and list retries, daily clean-up (the free plan allows Cron
   Triggers, 5 per account: check in the dashboard).
 - Sends to each user with `status = 'trialing'`, `trial_end - now ≤ 36 h` and
   `reminder_sent_at IS NULL`; then sets `reminder_sent_at`. Counts in
@@ -591,10 +596,11 @@ While the beta is open, step 3 ends the flow: the new account has `beta`.
 - Text: your trial ends on <date>, then <price> for <plan>; manage or cancel at
   `APP_URL/billing`. No marketing. Transactional.
 - Turn off Stripe's own trial reminder emails if they would duplicate it.
-- The same cron run retries the list (§10.2) and deletes expired `login_codes`
-  and `sessions`, and `stripe_events` older than 30 days.
+- The hourly run also retries the list (§10.2). The daily run deletes expired
+  `login_codes` and `sessions`, `stripe_events` older than 30 days and old
+  counters.
 
-## 12. Account deletion ☐
+## 12. Account deletion ☑
 
 `DELETE /account`, from `/settings` after typing the email to confirm:
 
@@ -612,7 +618,7 @@ While the beta is open, step 3 ends the flow: the new account has `beta`.
 The UI warns that Lifetime and beta access are lost too. "Delete data on this
 device" (existing) now also signs out, because the token is a `polish.*` key.
 
-## 13. Client ☐
+## 13. Client ☑
 
 ### 13.1 Gate
 
@@ -656,7 +662,7 @@ device" (existing) now also signs out, because the token is a `polish.*` key.
   sign in to start", and shows Lifetime while the offer runs.
 - `lib/site.ts`: `/signin`, `/plans` in `NOINDEX`.
 
-## 14. Analytics ☐
+## 14. Analytics ☑
 
 New events in `EventProps` and `EVENT_SCHEMA` (enum values and counts only, rule 12):
 
@@ -673,7 +679,7 @@ Never `posthog.identify` with the email or the user id, and never send the
 marketing consent: the privacy policy promises no link to an email. Revenue and
 trial conversion are read in Stripe.
 
-## 15. Privacy policy and docs ☐
+## 15. Privacy policy and docs ◐
 
 - `/privacy` is rewritten: it now says there are no accounts and nothing leaves
   the device. New content: the account (email), the synced log, settings and
@@ -700,6 +706,12 @@ trial conversion are read in Stripe.
 - Separate small fix: `workers/tts` `ALLOWED_ORIGINS` lacks
   `https://polishup.app`.
 
+Done: `/privacy` rewritten (date 10 October 2026), `AGENTS.md`, `README.md`,
+`workers/api/README.md`, this file and `plans/ROADMAP.md` updated; the TTS
+Worker's `ALLOWED_ORIGINS` has `https://polishup.app` (takes effect on its next
+deploy). Left: **the owner approves the new `/privacy`**. It describes the
+accounts-on world, so it should go live together with `NEXT_PUBLIC_API_URL`.
+
 ## 16. Workstreams for parallel agents
 
 **Step 0, before anything else:** `workers/api/src/contract.ts` written from §4
@@ -716,7 +728,7 @@ and reviewed. Every workstream below depends only on it, and on §3 for A and B.
 Order: 0 → A, B, C in parallel → D (can start with C's stubs) → E → owner
 setup (§18) → end-to-end test in Stripe test mode → launch with `BETA_OPEN=true`.
 
-## 17. Testing ☐
+## 17. Testing ◐
 
 - `workers/api` vitest, bindings mocked as in `workers/tts`: D1 as a small
   adapter over `node:sqlite` running the real migrations; rate limiters, Resend
@@ -743,6 +755,9 @@ setup (§18) → end-to-end test in Stripe test mode → launch with `BETA_OPEN=
 - Gates as always: test, lint, build, tsc, plus `cd workers/api && npm test &&
   npm run typecheck`.
 
+Done: the Worker and root unit tests above. Left: the end-to-end run in Stripe
+test mode (needs the owner setup, §18).
+
 ## 18. Owner setup
 
 1. **Stripe:** activate Managed Payments (before any live sale). Create the
@@ -754,7 +769,9 @@ setup (§18) → end-to-end test in Stripe test mode → launch with `BETA_OPEN=
 2. **Resend:** account; add the sending domain (e.g. `mail.polishup.app`) and
    its SPF, DKIM and DMARC records in Cloudflare DNS; create an API key;
    create the six segments (§10.1) and copy their ids; broadcast templates use
-   the contact's `unsub_url`.
+   the contact's `unsub_url`. Create the contact properties `user_id`, `plan`
+   and `unsub_url` first. The full checklist, as built, is in
+   `workers/api/README.md` ("Owner setup").
 3. **Cloudflare:** `wrangler d1 create polishup-api`, put its id in
    `wrangler.toml`, `wrangler d1 migrations apply --remote`; `wrangler secret
    put` for `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`,
@@ -767,6 +784,66 @@ setup (§18) → end-to-end test in Stripe test mode → launch with `BETA_OPEN=
 5. Approve the new `/privacy`. Tell the beta testers to sign in to keep their
    progress and get Pro free for good. Later: set `BETA_OPEN=false` and deploy
    the Worker to start charging.
+
+## As built: deviations from this spec
+
+- **Login codes (§4.3):** a correct code does not delete the `login_codes`
+  row; it empties `code_hash` and sets `expires_at = 0`, so the per-email send
+  limits (§4.6) still apply. The daily clean-up (03:30 UTC) deletes the row
+  once the code has expired, the 15-minute window has passed and the UTC day is over.
+- **CORS (§2):** a request whose `Origin` is not allowed gets **403** before any
+  handler runs (the spec only said no CORS headers). Requests without `Origin`
+  go through without CORS. Unknown routes answer 404 `not_found`.
+- **Stripe API version (§9.1):** no explicit `apiVersion`; the Worker uses the
+  one pinned by its `stripe` package, `2026-09-30.endive` (stripe 23.0.0),
+  which is later than basil as required. Set the webhook endpoint to it.
+- **Disputes (§5, §9.3):** a disputed Lifetime payment ends Lifetime unless
+  every dispute on it was won (`won` or `warning_closed`, looked up with
+  `disputes.list`); a won dispute restores Lifetime on `charge.dispute.closed`.
+- **Unsubscribe (§4.2, §10.3):** `GET` only shows a page with a confirm button
+  (it POSTs `confirm=1`); a bare POST is the RFC 8058 one-click. Consent
+  sources are `signin:v1`, `settings:v1` and `unsubscribe`.
+- **List (§10.1):** a post-beta account that never had a plan is a contact with
+  `plan` `none` and no segment (not "exactly one segment").
+- **Cron (§11):** two triggers. Hourly `0 * * * *`: at most 5 trial reminders
+  (`CRON_MAX_REMINDERS`) and 4 list users (`CRON_MAX_LIST_USERS`), ≤ 45
+  subrequests including D1. Daily `30 3 * * *`: the clean-up.
+- **Email budgets (§4.6):** three daily counters instead of one 80 cap:
+  `email_new` 50, `email_known` 30, `email_reminder` 20, so junk sign-ups can
+  never block a known learner's code or a reminder.
+- **Webhook (§9.3):** `stripe_events.processed_at` (NULL while in flight); a
+  duplicate of an in-flight event gets **409** so Stripe retries it; a claim
+  older than 5 minutes is taken over. Body capped at 256 KB.
+- **Entitlement write (§5):** `entitlements.read_at` stores when the Stripe
+  state was read; an older read never overwrites a newer one. The precedence
+  `beta` > `lifetime` > subscription is enforced in the SQL.
+- **Trial once per email (§5, §9.2):** table `trial_history(email_hash)`
+  (peppered hash) survives account deletion, so a new account with the same
+  email gets no second trial. Checkout also answers 409 `already_subscribed`
+  when Stripe still has a live subscription for the customer.
+- **Sync limits (§6):** `SYNC_MAX_PUSH` 500, `SYNC_MAX_PULL` 1,000. Unknown
+  event fields are dropped before storing; `base` must be v2-shaped;
+  `updatedAt` is clamped to at most now + 1 day. Bodies are read as a stream
+  with a cap.
+- **Rate limits (§4.6):** the IP limiters key IPv6 by its /64; a missing
+  binding lets requests through and logs it.
+- **Dev:** `DEV_LOG_EMAIL="true"` (only in `.dev.vars`) logs emails, code
+  included, instead of sending them.
+- **Checkout (§4.2):** `POST /billing/checkout`, `/billing/refresh` and
+  `/billing/portal` also answer 502 `stripe_error` when Stripe fails.
+- **Entitlement (§5):** a `paused` subscription counts as ended (`none`).
+- **Client state (§6.1):** `polish.sync.v1` also holds `settingsSynced` /
+  `profileSynced` (the stamp the server is known to hold), `joined` (a first
+  sync since sign-in succeeded; cleared on sign-out) and `merged` (show the
+  "progress merged" notice once, only when that first sync pushed local
+  progress). Settings or a profile never stamped on a
+  device are sent with `updatedAt` 1 (the server takes any stamp ≥ 0), so the
+  account's value wins. New keys: `polish.apiConfig.v1` (`/config`, kept on
+  sign-out) and, in sessionStorage, `polish.checkout.v1` (plan and currency of
+  a checkout in progress, for `checkout_completed`).
+- **Gate (§13.1):** before sending a signed-in learner without access to
+  `/plans`, `AccessGate` asks `GET /me` once, so a stale cache does not bounce
+  a learner who has just paid.
 
 ## Done when
 
@@ -797,3 +874,4 @@ setup (§18) → end-to-end test in Stripe test mode → launch with `BETA_OPEN=
 6. Resend sender `mail.polishup.app` OK?
 7. Offline grace 7 days OK?
 8. Refund policy / EU 14-day withdrawal waiver: Stripe's default OK?
+9. Turnstile on `/auth/start`? While `email_new` is spent, an unknown email gets 503 and a known one 200: a small account-enumeration leak.

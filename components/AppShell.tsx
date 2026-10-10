@@ -4,9 +4,12 @@ import { ChartColumn, CreditCard, House, Play, SlidersHorizontal, User, type Luc
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { MergedNotice, planName } from "@/components/account";
 import { DrillIcon } from "@/components/DrillIcon";
 import { Logo } from "@/components/Logo";
+import { apiEnabled, useAccount } from "@/lib/account";
 import { DRILLS } from "@/lib/drills";
+import { signInHref } from "@/lib/site";
 import { useProfile } from "@/lib/storage";
 import { EXERCISE_KINDS } from "@/lib/types";
 
@@ -43,6 +46,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const profile = useProfile();
   const initial = profile.name.trim().charAt(0).toUpperCase();
+  const account = useAccount();
+  /** With accounts in the build, a signed-out learner's sidebar card is the way to sign in. */
+  const signIn = apiEnabled() && !account;
+  const planLine = !apiEnabled() ? "Free · beta" : account ? planName(account.entitlement) : "Sign in";
 
   const navLink = ({ href, label, icon: Icon }: NavItem, current: boolean) => (
     <Link
@@ -105,13 +112,13 @@ export function AppShell({ children }: { children: ReactNode }) {
           {ACCOUNT.map((item) => navLink(item, isAt(pathname, item.href)))}
         </nav>
         <Link
-          href="/profile"
+          href={signIn ? signInHref("/learn") : "/profile"}
           className="mt-auto flex items-center gap-3 rounded-2xl border border-line p-3 text-foreground hover:border-accent-line"
         >
           {avatar("h-[2.375rem] w-[2.375rem]")}
           <span className="flex min-w-0 flex-col leading-tight">
             <span className="truncate text-sm font-semibold">{profile.name || "Your profile"}</span>
-            <span className="text-xs text-muted">Free · beta</span>
+            <span className={`text-xs ${signIn ? "font-semibold text-accent" : "text-muted"}`}>{planLine}</span>
           </span>
         </Link>
       </aside>
@@ -124,7 +131,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
         </header>
 
-        <div className="flex-1 pb-24 md:pb-0">{children}</div>
+        <div className="flex-1 pb-24 md:pb-0">
+          <MergedNotice />
+          {children}
+        </div>
 
         <nav
           aria-label="App"

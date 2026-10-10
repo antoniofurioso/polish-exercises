@@ -17,6 +17,7 @@
 import { useSyncExternalStore } from "react";
 import type { Verdict } from "./grade";
 import { EXERCISE_KINDS, type ExerciseKind } from "./types";
+import type { Currency, Plan } from "../workers/api/src/contract";
 
 // ---- consent ------------------------------------------------------------------
 
@@ -55,6 +56,7 @@ export const shouldAsk = (keyConfigured: boolean, consent: Consent | undefined):
 // ---- events -------------------------------------------------------------------
 
 export type Source = "today" | "practice";
+export type SignInKind = "new" | "returning";
 
 export type EventProps = {
   session_started: { source: Source; drill: ExerciseKind; size: number };
@@ -62,6 +64,13 @@ export type EventProps = {
   session_finished: { source: Source; size: number; correct: number };
   goal_met: { goal: number; streak: number };
   pwa_installed: Record<string, never>;
+  // Phase 4 (plans/phase-4.md §14): never the email, the user id or the marketing consent
+  sign_in_started: Record<string, never>;
+  signed_in: { kind: SignInKind };
+  paywall_shown: { from: Source };
+  checkout_started: { plan: Plan; currency: Currency };
+  checkout_completed: { plan: Plan; currency: Currency };
+  account_deleted: Record<string, never>;
 };
 export type EventName = keyof EventProps;
 
@@ -74,6 +83,10 @@ const count: Check = (v) => typeof v === "number" && Number.isInteger(v) && v >=
 
 const SOURCES = ["today", "practice"] as const;
 const VERDICTS = ["correct", "diacritics", "wrong"] as const;
+const SIGN_IN_KINDS = ["new", "returning"] as const;
+/** The contract's plans and currencies, repeated here: this module imports no runtime code but lib/types. */
+const PLAN_VALUES = ["monthly", "annual", "lifetime"] as const satisfies readonly Plan[];
+const CURRENCY_VALUES = ["eur", "usd", "pln"] as const satisfies readonly Currency[];
 
 /** Every event and the only props it may carry. Anything else is dropped. */
 export const EVENT_SCHEMA: { [E in EventName]: { [P in keyof EventProps[E]]-?: Check } } = {
@@ -82,6 +95,12 @@ export const EVENT_SCHEMA: { [E in EventName]: { [P in keyof EventProps[E]]-?: C
   session_finished: { source: oneOf(SOURCES), size: count, correct: count },
   goal_met: { goal: count, streak: count },
   pwa_installed: {},
+  sign_in_started: {},
+  signed_in: { kind: oneOf(SIGN_IN_KINDS) },
+  paywall_shown: { from: oneOf(SOURCES) },
+  checkout_started: { plan: oneOf(PLAN_VALUES), currency: oneOf(CURRENCY_VALUES) },
+  checkout_completed: { plan: oneOf(PLAN_VALUES), currency: oneOf(CURRENCY_VALUES) },
+  account_deleted: {},
 };
 
 /**

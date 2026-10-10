@@ -1,21 +1,27 @@
 "use client";
 
 import { Award, Check, User } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { AccountTabs } from "@/components/AccountTabs";
 import { AppPage } from "@/components/AppShell";
+import { planName } from "@/components/account";
 import { useTodayStatus } from "@/components/today";
+import { apiEnabled, useAccount } from "@/lib/account";
 import { DRILLS } from "@/lib/drills";
 import { levelCap } from "@/lib/progress";
 import { cardsByDrill, milestones, safely, totalAnswered } from "@/lib/progressView";
+import { signInHref } from "@/lib/site";
 import { PROFILE_NAME_MAX, saveProfile, useProfile } from "@/lib/storage";
 import { DRILL_KINDS } from "@/lib/types";
 
 const MONTH = new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric" });
 
-/** The learner's name, numbers and milestones. Everything is on this device until accounts exist. */
+/** The learner's name, numbers and milestones; with an account, its email and plan too. */
 export function ProfilePage() {
   const status = useTodayStatus();
+  const accounts = apiEnabled();
+  const account = useAccount();
   const { hydrated, ready, progress, streak } = status;
   const profile = useProfile();
   const initial = profile.name.charAt(0).toUpperCase();
@@ -42,10 +48,17 @@ export function ProfilePage() {
         </span>
         <div className="min-w-0 flex-[1_1_14rem]">
           <h2 className="text-[1.375rem] font-bold">{profile.name || "Your profile"}</h2>
+          {account ? <p className="mt-1 break-all text-sm text-foreground-soft">{account.email}</p> : null}
           <p className="mt-1 text-muted">{since ? `Practising since ${since}` : "No practice yet"}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {level ? <span className="chip chip-accent">New cards up to {level}</span> : null}
-            <span className="chip">Free · beta</span>
+            {!accounts ? (
+              <span className="chip">Free · beta</span>
+            ) : account ? (
+              <span className="chip">{planName(account.entitlement)}</span>
+            ) : (
+              <span className="chip">Not signed in</span>
+            )}
           </div>
         </div>
         <dl className="flex flex-wrap gap-8">
@@ -67,7 +80,21 @@ export function ProfilePage() {
           <h2 id="about-title" className="text-[1.0625rem] font-semibold">
             About you
           </h2>
-          <p className="mt-1 text-sm text-muted">Saved on this device. When accounts arrive, it moves with you.</p>
+          <p className="mt-1 text-sm text-muted">
+            {!accounts
+              ? "Saved on this device. When accounts arrive, it moves with you."
+              : account
+                ? "Saved to your account, on every device you sign in on."
+                : "Saved on this device. Sign in to have it on every device."}
+            {accounts && !account ? (
+              <>
+                {" "}
+                <Link href={signInHref("/profile")} className="link">
+                  Sign in
+                </Link>
+              </>
+            ) : null}
+          </p>
           {/* remount once storage is read, so the field starts from the saved name */}
           <NameForm key={hydrated ? "stored" : "server"} name={profile.name} />
         </section>

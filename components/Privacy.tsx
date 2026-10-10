@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { ConsentButton } from "@/components/ConsentBanner";
 import { POSTHOG_KEY, setConsent, useConsent } from "@/lib/analytics";
+import { ACCOUNTS_ON } from "@/lib/site";
 
 /** Prefix of every key this site keeps in localStorage (lib/storage.ts, lib/analytics.ts). */
 const LOCAL_PREFIX = "polish.";
@@ -47,8 +48,17 @@ export function ConsentChoice() {
 export function ClearLocalData() {
   const [failed, setFailed] = useState(false);
 
-  const clear = () => {
+  const clear = async () => {
     if (!window.confirm("Delete your progress, streak and settings from this device? This cannot be undone.")) return;
+    // the account token is a polish.* key too: end its session on the server first (best effort)
+    if (ACCOUNTS_ON) {
+      try {
+        const { signOut } = await import("@/lib/account");
+        await signOut();
+      } catch {
+        // offline: the token goes with the rest below
+      }
+    }
     try {
       // withdraw analytics first, so PostHog's own storage goes too
       if (POSTHOG_KEY) setConsent("denied");
@@ -66,7 +76,7 @@ export function ClearLocalData() {
 
   return (
     <div>
-      <button type="button" onClick={clear} className="btn btn-danger">
+      <button type="button" onClick={() => void clear()} className="btn btn-danger">
         <Trash2 size={18} aria-hidden="true" />
         Delete my data from this device
       </button>
