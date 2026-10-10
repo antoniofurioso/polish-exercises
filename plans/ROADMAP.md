@@ -12,7 +12,7 @@ Status key: ☐ todo · ◐ in progress · ☑ done
 | 1 | Content ×2–4 and natural audio | 3–5 weeks | ◐ code done; waiting on native review; audio engine chosen, render deferred — see [phase-1.md](./phase-1.md) |
 | 2 | Retention: SRS, "today's practice", streaks | 2–3 weeks | ☑ code done; tune in the Phase 3 beta — see [phase-2.md](./phase-2.md) |
 | 3 | Ship the web app: PWA, brand, landing page, beta | 1–2 weeks | ☑ live at polishup.app; beta running — see [phase-3.md](./phase-3.md) |
-| 4 | Accounts, sync, payments | ~2 weeks | ☐ |
+| 4 | Accounts, sync, payments | ~2 weeks | ◐ decisions made, spec in progress |
 | 5 | Mobile apps (Capacitor) | ~2 weeks | ☐ |
 
 **Critical path:** the native-speaker review of the Phase 1 drafts
@@ -88,9 +88,22 @@ audio on every device.
 ## Phase 4: Accounts and money
 
 - Auth and progress sync on Cloudflare Workers + D1, next to the audio Worker.
-- Lemon Squeezy or Paddle as merchant of record, so they handle EU VAT.
-- Freemium: A1 content and one drill free; all levels, SRS, audio and stats paid.
-  The `level` field from Phase 0.3 is what the paywall filters on.
+  Sign-in by email only (a one-time code; no Google for now).
+- Payments through Stripe (the owner's existing account): Checkout, Customer
+  Portal, webhooks to the Worker. VAT is on the owner (Stripe Tax + EU OSS
+  returns) unless Stripe's merchant-of-record option is used.
+- No free plan. A 3-day free trial, card required, then the plan the learner
+  picked. The guides and the landing sample stay free (they bring the search
+  traffic). The trial lands on `/today`, with a reminder email on day 2.
+- Prices (decided 2026-10-10):
+
+  | Plan | EUR | USD | PLN |
+  | --- | --- | --- | --- |
+  | Monthly | €6.99 | $7.99 | 29.99 zł |
+  | Annual (default) | €49 | $54.99 | 199 zł |
+  | Lifetime | €99 | $109 | 399 zł |
+
+  Lifetime is for beta users only. Raise prices later for new users only.
 
 ## Phase 5: Mobile
 
