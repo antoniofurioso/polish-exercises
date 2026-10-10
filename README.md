@@ -137,8 +137,10 @@ values and counts only, never answer text):
 | `goal_met` | `goal`, `streak`, at most once per day |
 | `pwa_installed` | none; from the browser's `appinstalled` event or the app's `pwa-installed` window event |
 
-Autocapture, session recording, surveys, heatmaps and feature flags are off;
-`respect_dnt` is on.
+Autocapture, session recording, surveys, heatmaps and feature flags are off.
+`respect_dnt` is off on purpose: the consent banner is the opt-in, and a learner
+who clicks "Allow analytics" is counted even if the browser sends Do Not Track
+(with it on, those learners were silently never counted).
 
 **Owner setup in PostHog** (once):
 
