@@ -3,6 +3,7 @@ import { Inter, Source_Serif_4 } from "next/font/google";
 import { Analytics } from "@/components/Analytics";
 import { ServiceWorker } from "@/components/ServiceWorker";
 import { BRAND } from "@/lib/brand";
+import { INSTALL_SCRIPT } from "@/lib/install";
 import { THEME_KEY } from "@/lib/theme";
 import "./globals.css";
 
@@ -43,6 +44,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${inter.variable} ${serif.variable} h-full`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        {/* catches the browser's install prompt before React loads (Settings → Install the app) */}
+        <script dangerouslySetInnerHTML={{ __html: INSTALL_SCRIPT }} />
       </head>
       <body className="flex min-h-full flex-col">
         {children}

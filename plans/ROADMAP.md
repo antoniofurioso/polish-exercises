@@ -103,3 +103,9 @@ audio on every device.
 - `lang="pl"` on Polish words inside English prose (landing page, drill blurbs)
   for screen readers and TTS; the guide pages already use `<Pl>`.
 - `/billing`: a price and Pro feature list once Phase 4 decides them.
+- **Reminders**, opt-in, for the streak and due reviews: web push notifications
+  through the service worker (on iPhone only for the installed app, iOS 16.4+), and
+  email reminders once Phase 4 has accounts and an address to send to.
+- **An install popup**: after a learner's first finished session (never on the
+  first visit), a dismissible card offering to add the app to the home screen.
+  It reuses `lib/install.ts` (the browser prompt, or Safari's steps on iPhone).
