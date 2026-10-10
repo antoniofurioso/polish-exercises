@@ -39,11 +39,13 @@ delivered:
      choices.
    - **Adjectives with no example sentence:** psi, koci, bezpośredni and wrogi
      have no noun that collocates with them.
-2. **Audio.**
-   - Choose an engine: Azure, a one-off batch of about 1.4M characters; Piper,
-     after checking the Polish voice's licence for commercial use; or `cmd` for
-     any local tool.
-   - Render, upload to R2, deploy `workers/tts`, and set `NEXT_PUBLIC_TTS_URL`.
+2. **Audio: decided, deferred.** Engine: **Chatterbox Multilingual** (see
+   "Engine choice" under 1.5b). Not rendered yet: the live app keeps the
+   browser voice until real learners arrive, and rendering after the native
+   review means paying the render time once.
+   - When it is time: set up Chatterbox (steps under 1.5b), render 20 samples to
+     check quality and speed, then the full set.
+   - Upload to R2, deploy `workers/tts`, and set `NEXT_PUBLIC_TTS_URL`.
    - Steps are in the README "Audio" section and `workers/tts/README.md`.
 
 ## Ground rules for every content agent
@@ -167,12 +169,36 @@ drill saturates. Pipeline and engines: root README, "Audio".
 
 At around 12 kB per clip the whole set is under 1 GB of R2 storage.
 
-**Engine licence matters, since the app is commercial.** Piper is MIT, but each
-voice model has its own licence: check the Polish voice's model card before
-using it. XTTS-v2 (Coqui Public Model License) and Meta MMS-TTS (CC BY-NC) are
-non-commercial, so they are out. Another option is a one-off batch through
-Azure: at about 1.7M characters it is a single small cost, or it can be spread
-over the monthly free tier.
+**Engine licence matters, since the app is commercial.** Checked 2026-10-10:
+
+- **Piper: no Polish voice is usable.** The code is MIT, but every Polish voice
+  is finetuned from a non-commercial base. gosia, darkman, mc_speech and bass
+  (despite its "Apache 2.0" card) come from en_US-lessac, whose Blizzard 2013
+  data is "Research Purposes only". mls_6892 comes from en_US-ryan, which is
+  CC BY-NC-SA.
+- **Out:** XTTS-v2 (Coqui Public Model License), Meta MMS-TTS (CC BY-NC),
+  F5-TTS and Fish Speech (non-commercial weights). Kokoro, MeloTTS and Orpheus
+  are permissive but have no Polish.
+- **Fallback:** Azure neural voices, a one-off batch of about 1.6M characters
+  (a small cost, or about 3 months of the free tier).
+
+**Engine choice: Chatterbox Multilingual** (Resemble AI, `chatterbox-tts` on
+PyPI). MIT, 23 languages including Polish, and the online demo sounded good.
+Every clip carries an inaudible Perth watermark, which is fine here.
+
+- **Voice:** cloned from about 10 s of reference audio. To keep the licence
+  clean, take it from the **mc_speech dataset (CC0**, one female speaker,
+  huggingface.co/datasets/czyzi0/the-mc-speech-dataset), or from a native
+  speaker who signs off on it. Not the demo's default voice.
+- **Setup:**
+  - A Python 3.12 venv under `.tmp/`; downloads are about 2 GB of packages and
+    3.3 GB of weights (needs disk space).
+  - Plus `scripts/audio/chatterbox_server.py`, a small local HTTP server that
+    keeps the model loaded. Our `cmd` engine starts a process per sentence, and
+    reloading the model each time would be far too slow, so `--cmd` calls the
+    server with `curl --data-binary @{text_file} … -o {out}`.
+- **Speed:** unmeasured. On the M1 the full set may take days, so render 20
+  samples first. A rented GPU for a few hours is the faster option.
 
 ### 1.6 Templates and collocations: 142 → 300 ☑ (319, drafts) (wave 3)
 

@@ -9,7 +9,7 @@ Status key: ☐ todo · ◐ in progress · ☑ done
 | Phase | Theme | Size | Status |
 | --- | --- | --- | --- |
 | 0 | Groundwork: registry, data files, levels, content gate | ~1 week | ☑ — see [phase-0.md](./phase-0.md) |
-| 1 | Content ×2–4 and natural audio | 3–5 weeks | ◐ code done; waiting on native review + audio render — see [phase-1.md](./phase-1.md) |
+| 1 | Content ×2–4 and natural audio | 3–5 weeks | ◐ code done; waiting on native review; audio engine chosen, render deferred — see [phase-1.md](./phase-1.md) |
 | 2 | Retention: SRS, "today's practice", streaks | 2–3 weeks | ☑ code done; tune in the Phase 3 beta — see [phase-2.md](./phase-2.md) |
 | 3 | Ship the web app: PWA, brand, landing page, beta | 1–2 weeks | ☑ live at polishup.app; beta running — see [phase-3.md](./phase-3.md) |
 | 4 | Accounts, sync, payments | ~2 weeks | ☐ |
@@ -61,6 +61,10 @@ Changes that make content cheap to add. Full spec: [phase-0.md](./phase-0.md).
   served from R2 by `workers/tts/`, with Azure as an optional fallback.
 - `lib/speak.ts` (browser `speechSynthesis`) stays as the offline fallback.
 - First backend piece: standalone, no accounts.
+- Engine chosen: **Chatterbox Multilingual** (MIT), with a CC0 reference voice.
+  No Piper Polish voice is licensed for commercial use. Render deferred until
+  real learners arrive and the native review is in. Details:
+  [phase-1.md](./phase-1.md) §1.5b.
 
 **Done when:** about 4× the content, all native-reviewed, CI green, and natural
 audio on every device.
