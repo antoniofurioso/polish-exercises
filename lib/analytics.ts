@@ -337,7 +337,10 @@ async function loadPostHog(key: string): Promise<PostHogLike> {
     advanced_disable_feature_flags: true,
     person_profiles: "identified_only",
     persistence: "localStorage+cookie",
-    respect_dnt: true,
+    // The banner's "Allow analytics" is the learner's own, specific choice, so it is not
+    // overridden by the browser-wide Do Not Track signal: with respect_dnt on, a learner
+    // who allowed analytics was silently never counted. Without "Allow", nothing loads.
+    respect_dnt: false,
   });
   return posthog as unknown as PostHogLike;
 }
