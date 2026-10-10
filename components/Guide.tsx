@@ -17,6 +17,11 @@ export function Pl({ children, className }: { children: ReactNode; className?: s
   );
 }
 
+/** English text with its Polish words between asterisks (`Make *ten* agree`), each one put in `<Pl>`. */
+export function PlText({ text }: { text: string }) {
+  return text.split("*").map((part, i) => (i % 2 ? <Pl key={i}>{part}</Pl> : part));
+}
+
 export function GuideLayout({
   path,
   eyebrow,

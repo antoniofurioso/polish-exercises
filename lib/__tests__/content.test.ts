@@ -255,3 +255,9 @@ describe("level in the session URL", () => {
     expect(parseSession(bogus)?.config).not.toHaveProperty("maxLevel");
   });
 });
+
+describe("drill blurbs", () => {
+  it("close every *Polish* span they open", () => {
+    for (const drill of Object.values(DRILLS)) expect(drill.blurb.split("*").length % 2, drill.blurb).toBe(1);
+  });
+});

@@ -1,6 +1,7 @@
 import { ArrowRight, BookOpen, Check, Flame, Lightbulb, Repeat, Sparkles, Target } from "lucide-react";
 import Link from "next/link";
 import { DrillIcon } from "@/components/DrillIcon";
+import { PlText } from "@/components/Guide";
 import { CaseForms, ReviewCurve, SessionMix } from "@/components/Infographics";
 import { SampleQuestion } from "@/components/SampleQuestion";
 import { StartButton } from "@/components/StartButton";
@@ -142,7 +143,9 @@ export default function LandingPage() {
                       </Link>
                     </h3>
                   </div>
-                  <p className="text-[0.9375rem] text-muted">{drill.blurb}</p>
+                  <p className="text-[0.9375rem] text-muted">
+                    <PlText text={drill.blurb} />
+                  </p>
                   {GUIDE_FOR[kind] ? (
                     <Link href={GUIDE_FOR[kind]} className="link mt-auto text-sm">
                       Read the grammar →

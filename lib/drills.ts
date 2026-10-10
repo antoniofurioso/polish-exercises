@@ -29,6 +29,7 @@ export type Drill = {
   route: string;
   title: string;
   pl: string;
+  /** English, with any Polish words between asterisks (`*ten*`) so they render in `lang="pl"`. */
   blurb: string;
   build: (config: Config, seed: number) => Exercise[];
   /** The cases a session URL may name; anything else is dropped. */
@@ -71,7 +72,7 @@ export const DRILLS: Registry = {
     route: "/pronouns",
     title: "Demonstrative pronouns",
     pl: "Zaimki wskazujące",
-    blurb: "Make ten / tamten agree with the noun in gender, number and case.",
+    blurb: "Make *ten / tamten* agree with the noun in gender, number and case.",
     build: buildPronounSession,
     cases: PRONOUN_CASES,
     serialise: (config, params) => {
@@ -88,7 +89,7 @@ export const DRILLS: Registry = {
     route: "/possessives",
     title: "Possessive pronouns",
     pl: "Zaimki dzierżawcze",
-    blurb: "Decline mój, twój, nasz, wasz — and learn where jego, jej and ich stay put.",
+    blurb: "Decline *mój, twój, nasz, wasz* — and learn where *jego*, *jej* and *ich* stay put.",
     build: buildPossessiveSession,
     cases: POSSESSIVE_CASES,
     serialise: (config, params) => {
@@ -105,7 +106,7 @@ export const DRILLS: Registry = {
     route: "/numbers",
     title: "Numbers",
     pl: "Liczebniki",
-    blurb: "Why it's dwa koty but pięć kotów — plus writing figures out, dates and the time.",
+    blurb: "Why it's *dwa koty* but *pięć kotów* — plus writing figures out, dates and the time.",
     build: buildNumberSession,
     cases: NUMBER_CASES,
     serialise: (config, params) => {
@@ -127,7 +128,7 @@ export const DRILLS: Registry = {
     route: "/verbs",
     title: "Verbs",
     pl: "Czasowniki",
-    blurb: "Past, simple future, compound future (będę robić) and the imperative — with aspect.",
+    blurb: "Past, simple future, compound future (*będę robić*) and the imperative — with aspect.",
     build: buildVerbSession,
     // the verbs drill has no case, but a session URL still has to name one
     cases: PRONOUN_CASES,

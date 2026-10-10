@@ -1,5 +1,6 @@
 import { drillOfCard } from "./cards";
 import type { CardInfo } from "./cards";
+import type { Verdict } from "./grade";
 import { dueCards, introducedToday, levelCap, registrySources, weakSkills } from "./progress";
 import type { Progress, Settings, Sources } from "./progress";
 import { DRILL_KINDS, LEVELS } from "./types";
@@ -265,4 +266,73 @@ function interleave(picked: Picked[]): Exercise[] {
     }
   }
   return out;
+}
+
+// ---- resuming today's practice -------------------------------------------------
+
+/**
+ * Where a session stands, as the Runner reports it after every answer: the
+ * exercise list (with any re-asks appended), which positions are re-asks, the
+ * next unanswered position, and the verdicts of the scored answers so far
+ * (re-asks are not scored), in order.
+ */
+export type RunState = {
+  exercises: Exercise[];
+  reasks: number[];
+  next: number;
+  verdicts: Verdict[];
+};
+
+/** Today's session as kept in storage, so leaving /today and coming back continues it. */
+export type SavedToday = {
+  v: 1;
+  /** The local day it was built on (dayKey); another day's session is never resumed. */
+  day: string;
+  /** "Another round" count, so a later round resumes as itself. */
+  round: number;
+  plan: TodayPlan;
+  run: RunState;
+};
+
+const VERDICTS: readonly unknown[] = ["correct", "diacritics", "wrong"] satisfies Verdict[];
+
+const isRecord = (x: unknown): x is Record<string, unknown> =>
+  typeof x === "object" && x !== null && !Array.isArray(x);
+
+const isIndex = (x: unknown, length: number): x is number =>
+  typeof x === "number" && Number.isInteger(x) && x >= 0 && x < length;
+
+function isExercise(x: unknown): x is Exercise {
+  return (
+    isRecord(x) &&
+    typeof x.id === "string" &&
+    Array.isArray(x.tokens) &&
+    Array.isArray(x.answers) &&
+    x.answers.every((a) => typeof a === "string")
+  );
+}
+
+/** A run that is consistent and still has a question left. */
+export function isUnfinished(run: unknown): run is RunState {
+  if (!isRecord(run)) return false;
+  const { exercises, reasks, next, verdicts } = run;
+  if (!Array.isArray(exercises) || !exercises.every(isExercise)) return false;
+  if (!isIndex(next, exercises.length)) return false;
+  if (!Array.isArray(reasks) || !reasks.every((i) => isIndex(i, exercises.length))) return false;
+  if (!Array.isArray(verdicts) || !verdicts.every((v) => VERDICTS.includes(v))) return false;
+  const scored = Array.from({ length: next }, (_, i) => i).filter((i) => !reasks.includes(i)).length;
+  return verdicts.length === scored;
+}
+
+/**
+ * The saved session if it can be resumed on `day`: built that same local day,
+ * well formed, and not finished. Anything else (another day's, a finished or a
+ * corrupt one) gives null, and the caller builds a fresh session.
+ */
+export function resumableToday(saved: unknown, day: string): SavedToday | null {
+  if (!isRecord(saved) || saved.v !== 1 || saved.day !== day) return null;
+  if (typeof saved.round !== "number" || !Number.isInteger(saved.round) || saved.round < 0) return null;
+  const plan = saved.plan;
+  if (!isRecord(plan) || !Array.isArray(plan.exercises)) return null;
+  return isUnfinished(saved.run) ? (saved as SavedToday) : null;
 }

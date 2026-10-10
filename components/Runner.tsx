@@ -12,6 +12,7 @@ import { playFinish, playVerdict } from "@/lib/sound";
 import { stopSpeaking } from "@/lib/speak";
 import { dayKey } from "@/lib/srs";
 import { readProgress, readSettings, recordAnswer, setSoundOn, useSoundOn } from "@/lib/storage";
+import type { RunState } from "@/lib/today";
 import type { Exercise, ExerciseKind } from "@/lib/types";
 
 /**
@@ -29,6 +30,8 @@ export function Runner({
   reaskWrong = false,
   summaryExtra,
   source = "practice",
+  resume,
+  onProgress,
 }: {
   exercises: Exercise[];
   /** Recorded for exercises that do not name their own drill. */
@@ -44,14 +47,20 @@ export function Runner({
   summaryExtra?: ReactNode;
   /** Where the session came from, for analytics only. */
   source?: Source;
+  /** Continue a session left midway (today's practice): its list, re-asks and scored answers. */
+  resume?: RunState;
+  /** Called after every answer of the first run with where the session stands (to save it). */
+  onProgress?: (run: RunState) => void;
 }) {
-  const [exercises, setExercises] = useState<Exercise[]>(initial);
+  const [exercises, setExercises] = useState<Exercise[]>(resume?.exercises ?? initial);
   /** Indexes of exercises that are a re-ask: answered and recorded, but not scored twice. */
-  const [reasks, setReasks] = useState<ReadonlySet<number>>(() => new Set());
-  const [index, setIndex] = useState(0);
+  const [reasks, setReasks] = useState<ReadonlySet<number>>(() => new Set(resume?.reasks));
+  const [index, setIndex] = useState(resume?.next ?? 0);
   const [value, setValue] = useState("");
   const [verdict, setVerdict] = useState<Verdict | null>(null);
-  const [results, setResults] = useState<Result[]>([]);
+  const [results, setResults] = useState<Result[]>(() => (resume ? resumedResults(resume) : []));
+  /** "Practise the missed" is a new run: it is not reported to onProgress. */
+  const [retrying, setRetrying] = useState(false);
   const [done, setDone] = useState(false);
   const soundOn = useSoundOn();
 
@@ -59,7 +68,8 @@ export function Runner({
   const score = results.filter((r) => r.verdict === "correct").length;
 
   // analytics (lib/analytics.ts): a no-op without a key and consent
-  const started = useRef(false);
+  // a resumed session was counted when it first started
+  const started = useRef(resume !== undefined);
   useEffect(() => {
     if (started.current) return;
     started.current = true;
@@ -73,10 +83,19 @@ export function Runner({
       setValue(answer);
       setVerdict(result);
       const isReask = reasks.has(index);
+      const reask = reaskWrong && !isReask && result === "wrong";
       if (!isReask) setResults((r) => [...r, { exercise, verdict: result }]);
-      if (reaskWrong && !isReask && result === "wrong") {
+      if (reask) {
         setReasks((s) => new Set(s).add(exercises.length));
         setExercises((list) => [...list, exercise]);
+      }
+      if (onProgress && !retrying) {
+        onProgress({
+          exercises: reask ? [...exercises, exercise] : exercises,
+          reasks: reask ? [...reasks, exercises.length] : [...reasks],
+          next: index + 1,
+          verdicts: [...results.map((r) => r.verdict), ...(isReask ? [] : [result])],
+        });
       }
       recordAnswer(exercise, exercise.kind ?? kind, result, answer);
       track("answer", { drill: exercise.kind ?? kind, verdict: result });
@@ -111,6 +130,7 @@ export function Runner({
     if (missed.length === 0) return;
     track("session_started", { source, drill: kind, size: missed.length });
     setExercises(missed);
+    setRetrying(true);
     setReasks(new Set());
     setResults([]);
     setIndex(0);
@@ -185,4 +205,10 @@ export function Runner({
       </main>
     </div>
   );
+}
+
+/** The scored results of a resumed run: its answered positions that are not re-asks, with their verdicts. */
+function resumedResults({ exercises, reasks, next, verdicts }: RunState): Result[] {
+  const scored = exercises.slice(0, next).filter((_, i) => !reasks.includes(i));
+  return scored.map((exercise, i) => ({ exercise, verdict: verdicts[i] }));
 }

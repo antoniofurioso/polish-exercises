@@ -17,6 +17,7 @@ import {
   type Settings,
 } from "./progress";
 import { dayKey } from "./srs";
+import { resumableToday, type SavedToday } from "./today";
 import { THEME_KEY, THEMES, type Theme } from "./theme";
 
 export type { Theme } from "./theme";
@@ -34,6 +35,8 @@ const configKey = (kind: ExerciseKind) => `polish.config.${kind}.v1`;
 const v1StatsKey = (kind: ExerciseKind) => `polish.stats.${kind}.v1`;
 const SOUND_KEY = "polish.sound.v1";
 const PROFILE_KEY = "polish.profile.v1";
+const TODAY_KEY = "polish.today.v1";
+const INSTALL_CARD_KEY = "polish.installCard.v1";
 export const LOG_KEY = "polish.log.v2";
 export const PROGRESS_KEY = "polish.progress.v2";
 export const SETTINGS_KEY = "polish.settings.v2";
@@ -354,6 +357,29 @@ function decodeProfile(value: unknown): Profile {
 export const useProfile = (): Profile => useStored<Profile>(PROFILE_KEY, NO_PROFILE, decodeProfile);
 
 export const saveProfile = (profile: Profile) => write(PROFILE_KEY, decodeProfile(profile));
+
+// ---- today's session and the install card ----------------------------------------
+
+/** Today's unfinished session, to resume on /today; null for another day's, a finished or a corrupt one. */
+export function readTodaySession(day: string): SavedToday | null {
+  return resumableToday(parse(readRaw(TODAY_KEY)), day);
+}
+
+/** Keeps today's session after an answer; a finished one is dropped, so the next visit builds afresh. */
+export function saveTodaySession(saved: SavedToday): void {
+  writeRaw(TODAY_KEY, resumableToday(saved, saved.day) ? JSON.stringify(saved) : null);
+}
+
+export const clearTodaySession = () => writeRaw(TODAY_KEY, null);
+
+/** The learner closed the "add to home screen" card; it never comes back. */
+/** The practice day the install card was last closed on (lib/install.ts), 0 if never. */
+export const useInstallCardDismissedOn = (): number =>
+  useStored<number>(INSTALL_CARD_KEY, 0, (v) =>
+    typeof v === "number" && Number.isInteger(v) && v >= 0 ? v : 0,
+  );
+
+export const dismissInstallCard = (practiceDay: number) => write(INSTALL_CARD_KEY, practiceDay);
 
 // ---- rendering helpers ----------------------------------------------------------
 

@@ -97,19 +97,20 @@ audio on every device.
 ## Later
 
 - Interface translations: Ukrainian and Italian.
-- A shared configurator component for the six drill configurator pages; with it,
-  a real page title for each (they are client components and keep the site's
-  default title today).
-- `lang="pl"` on Polish words inside English prose (landing page, drill blurbs)
-  for screen readers and TTS; the guide pages already use `<Pl>`.
 - `/billing`: a price and Pro feature list once Phase 4 decides them.
 - **Reminders**, opt-in, for the streak and due reviews: web push notifications
   through the service worker (on iPhone only for the installed app, iOS 16.4+), and
   email reminders once Phase 4 has accounts and an address to send to.
-- **An install popup**: after a learner's first finished session (never on the
-  first visit), a dismissible card offering to add the app to the home screen.
-  It reuses `lib/install.ts` (the browser prompt, or Safari's steps on iPhone).
-- **Resume today's practice**: leaving `/today` mid-session and coming back starts
-  the session over. Keep the day's session (its card list and position) in
-  localStorage, keyed by the local day, and continue from the next unanswered
-  question; answers already given are in the log anyway.
+
+### Done from Later
+
+- ☑ Shared configurator (`components/Configurator.tsx`) for the six drill pages,
+  each now a server `page.tsx` with its own `<title>`.
+- ☑ `lang="pl"` on Polish words in drill blurbs (`*…*` marks + `PlText`); the
+  landing page and guides were already marked.
+- ☑ Install card on the results screen (`components/InstallCard.tsx`), on the
+  learner's 2nd, 7th and 15th practice day while not installed; closing it
+  hides it until the next of those days.
+- ☑ Resume today's practice: the day's session is saved in `polish.today.v1`
+  and continues from the next unanswered question; a finished or stale save is
+  ignored.

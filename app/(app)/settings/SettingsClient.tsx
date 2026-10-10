@@ -156,7 +156,8 @@ function Row({
 }) {
   return (
     <div className={`flex flex-wrap gap-x-6 gap-y-3 py-5 ${stacked ? "flex-col" : "items-center justify-between"}`}>
-      <div className="flex min-w-0 flex-[1_1_15rem] gap-3.5">
+      {/* flex-basis would be a height in the stacked (column) layout, so only rows get it */}
+      <div className={`flex min-w-0 gap-3.5 ${stacked ? "" : "flex-[1_1_15rem]"}`}>
         {icon ? <span className="mt-0.5 text-accent">{icon}</span> : null}
         <div>
           <p className="font-semibold">{title}</p>

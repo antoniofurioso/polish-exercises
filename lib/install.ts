@@ -49,3 +49,31 @@ export function installState(env: {
     (/Macintosh/.test(env.userAgent) && env.maxTouchPoints > 1);
   return ios ? "ios" : "manual";
 }
+
+/** The practice days (the learner's 2nd, 7th and 15th day with answers) the install card is offered on. */
+export const INSTALL_CARD_DAYS = [2, 7, 15] as const;
+
+/**
+ * Which practice day today is: 1 + the local days answered on before `today`.
+ * `days` may or may not include today itself.
+ */
+export function practiceDay(days: readonly string[], today: string): number {
+  return 1 + days.filter((day) => day < today).length;
+}
+
+/**
+ * Whether the results screen offers the install card: only on the practice days in
+ * INSTALL_CARD_DAYS (so never on the first visit), only where the app can actually
+ * be installed from the page (the browser's prompt, or Safari's steps), and not
+ * again on a day it was closed (`dismissedOn`: the practice day it was last closed on, 0 if never).
+ */
+export function offersInstallCard(env: {
+  state: InstallState;
+  dismissedOn: number;
+  days: readonly string[];
+  today: string;
+}): boolean {
+  if (env.state !== "prompt" && env.state !== "ios") return false;
+  const day = practiceDay(env.days, env.today);
+  return (INSTALL_CARD_DAYS as readonly number[]).includes(day) && env.dismissedOn < day;
+}

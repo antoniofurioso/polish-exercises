@@ -4,7 +4,8 @@ import type { Verdict } from "../grade";
 import { apply, DEFAULT_SETTINGS, EMPTY_PROGRESS, replay } from "../progress";
 import type { AnswerEvent, Progress, Sources } from "../progress";
 import { dayKey, startOfDay } from "../srs";
-import { buildToday, cardSeed, daySeed, orderNew } from "../today";
+import { buildToday, cardSeed, daySeed, isUnfinished, orderNew, resumableToday } from "../today";
+import type { RunState, SavedToday } from "../today";
 import type { TodayOptions } from "../today";
 import type { DrillKind, Exercise, Freq, Level } from "../types";
 
@@ -301,5 +302,53 @@ describe("buildToday", () => {
       expect(e.id.startsWith(`${e.kind}:`)).toBe(true);
     }
     expect(plan.exercises.length).toBe(plan.fresh);
+  });
+});
+
+describe("resumableToday", () => {
+  const ex = (id: string): Exercise => ({
+    id,
+    case: "nom",
+    number: "sg",
+    before: "",
+    after: "",
+    tokens: [],
+    hint: id,
+    en: "",
+    answers: ["x"],
+    note: "",
+  });
+  const plan = { exercises: [ex("a"), ex("b"), ex("c")], due: 1, fresh: 2, extra: 0, extraOnly: false, level: "A1" as const, size: 3, dueTotal: 1, newLeft: 2 };
+  // "a" answered wrong and re-asked at position 3; "b" answered right; "c" is next
+  const run: RunState = { exercises: [...plan.exercises, ex("a")], reasks: [3], next: 2, verdicts: ["wrong", "correct"] };
+  const saved: SavedToday = { v: 1, day: "2026-10-10", round: 0, plan, run };
+
+  it("resumes the same day's unfinished session", () => {
+    expect(resumableToday(saved, "2026-10-10")).toBe(saved);
+    expect(resumableToday(JSON.parse(JSON.stringify(saved)), "2026-10-10")).toEqual(saved);
+  });
+
+  it("ignores another day's session", () => {
+    expect(resumableToday(saved, "2026-10-11")).toBeNull();
+  });
+
+  it("does not resume a finished session", () => {
+    expect(resumableToday({ ...saved, run: { ...run, next: 4, verdicts: ["wrong", "correct", "correct"] } }, "2026-10-10")).toBeNull();
+  });
+
+  it("rejects corrupt saves", () => {
+    for (const bad of [null, "x", [], { ...saved, v: 2 }, { ...saved, round: -1 }, { ...saved, plan: {} }]) {
+      expect(resumableToday(bad, "2026-10-10")).toBeNull();
+    }
+  });
+
+  it("checks that the scored verdicts match the answered, non-re-asked positions", () => {
+    expect(isUnfinished(run)).toBe(true);
+    // a re-ask answered: not scored, so no extra verdict
+    expect(isUnfinished({ ...run, reasks: [2], exercises: [ex("a"), ex("b"), ex("a"), ex("c")], next: 3 })).toBe(true);
+    expect(isUnfinished({ ...run, verdicts: ["wrong"] })).toBe(false);
+    expect(isUnfinished({ ...run, verdicts: ["wrong", "maybe"] })).toBe(false);
+    expect(isUnfinished({ ...run, reasks: [9] })).toBe(false);
+    expect(isUnfinished({ ...run, exercises: [{ id: 1 }] })).toBe(false);
   });
 });

@@ -14,7 +14,7 @@ exercises:
 | `/billing` | The current plan (free beta), Pro "coming later", and empty payment method and invoices: there are no payments yet. |
 | `/polish-cases`, `/polish-pronouns`, `/polish-numbers`, `/polish-verbs` | Grammar reference pages written for search: explanations, paradigm tables and example sentences, all generated at build time from the grammar code and the published lexicon (`lib/guides.ts`), each with "Practise …" links to configured `/practice` sessions. |
 | `/sitemap.xml`, `/robots.txt` | Built from `BRAND.url` (`https://polishup.app`, or `NEXT_PUBLIC_SITE_URL` when set): absolute sitemap URLs and a `Sitemap:` line in robots.txt. `/practice` and `/today` are `noindex`. |
-| `/today` | Today's practice: due reviews first, then new words, then filler, built from your progress with no setup. A wrong answer is asked again at the end. "Extra practice" (weakest skills) once nothing is due. |
+| `/today` | Today's practice: due reviews first, then new words, then filler, built from your progress with no setup. A wrong answer is asked again at the end. "Extra practice" (weakest skills) once nothing is due. Leaving midway and coming back the same day continues from the next unanswered question (`polish.today.v1`); another day's or a finished session starts afresh. |
 | `/progress` | Streak (with one grace day per week), today's goal, the last 28 days, your weak spots with their most common mistakes and a link to drill each. The daily goal and new words per day are on `/settings`. |
 | `/privacy` | The privacy policy: what stays on the device, what analytics collect (only with consent), your rights; change the analytics choice or delete your data from this device. |
 | `/cases` | Decline nouns / adjectives across all seven cases. |
@@ -45,7 +45,10 @@ Install and offline: the built site is a PWA. Browsers offer to install it
 to Home Screen), and it opens on `/today` in its own window. **Settings → Install
 the app** opens the browser's install prompt where there is one (caught early by
 `INSTALL_SCRIPT` in `lib/install.ts`), shows Safari's steps on iPhone and iPad,
-and says "Installed" inside the installed app. After the first
+and says "Installed" inside the installed app. On the learner's 2nd, 7th and 15th
+practice day, while the app isn't installed, the results screen after a session
+offers the same button in a card (only where the prompt or Safari's steps exist);
+closing it hides it until the next of those days (`polish.installCard.v1`). After the first
 visit every page works offline, including `/today`, `/progress` and any
 `/practice?…` session: progress lives in localStorage anyway. Natural-voice
 clips heard online (up to the last 300) replay offline; any other sentence is
@@ -295,11 +298,11 @@ Everything is generated locally and deterministically — no API calls.
 | `lib/cards/verbs.ts` | The verbs drill's SRS card source: every drillable verb × tense, levelled (present A1; past, futures and imperative A2), with learner-facing skill names |
 | `lib/srs.ts` | The spaced-repetition scheduler (SM-2 with right / accents-only / wrong) and local calendar-day helpers |
 | `lib/progress.ts` | Learner progress from the answer log: per-card schedule, per-skill and per-day counts, log replay and compaction, v1 migration, streak (one grace day per 7 days), weak spots and the level cap for new cards |
-| `lib/today.ts` | Builds "Today's practice": due reviews, then the day's new cards, then filler from weak skills, mixed across drills |
+| `lib/today.ts` | Builds "Today's practice": due reviews, then the day's new cards, then filler from weak skills, mixed across drills. Also the saved-session shape and `resumableToday` (same day, unfinished) |
 | `lib/session.ts` | Encodes a session in the query string and reads it back (`type=` selects the drill, `lvl=` caps the CEFR level; drill-specific params come from the registry) |
 | `lib/review/`, `scripts/review-*.ts` | The native-speaker review sheet: CSV export and import of draft entries |
 | `lib/grade.ts` | Normalises the answer; a diacritics-only miss is reported separately |
-| `lib/storage.ts` | localStorage: last config per drill, sound, appearance, profile name, and the v2 answer log, progress cache and settings (with the one-time v1 migration) |
+| `lib/storage.ts` | localStorage: last config per drill, sound, appearance, profile name, and the v2 answer log, progress cache and settings (with the one-time v1 migration), today's unfinished session, the install card's dismissal |
 | `lib/progressView.ts` | Labels, links and numbers for the dashboard, progress and profile: miss kinds in English, weak skill → practice URL, the day grid, accuracy, cards per drill, milestones |
 | `lib/missKind.ts` | The miss kind logged with a wrong answer |
 | `components/Runner.tsx` | Runs a list of exercises and records every answer; used by `/practice` and `/today`. Sends the session and answer analytics events |
@@ -321,7 +324,7 @@ Everything is generated locally and deterministically — no API calls.
 | `app/manifest.ts` | The web app manifest from `BRAND` (start `/today`, standalone, colours from `app/globals.css`) |
 | `public/sw.js`, `scripts/sw-manifest.ts` | The offline service worker (a template) and the post-build step that stamps it with the version and precache list |
 | `components/ServiceWorker.tsx` | Registers the worker in production builds; re-dispatches `appinstalled` as a window `pwa-installed` event |
-| `lib/install.ts`, `components/InstallButton.tsx` | Settings → Install the app: the head script that keeps the browser's install prompt, the install state (installed / prompt / iOS steps / browser menu) and the button |
+| `lib/install.ts`, `components/InstallButton.tsx`, `components/InstallCard.tsx` | Settings → Install the app: the head script that keeps the browser's install prompt, the install state (installed / prompt / iOS steps / browser menu) and the button; the dismissible install card on the results screen (`offersInstallCard`) |
 | `public/brand/icon.svg`, `scripts/icons.ts` | The icon source and `npm run icons`, which renders every PNG / ICO from it |
 
 Semantic tags on each noun (`food`, `vehicle`, `placeIn`, …) keep sentences sensible —

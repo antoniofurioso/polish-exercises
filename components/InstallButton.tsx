@@ -26,13 +26,17 @@ function snapshot(): InstallState {
   });
 }
 
+/** The install state, live; "manual" on the server. Shared with the results screen's InstallCard. */
+export const useInstallState = (): InstallState =>
+  useSyncExternalStore(subscribe, snapshot, () => "manual" as InstallState);
+
 /**
  * Settings → Install the app. Opens the browser's own install prompt where there is
  * one (Chrome, Edge, Android), shows Safari's steps on iPhone and iPad, and says so
  * once the app is installed. The prompt is caught early by INSTALL_SCRIPT (lib/install.ts).
  */
 export function InstallButton() {
-  const state = useSyncExternalStore(subscribe, snapshot, () => "manual" as InstallState);
+  const state = useInstallState();
   const [showSteps, setShowSteps] = useState(false);
 
   if (state === "installed") {

@@ -2,6 +2,7 @@
 
 import { RotateCcw } from "lucide-react";
 import Link from "next/link";
+import { InstallCard } from "@/components/InstallCard";
 import { CASE_INFO } from "@/lib/cases";
 import { renderPrompt, renderSolution } from "@/lib/generate";
 import type { Verdict } from "@/lib/grade";
@@ -50,6 +51,8 @@ export function ResultsSummary({
           {correct} of {results.length} right
         </p>
       </div>
+
+      <InstallCard />
 
       {byGroup.size > 0 ? (
         <section aria-label="By topic" className="card space-y-3 p-6">
